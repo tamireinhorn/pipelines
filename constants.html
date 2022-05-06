@@ -59,11 +59,43 @@ class constants(Enum):  # pylint: disable=c0103
     BD_DISCORD_WEBHOOK_SECRET_PATH = &#34;prefect-discord-webhook&#34;
     # Prefect
     GCS_FLOWS_BUCKET = &#34;basedosdados-dev-prefect&#34;
-    DEFAULT_CODE_OWNERS = [&#34;equipe_infra&#34;, &#34;equipe_dados&#34;]
     # Prefect tasks retry policy
     TASK_MAX_RETRIES = 5
     TASK_RETRY_DELAY = 10  # seconds
-    PREFECT_DEFAULT_PROJECT = &#34;main&#34;</code></pre>
+    PREFECT_DEFAULT_PROJECT = &#34;main&#34;
+    # Code Owners #
+    DEFAULT_CODE_OWNERS = [&#34;equipe_infra&#34;, &#34;equipe_dados&#34;]
+
+
+def _get_owners_mentions():
+    &#34;&#34;&#34;
+    Register all code owners, users_id and type
+        - possible types: https://docs.discord.club/embedg/reference/mentions
+        - how to discover user_id: https://www.remote.tools/remote-work/how-to-find-discord-id
+        - types: user, user_nickname, channel, role
+    &#34;&#34;&#34;
+    return {
+        &#34;equipe_infra&#34;: {
+            &#34;user_id&#34;: &#34;865223885031997455&#34;,
+            &#34;type&#34;: &#34;role&#34;,
+        },
+        &#34;equipe_dados&#34;: {
+            &#34;user_id&#34;: &#34;865034571469160458&#34;,
+            &#34;type&#34;: &#34;role&#34;,
+        },
+        &#34;pimbel&#34;: {
+            &#34;user_id&#34;: &#34;272581753829326849&#34;,
+            &#34;type&#34;: &#34;user_nickname&#34;,
+        },
+        &#34;lucas_cr&#34;: {
+            &#34;user_id&#34;: &#34;776914459545436200&#34;,
+            &#34;type&#34;: &#34;user_nickname&#34;,
+        },
+        &#34;crislanealves&#34;: {
+            &#34;user_id&#34;: &#34;740986161652301886&#34;,
+            &#34;type&#34;: &#34;user_nickname&#34;,
+        },
+    }</code></pre>
 </details>
 </section>
 <section>
@@ -110,11 +142,12 @@ class constants(Enum):  # pylint: disable=c0103
     BD_DISCORD_WEBHOOK_SECRET_PATH = &#34;prefect-discord-webhook&#34;
     # Prefect
     GCS_FLOWS_BUCKET = &#34;basedosdados-dev-prefect&#34;
-    DEFAULT_CODE_OWNERS = [&#34;equipe_infra&#34;, &#34;equipe_dados&#34;]
     # Prefect tasks retry policy
     TASK_MAX_RETRIES = 5
     TASK_RETRY_DELAY = 10  # seconds
-    PREFECT_DEFAULT_PROJECT = &#34;main&#34;</code></pre>
+    PREFECT_DEFAULT_PROJECT = &#34;main&#34;
+    # Code Owners #
+    DEFAULT_CODE_OWNERS = [&#34;equipe_infra&#34;, &#34;equipe_dados&#34;]</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
