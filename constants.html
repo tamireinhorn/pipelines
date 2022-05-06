@@ -34,6 +34,37 @@ Constants for all flows
 from enum import Enum
 
 
+def get_owners_discord_mentions():
+    &#34;&#34;&#34;
+    Register all code owners, users_id and type
+        - possible types: https://docs.discord.club/embedg/reference/mentions
+        - how to discover user_id: https://www.remote.tools/remote-work/how-to-find-discord-id
+        - types: user, user_nickname, channel, role
+    &#34;&#34;&#34;
+    return {
+        &#34;equipe_infra&#34;: {
+            &#34;user_id&#34;: &#34;865223885031997455&#34;,
+            &#34;type&#34;: &#34;role&#34;,
+        },
+        &#34;equipe_dados&#34;: {
+            &#34;user_id&#34;: &#34;865034571469160458&#34;,
+            &#34;type&#34;: &#34;role&#34;,
+        },
+        &#34;pimbel&#34;: {
+            &#34;user_id&#34;: &#34;272581753829326849&#34;,
+            &#34;type&#34;: &#34;user_nickname&#34;,
+        },
+        &#34;lucas_cr&#34;: {
+            &#34;user_id&#34;: &#34;776914459545436200&#34;,
+            &#34;type&#34;: &#34;user_nickname&#34;,
+        },
+        &#34;crislanealves&#34;: {
+            &#34;user_id&#34;: &#34;740986161652301886&#34;,
+            &#34;type&#34;: &#34;user_nickname&#34;,
+        },
+    }
+
+
 class constants(Enum):  # pylint: disable=c0103
     &#34;&#34;&#34;
     Constants used in the BD flows.
@@ -64,10 +95,29 @@ class constants(Enum):  # pylint: disable=c0103
     TASK_RETRY_DELAY = 10  # seconds
     PREFECT_DEFAULT_PROJECT = &#34;main&#34;
     # Code Owners #
-    DEFAULT_CODE_OWNERS = [&#34;equipe_infra&#34;, &#34;equipe_dados&#34;]
-
-
-def _get_owners_mentions():
+    DEFAULT_CODE_OWNERS = [&#34;equipe_infra&#34;, &#34;equipe_dados&#34;]</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="pipelines.constants.get_owners_discord_mentions"><code class="name flex">
+<span>def <span class="ident">get_owners_discord_mentions</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Register all code owners, users_id and type
+- possible types: <a href="https://docs.discord.club/embedg/reference/mentions">https://docs.discord.club/embedg/reference/mentions</a>
+- how to discover user_id: <a href="https://www.remote.tools/remote-work/how-to-find-discord-id">https://www.remote.tools/remote-work/how-to-find-discord-id</a>
+- types: user, user_nickname, channel, role</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_owners_discord_mentions():
     &#34;&#34;&#34;
     Register all code owners, users_id and type
         - possible types: https://docs.discord.club/embedg/reference/mentions
@@ -97,12 +147,8 @@ def _get_owners_mentions():
         },
     }</code></pre>
 </details>
-</section>
-<section>
-</section>
-<section>
-</section>
-<section>
+</dd>
+</dl>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
@@ -217,6 +263,11 @@ def _get_owners_mentions():
 <li><h3>Super-module</h3>
 <ul>
 <li><code><a title="pipelines" href="index.html">pipelines</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="pipelines.constants.get_owners_discord_mentions" href="#pipelines.constants.get_owners_discord_mentions">get_owners_discord_mentions</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
