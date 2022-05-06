@@ -213,16 +213,16 @@ def notify_discord_on_failure(
     at_code_owners = []
     for code_owner in code_owners:
         if code_owner.startswith(&#34;@&#34;):
-            at_code_owners.append(code_owner)
+            at_code_owners.append(f&#34;    - &lt;{code_owner}&gt;\n&#34;)
         else:
-            at_code_owners.append(f&#34;@{code_owner}&#34;)
+            at_code_owners.append(f&#34;    - &lt;@{code_owner}&gt;\n&#34;)
     message = (
         f&#34;:man_facepalming: Flow **{flow.name}** has failed.&#34;
         + f&#39;\n  - State message: *&#34;{state.message}&#34;*&#39;
         + &#34;\n  - Link to the failed flow: &#34;
         + f&#34;http://prefect-ui.prefect.svc.cluster.local:8080/flow-run/{flow_run_id}&#34;
-        + &#34;\n  - Extra attention:&#34;
-        + &#34;\n    - &#34;.join(at_code_owners)
+        + &#34;\n  - Extra attention:\n&#34;
+        + &#34;&#34;.join(at_code_owners)
     )
     send_discord_message(
         message=message,
@@ -830,16 +830,16 @@ def log_task(
     at_code_owners = []
     for code_owner in code_owners:
         if code_owner.startswith(&#34;@&#34;):
-            at_code_owners.append(code_owner)
+            at_code_owners.append(f&#34;    - &lt;{code_owner}&gt;\n&#34;)
         else:
-            at_code_owners.append(f&#34;@{code_owner}&#34;)
+            at_code_owners.append(f&#34;    - &lt;@{code_owner}&gt;\n&#34;)
     message = (
         f&#34;:man_facepalming: Flow **{flow.name}** has failed.&#34;
         + f&#39;\n  - State message: *&#34;{state.message}&#34;*&#39;
         + &#34;\n  - Link to the failed flow: &#34;
         + f&#34;http://prefect-ui.prefect.svc.cluster.local:8080/flow-run/{flow_run_id}&#34;
-        + &#34;\n  - Extra attention:&#34;
-        + &#34;\n    - &#34;.join(at_code_owners)
+        + &#34;\n  - Extra attention:\n&#34;
+        + &#34;&#34;.join(at_code_owners)
     )
     send_discord_message(
         message=message,
