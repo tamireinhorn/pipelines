@@ -34,37 +34,6 @@ Constants for all flows
 from enum import Enum
 
 
-def get_owners_discord_mentions():
-    &#34;&#34;&#34;
-    Register all code owners, users_id and type
-        - possible types: https://docs.discord.club/embedg/reference/mentions
-        - how to discover user_id: https://www.remote.tools/remote-work/how-to-find-discord-id
-        - types: user, user_nickname, channel, role
-    &#34;&#34;&#34;
-    return {
-        &#34;equipe_infra&#34;: {
-            &#34;user_id&#34;: &#34;865223885031997455&#34;,
-            &#34;type&#34;: &#34;role&#34;,
-        },
-        &#34;equipe_dados&#34;: {
-            &#34;user_id&#34;: &#34;865034571469160458&#34;,
-            &#34;type&#34;: &#34;role&#34;,
-        },
-        &#34;pimbel&#34;: {
-            &#34;user_id&#34;: &#34;272581753829326849&#34;,
-            &#34;type&#34;: &#34;user_nickname&#34;,
-        },
-        &#34;lucas_cr&#34;: {
-            &#34;user_id&#34;: &#34;776914459545436200&#34;,
-            &#34;type&#34;: &#34;user_nickname&#34;,
-        },
-        &#34;crislanealves&#34;: {
-            &#34;user_id&#34;: &#34;740986161652301886&#34;,
-            &#34;type&#34;: &#34;user_nickname&#34;,
-        },
-    }
-
-
 class constants(Enum):  # pylint: disable=c0103
     &#34;&#34;&#34;
     Constants used in the BD flows.
@@ -86,8 +55,6 @@ class constants(Enum):  # pylint: disable=c0103
     ######################################
     # Other constants
     ######################################
-    # Discord
-    BD_DISCORD_WEBHOOK_SECRET_PATH = &#34;prefect-discord-webhook&#34;
     # Prefect
     GCS_FLOWS_BUCKET = &#34;basedosdados-dev-prefect&#34;
     # Prefect tasks retry policy
@@ -95,36 +62,17 @@ class constants(Enum):  # pylint: disable=c0103
     TASK_RETRY_DELAY = 10  # seconds
     PREFECT_DEFAULT_PROJECT = &#34;main&#34;
     # Code Owners #
-    DEFAULT_CODE_OWNERS = [&#34;equipe_infra&#34;, &#34;equipe_dados&#34;]</code></pre>
-</details>
-</section>
-<section>
-</section>
-<section>
-</section>
-<section>
-<h2 class="section-title" id="header-functions">Functions</h2>
-<dl>
-<dt id="pipelines.constants.get_owners_discord_mentions"><code class="name flex">
-<span>def <span class="ident">get_owners_discord_mentions</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Register all code owners, users_id and type
-- possible types: <a href="https://docs.discord.club/embedg/reference/mentions">https://docs.discord.club/embedg/reference/mentions</a>
-- how to discover user_id: <a href="https://www.remote.tools/remote-work/how-to-find-discord-id">https://www.remote.tools/remote-work/how-to-find-discord-id</a>
-- types: user, user_nickname, channel, role</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_owners_discord_mentions():
-    &#34;&#34;&#34;
-    Register all code owners, users_id and type
-        - possible types: https://docs.discord.club/embedg/reference/mentions
-        - how to discover user_id: https://www.remote.tools/remote-work/how-to-find-discord-id
-        - types: user, user_nickname, channel, role
-    &#34;&#34;&#34;
-    return {
+
+    ######################################
+    # Discord code owners constants
+    ######################################
+    BD_DISCORD_WEBHOOK_SECRET_PATH = &#34;prefect-discord-webhook&#34;
+    DEFAULT_CODE_OWNERS = [&#34;equipe_infra&#34;, &#34;equipe_dados&#34;]
+    OWNERS_DISCORD_MENTIONS = {
+        # Register all code owners, users_id and type
+        #     - possible types: https://docs.discord.club/embedg/reference/mentions
+        #     - how to discover user_id: https://www.remote.tools/remote-work/how-to-find-discord-id
+        #     - types: user, user_nickname, channel, role
         &#34;equipe_infra&#34;: {
             &#34;user_id&#34;: &#34;865223885031997455&#34;,
             &#34;type&#34;: &#34;role&#34;,
@@ -147,8 +95,12 @@ class constants(Enum):  # pylint: disable=c0103
         },
     }</code></pre>
 </details>
-</dd>
-</dl>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
 </section>
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
@@ -184,8 +136,6 @@ class constants(Enum):  # pylint: disable=c0103
     ######################################
     # Other constants
     ######################################
-    # Discord
-    BD_DISCORD_WEBHOOK_SECRET_PATH = &#34;prefect-discord-webhook&#34;
     # Prefect
     GCS_FLOWS_BUCKET = &#34;basedosdados-dev-prefect&#34;
     # Prefect tasks retry policy
@@ -193,7 +143,38 @@ class constants(Enum):  # pylint: disable=c0103
     TASK_RETRY_DELAY = 10  # seconds
     PREFECT_DEFAULT_PROJECT = &#34;main&#34;
     # Code Owners #
-    DEFAULT_CODE_OWNERS = [&#34;equipe_infra&#34;, &#34;equipe_dados&#34;]</code></pre>
+
+    ######################################
+    # Discord code owners constants
+    ######################################
+    BD_DISCORD_WEBHOOK_SECRET_PATH = &#34;prefect-discord-webhook&#34;
+    DEFAULT_CODE_OWNERS = [&#34;equipe_infra&#34;, &#34;equipe_dados&#34;]
+    OWNERS_DISCORD_MENTIONS = {
+        # Register all code owners, users_id and type
+        #     - possible types: https://docs.discord.club/embedg/reference/mentions
+        #     - how to discover user_id: https://www.remote.tools/remote-work/how-to-find-discord-id
+        #     - types: user, user_nickname, channel, role
+        &#34;equipe_infra&#34;: {
+            &#34;user_id&#34;: &#34;865223885031997455&#34;,
+            &#34;type&#34;: &#34;role&#34;,
+        },
+        &#34;equipe_dados&#34;: {
+            &#34;user_id&#34;: &#34;865034571469160458&#34;,
+            &#34;type&#34;: &#34;role&#34;,
+        },
+        &#34;pimbel&#34;: {
+            &#34;user_id&#34;: &#34;272581753829326849&#34;,
+            &#34;type&#34;: &#34;user_nickname&#34;,
+        },
+        &#34;lucas_cr&#34;: {
+            &#34;user_id&#34;: &#34;776914459545436200&#34;,
+            &#34;type&#34;: &#34;user_nickname&#34;,
+        },
+        &#34;crislanealves&#34;: {
+            &#34;user_id&#34;: &#34;740986161652301886&#34;,
+            &#34;type&#34;: &#34;user_nickname&#34;,
+        },
+    }</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -237,6 +218,10 @@ class constants(Enum):  # pylint: disable=c0103
 <dd>
 <div class="desc"></div>
 </dd>
+<dt id="pipelines.constants.constants.OWNERS_DISCORD_MENTIONS"><code class="name">var <span class="ident">OWNERS_DISCORD_MENTIONS</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
 <dt id="pipelines.constants.constants.PREFECT_DEFAULT_PROJECT"><code class="name">var <span class="ident">PREFECT_DEFAULT_PROJECT</span></code></dt>
 <dd>
 <div class="desc"></div>
@@ -265,11 +250,6 @@ class constants(Enum):  # pylint: disable=c0103
 <li><code><a title="pipelines" href="index.html">pipelines</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="">
-<li><code><a title="pipelines.constants.get_owners_discord_mentions" href="#pipelines.constants.get_owners_discord_mentions">get_owners_discord_mentions</a></code></li>
-</ul>
-</li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
@@ -284,6 +264,7 @@ class constants(Enum):  # pylint: disable=c0103
 <li><code><a title="pipelines.constants.constants.DOCKER_IMAGE_NAME" href="#pipelines.constants.constants.DOCKER_IMAGE_NAME">DOCKER_IMAGE_NAME</a></code></li>
 <li><code><a title="pipelines.constants.constants.DOCKER_TAG" href="#pipelines.constants.constants.DOCKER_TAG">DOCKER_TAG</a></code></li>
 <li><code><a title="pipelines.constants.constants.GCS_FLOWS_BUCKET" href="#pipelines.constants.constants.GCS_FLOWS_BUCKET">GCS_FLOWS_BUCKET</a></code></li>
+<li><code><a title="pipelines.constants.constants.OWNERS_DISCORD_MENTIONS" href="#pipelines.constants.constants.OWNERS_DISCORD_MENTIONS">OWNERS_DISCORD_MENTIONS</a></code></li>
 <li><code><a title="pipelines.constants.constants.PREFECT_DEFAULT_PROJECT" href="#pipelines.constants.constants.PREFECT_DEFAULT_PROJECT">PREFECT_DEFAULT_PROJECT</a></code></li>
 <li><code><a title="pipelines.constants.constants.TASK_MAX_RETRIES" href="#pipelines.constants.constants.TASK_MAX_RETRIES">TASK_MAX_RETRIES</a></code></li>
 <li><code><a title="pipelines.constants.constants.TASK_RETRY_DELAY" href="#pipelines.constants.constants.TASK_RETRY_DELAY">TASK_RETRY_DELAY</a></code></li>

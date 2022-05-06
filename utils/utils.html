@@ -49,7 +49,7 @@ from prefect.engine.state import State
 from prefect.run_configs import KubernetesRun
 import requests
 
-from pipelines.constants import constants, get_owners_discord_mentions
+from pipelines.constants import constants
 
 # import telegram
 
@@ -210,11 +210,12 @@ def notify_discord_on_failure(
     url = get_vault_secret(secret_path)[&#34;data&#34;][&#34;url&#34;]
     flow_run_id = prefect.context.get(&#34;flow_run_id&#34;)
     code_owners = code_owners or constants.DEFAULT_CODE_OWNERS.value
+    code_owner_dict = constants.OWNERS_DISCORD_MENTIONS.value
     at_code_owners = []
     for code_owner in code_owners:
-        code_owner_dict = get_owners_discord_mentions()[code_owner]
-        code_owner_id = code_owner_dict[&#34;user_id&#34;]
-        code_owner_type = code_owner_dict[&#34;type&#34;]
+        code_owner_id = code_owner_dict[code_owner][&#34;user_id&#34;]
+        code_owner_type = code_owner_dict[code_owner][&#34;type&#34;]
+
         if code_owner_type == &#34;user&#34;:
             at_code_owners.append(f&#34;    - &lt;@{code_owner_id}&gt;\n&#34;)
         elif code_owner_type == &#34;user_nickname&#34;:
@@ -835,11 +836,12 @@ def log_task(
     url = get_vault_secret(secret_path)[&#34;data&#34;][&#34;url&#34;]
     flow_run_id = prefect.context.get(&#34;flow_run_id&#34;)
     code_owners = code_owners or constants.DEFAULT_CODE_OWNERS.value
+    code_owner_dict = constants.OWNERS_DISCORD_MENTIONS.value
     at_code_owners = []
     for code_owner in code_owners:
-        code_owner_dict = get_owners_discord_mentions()[code_owner]
-        code_owner_id = code_owner_dict[&#34;user_id&#34;]
-        code_owner_type = code_owner_dict[&#34;type&#34;]
+        code_owner_id = code_owner_dict[code_owner][&#34;user_id&#34;]
+        code_owner_type = code_owner_dict[code_owner][&#34;type&#34;]
+
         if code_owner_type == &#34;user&#34;:
             at_code_owners.append(f&#34;    - &lt;@{code_owner_id}&gt;\n&#34;)
         elif code_owner_type == &#34;user_nickname&#34;:
