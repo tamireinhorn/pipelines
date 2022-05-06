@@ -99,7 +99,7 @@ def was_table_updated(page_size: int, hours: int, wait=None) -&gt; bool:
     dfs = []
     for index in range(n_datasets):
         dataset_dict = datasets[index]
-        dataset_name = dataset_dict[&#34;name&#34;]
+        dataset_name = dataset_dict[&#34;resources&#34;][0][&#34;dataset_id&#34;]
         n_tables = len(dataset_dict[&#34;resources&#34;])
         dataset_resources = [
             dataset_dict[&#34;resources&#34;][k]
@@ -185,8 +185,7 @@ def send_tweet(
     for dataset in datasets:
         tables = dataframe[dataframe.dataset == dataset].table.to_list()
         coverages = dataframe[dataframe.dataset == dataset].temporal_coverage.to_list()
-        dataset_name = dataset.replace(&#34;-&#34;, &#34;_&#34;)
-        main_tweet = f&#34;&#34;&#34;📣 O conjunto #{dataset_name} acaba de ser atualizado no datalake da @basedosdados.&#34;&#34;&#34;
+        main_tweet = f&#34;&#34;&#34;📣 O conjunto #{dataset} acaba de ser atualizado no datalake da @basedosdados.&#34;&#34;&#34;
         next_tweet = &#34;As tabelas atualizadas foram:\n&#34;
         for table, coverage in zip(tables, coverages):
             if len(coverage.split(&#34;(&#34;)[0]) == 4:
@@ -313,8 +312,7 @@ def send_tweet(
     for dataset in datasets:
         tables = dataframe[dataframe.dataset == dataset].table.to_list()
         coverages = dataframe[dataframe.dataset == dataset].temporal_coverage.to_list()
-        dataset_name = dataset.replace(&#34;-&#34;, &#34;_&#34;)
-        main_tweet = f&#34;&#34;&#34;📣 O conjunto #{dataset_name} acaba de ser atualizado no datalake da @basedosdados.&#34;&#34;&#34;
+        main_tweet = f&#34;&#34;&#34;📣 O conjunto #{dataset} acaba de ser atualizado no datalake da @basedosdados.&#34;&#34;&#34;
         next_tweet = &#34;As tabelas atualizadas foram:\n&#34;
         for table, coverage in zip(tables, coverages):
             if len(coverage.split(&#34;(&#34;)[0]) == 4:
@@ -370,7 +368,7 @@ def was_table_updated(page_size: int, hours: int, wait=None) -&gt; bool:
     dfs = []
     for index in range(n_datasets):
         dataset_dict = datasets[index]
-        dataset_name = dataset_dict[&#34;name&#34;]
+        dataset_name = dataset_dict[&#34;resources&#34;][0][&#34;dataset_id&#34;]
         n_tables = len(dataset_dict[&#34;resources&#34;])
         dataset_resources = [
             dataset_dict[&#34;resources&#34;][k]

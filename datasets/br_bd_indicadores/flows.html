@@ -63,10 +63,10 @@ with Flow(name=&#34;br_bd_indicadores.metricas_tweets&#34;) as bd_twt_metricas:
         &#34;materialization_mode&#34;, default=&#34;dev&#34;, required=False
     )
     materialize_after_dump = Parameter(
-        &#34;materialize after dump&#34;, default=False, required=False
+        &#34;materialize after dump&#34;, default=True, required=False
     )
-    dataset_id = &#34;br_bd_indicadores&#34;  # pylint: disable=C0103
-    table_id = &#34;metricas_tweets&#34;  # pylint: disable=C0103
+    dataset_id = Parameter(&#34;dataset_id&#34;, default=&#34;br_bd_indicadores&#34;, required=True)
+    table_id = Parameter(&#34;table_id&#34;, default=&#34;twitter_metrics&#34;, required=True)
     #####################################
     #
     # Rename flow run
@@ -84,7 +84,7 @@ with Flow(name=&#34;br_bd_indicadores.metricas_tweets&#34;) as bd_twt_metricas:
         bearer_token,
     ) = get_credentials(secret_path=&#34;twitter_credentials&#34;, wait=None)
 
-    cond = has_new_tweets(bearer_token)
+    cond = has_new_tweets(bearer_token, table_id=table_id)
 
     with case(cond, False):
         echo(&#34;No tweets to update&#34;)
@@ -97,6 +97,7 @@ with Flow(name=&#34;br_bd_indicadores.metricas_tweets&#34;) as bd_twt_metricas:
             consumer_key,
             consumer_secret,
             upstream_tasks=[cond],
+            table_id=table_id,
         )  # pylint: disable=C0103
 
         # pylint: disable=C0103
@@ -142,11 +143,12 @@ bd_twt_metricas.schedule = every_day
 
 
 with Flow(&#34;br_bd_indicadores.metricas_tweets_agg&#34;) as bd_twt_metricas_agg:
-    dataset_id = &#34;br_bd_indicadores&#34;  # pylint: disable=C0103
-    table_id = &#34;metricas_tweets_agg&#34;  # pylint: disable=C0103
+    dataset_id = Parameter(&#34;dataset_id&#34;, default=&#34;br_bd_indicadores&#34;, required=True)
+    table_id = Parameter(&#34;table_id&#34;, default=&#34;twitter_metrics_agg&#34;, required=True)
+    table_to_agg = Parameter(&#34;table_to_agg&#34;, default=&#34;twitter_metrics&#34;, required=True)
 
     # pylint: disable=C0103
-    filepath = crawler_metricas_agg()
+    filepath = crawler_metricas_agg(table_to_agg=table_to_agg)
 
     # pylint: disable=C0103
     wait_upload_table = create_table_and_upload_to_gcs(
