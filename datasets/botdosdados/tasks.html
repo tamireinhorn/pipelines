@@ -35,11 +35,13 @@ import os
 from typing import Tuple
 from datetime import timedelta, datetime
 from time import sleep
+from collections import defaultdict
 
 import tweepy
 from prefect import task
 from basedosdados.download.metadata import _safe_fetch
 import pandas as pd
+import numpy as np
 from pipelines.utils.utils import log
 from pipelines.datasets.botdosdados.utils import (
     get_credentials_from_secret,
@@ -91,6 +93,35 @@ def was_table_updated(page_size: int, hours: int, wait=None) -&gt; bool:
     &#34;&#34;&#34;
     Checks if there are tables updated within last hour. If True, saves table locally.
     &#34;&#34;&#34;
+
+    # pylint: disable=R0915
+    datasets_links = defaultdict(lambda: &#34;not selected&#34;)
+    datasets_links[
+        &#34;mundo_transfermarkt_competicoes&#34;
+    ] = &#34;https://basedosdados.org/dataset/mundo-transfermarkt-competicoes&#34;
+    datasets_links[
+        &#34;br_me_caged.microdados_antigos&#34;
+    ] = &#34;https://basedosdados.org/dataset/br-me-caged&#34;
+    datasets_links[&#34;br_ibge_inpc&#34;] = &#34;https://basedosdados.org/dataset/br-ibge-inpc&#34;
+    datasets_links[&#34;br_ibge_ipca&#34;] = &#34;https://basedosdados.org/dataset/br-ibge-ipca&#34;
+    datasets_links[&#34;br_ibge_ipca15&#34;] = &#34;https://basedosdados.org/dataset/br-ibge-ipca15&#34;
+    datasets_links[
+        &#34;br_anp_precos_combustiveis&#34;
+    ] = &#34;https://basedosdados.org/dataset/br-anp-precos-combustiveis&#34;
+    datasets_links[
+        &#34;br_poder360_pesquisas&#34;
+    ] = &#34;https://basedosdados.org/dataset/br-poder360-pesquisas&#34;
+    datasets_links[&#34;br_ms_cnes&#34;] = &#34;https://basedosdados.org/dataset/br-ms-cnes&#34;
+    datasets_links[
+        &#34;br_camara_atividade_legislativa&#34;
+    ] = &#34;https://basedosdados.org/dataset/br-camara-atividade-legislativa&#34;
+    datasets_links[&#34;br_ibge_pnadc&#34;] = &#34;https://basedosdados.org/dataset/br-ibge-pnadc&#34;
+    datasets_links[
+        &#34;br_ana_reservatorios&#34;
+    ] = &#34;https://basedosdados.org/dataset/br-ana-reservatorios&#34;
+
+    selected_datasets = list(datasets_links.keys())
+
     url = f&#34;https://basedosdados.org/api/3/action/bd_dataset_search?q=&amp;resource_type=bdm_table&amp;page=1&amp;page_size={page_size}&#34;
     response = _safe_fetch(url)
     json_response = response.json()
@@ -153,7 +184,15 @@ def was_table_updated(page_size: int, hours: int, wait=None) -&gt; bool:
         dfs.append(df)
 
     df = dfs[0].append(dfs[1:])
-    df[&#34;last_updated&#34;] = pd.to_datetime(df[&#34;last_updated&#34;])
+    df[&#34;link&#34;] = df[&#34;dataset&#34;].map(datasets_links)
+    df[&#34;last_updated&#34;] = [
+        datetime.strptime(date.strftime(&#34;%Y-%m-%d %H:%M:%S&#34;), &#34;%Y-%m-%d %H:%M:%S&#34;)
+        if date is not None
+        else np.nan
+        for date in pd.to_datetime(df[&#34;last_updated&#34;])
+    ]
+    log(df[&#34;last_updated&#34;].unique())
+    df = df[df[&#34;last_updated&#34;] != &#34;None&#34;]
     df.dropna(
         subset=[&#34;last_updated&#34;, &#34;temporal_coverage&#34;, &#34;updated_frequency&#34;], inplace=True
     )
@@ -161,6 +200,9 @@ def was_table_updated(page_size: int, hours: int, wait=None) -&gt; bool:
         k[0] if len(k) &gt; 0 else k for k in df[&#34;temporal_coverage&#34;]
     ]
     df.reset_index(drop=True, inplace=True)
+    df.sort_values(&#34;last_updated&#34;, ascending=False, inplace=True)
+    log(df[[&#34;dataset&#34;, &#34;link&#34;, &#34;last_updated&#34;]])
+    df = df[df.dataset.isin(selected_datasets)]
     df = df[
         df[&#34;last_updated&#34;].apply(lambda x: x.timestamp())
         &gt; (datetime.now() - pd.Timedelta(hours=hours)).timestamp()
@@ -206,7 +248,9 @@ def send_tweet(
         updated_frequencies = dataframe[
             dataframe.dataset == dataset
         ].updated_frequency.to_list()
-        main_tweet = f&#34;&#34;&#34;📣 O conjunto #{dataset} foi atualizado no datalake da @basedosdados às {last_updateds[0]}.&#34;&#34;&#34;
+        links = dataframe[dataframe.dataset == dataset].link.to_list()
+        main_tweet = f&#34;&#34;&#34;📣 O conjunto #{dataset} foi atualizado no datalake da @basedosdados às {last_updateds[0][11:16]}.\n\nAcesse por aqui ⤵️\n{links[0]}
+        &#34;&#34;&#34;
         thread = &#34;As tabelas atualizadas foram:\n&#34;
 
         dict_frequency = {
@@ -214,6 +258,7 @@ def send_tweet(
             &#34;month&#34;: &#34;anuais&#34;,
             &#34;one_year&#34;: &#34;anuais&#34;,
             &#34;two_years&#34;: &#34;bianuais&#34;,
+            &#34;recurring&#34;: &#34;recorrentes&#34;,
         }
         i = 1
         for table, coverage, updated_frequency in zip(
@@ -362,7 +407,9 @@ def send_tweet(
         updated_frequencies = dataframe[
             dataframe.dataset == dataset
         ].updated_frequency.to_list()
-        main_tweet = f&#34;&#34;&#34;📣 O conjunto #{dataset} foi atualizado no datalake da @basedosdados às {last_updateds[0]}.&#34;&#34;&#34;
+        links = dataframe[dataframe.dataset == dataset].link.to_list()
+        main_tweet = f&#34;&#34;&#34;📣 O conjunto #{dataset} foi atualizado no datalake da @basedosdados às {last_updateds[0][11:16]}.\n\nAcesse por aqui ⤵️\n{links[0]}
+        &#34;&#34;&#34;
         thread = &#34;As tabelas atualizadas foram:\n&#34;
 
         dict_frequency = {
@@ -370,6 +417,7 @@ def send_tweet(
             &#34;month&#34;: &#34;anuais&#34;,
             &#34;one_year&#34;: &#34;anuais&#34;,
             &#34;two_years&#34;: &#34;bianuais&#34;,
+            &#34;recurring&#34;: &#34;recorrentes&#34;,
         }
         i = 1
         for table, coverage, updated_frequency in zip(
@@ -435,6 +483,35 @@ def was_table_updated(page_size: int, hours: int, wait=None) -&gt; bool:
     &#34;&#34;&#34;
     Checks if there are tables updated within last hour. If True, saves table locally.
     &#34;&#34;&#34;
+
+    # pylint: disable=R0915
+    datasets_links = defaultdict(lambda: &#34;not selected&#34;)
+    datasets_links[
+        &#34;mundo_transfermarkt_competicoes&#34;
+    ] = &#34;https://basedosdados.org/dataset/mundo-transfermarkt-competicoes&#34;
+    datasets_links[
+        &#34;br_me_caged.microdados_antigos&#34;
+    ] = &#34;https://basedosdados.org/dataset/br-me-caged&#34;
+    datasets_links[&#34;br_ibge_inpc&#34;] = &#34;https://basedosdados.org/dataset/br-ibge-inpc&#34;
+    datasets_links[&#34;br_ibge_ipca&#34;] = &#34;https://basedosdados.org/dataset/br-ibge-ipca&#34;
+    datasets_links[&#34;br_ibge_ipca15&#34;] = &#34;https://basedosdados.org/dataset/br-ibge-ipca15&#34;
+    datasets_links[
+        &#34;br_anp_precos_combustiveis&#34;
+    ] = &#34;https://basedosdados.org/dataset/br-anp-precos-combustiveis&#34;
+    datasets_links[
+        &#34;br_poder360_pesquisas&#34;
+    ] = &#34;https://basedosdados.org/dataset/br-poder360-pesquisas&#34;
+    datasets_links[&#34;br_ms_cnes&#34;] = &#34;https://basedosdados.org/dataset/br-ms-cnes&#34;
+    datasets_links[
+        &#34;br_camara_atividade_legislativa&#34;
+    ] = &#34;https://basedosdados.org/dataset/br-camara-atividade-legislativa&#34;
+    datasets_links[&#34;br_ibge_pnadc&#34;] = &#34;https://basedosdados.org/dataset/br-ibge-pnadc&#34;
+    datasets_links[
+        &#34;br_ana_reservatorios&#34;
+    ] = &#34;https://basedosdados.org/dataset/br-ana-reservatorios&#34;
+
+    selected_datasets = list(datasets_links.keys())
+
     url = f&#34;https://basedosdados.org/api/3/action/bd_dataset_search?q=&amp;resource_type=bdm_table&amp;page=1&amp;page_size={page_size}&#34;
     response = _safe_fetch(url)
     json_response = response.json()
@@ -497,7 +574,15 @@ def was_table_updated(page_size: int, hours: int, wait=None) -&gt; bool:
         dfs.append(df)
 
     df = dfs[0].append(dfs[1:])
-    df[&#34;last_updated&#34;] = pd.to_datetime(df[&#34;last_updated&#34;])
+    df[&#34;link&#34;] = df[&#34;dataset&#34;].map(datasets_links)
+    df[&#34;last_updated&#34;] = [
+        datetime.strptime(date.strftime(&#34;%Y-%m-%d %H:%M:%S&#34;), &#34;%Y-%m-%d %H:%M:%S&#34;)
+        if date is not None
+        else np.nan
+        for date in pd.to_datetime(df[&#34;last_updated&#34;])
+    ]
+    log(df[&#34;last_updated&#34;].unique())
+    df = df[df[&#34;last_updated&#34;] != &#34;None&#34;]
     df.dropna(
         subset=[&#34;last_updated&#34;, &#34;temporal_coverage&#34;, &#34;updated_frequency&#34;], inplace=True
     )
@@ -505,6 +590,9 @@ def was_table_updated(page_size: int, hours: int, wait=None) -&gt; bool:
         k[0] if len(k) &gt; 0 else k for k in df[&#34;temporal_coverage&#34;]
     ]
     df.reset_index(drop=True, inplace=True)
+    df.sort_values(&#34;last_updated&#34;, ascending=False, inplace=True)
+    log(df[[&#34;dataset&#34;, &#34;link&#34;, &#34;last_updated&#34;]])
+    df = df[df.dataset.isin(selected_datasets)]
     df = df[
         df[&#34;last_updated&#34;].apply(lambda x: x.timestamp())
         &gt; (datetime.now() - pd.Timedelta(hours=hours)).timestamp()
