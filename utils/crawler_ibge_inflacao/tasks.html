@@ -33,6 +33,7 @@ Tasks for br_ibge_inpc
 &#34;&#34;&#34;
 # pylint: disable=line-too-long, W0702, E1101
 import glob
+import errno
 import os
 from time import sleep
 
@@ -42,6 +43,10 @@ from tqdm import tqdm
 import wget
 
 from pipelines.utils.utils import log
+
+# pylint: disable=C0206
+# pylint: disable=C0201
+# pylint: disable=R0914
 
 
 @task
@@ -223,6 +228,13 @@ def clean_mes_brasil(indice: str) -&gt; None:
         for arquivo in glob.iglob(&#34;/tmp/data/input/br/*&#34;)
         if arquivo.split(&#34;/&#34;)[-1].split(&#34;_&#34;)[0] == indice
     ]
+
+    if len(arquivos) == 0:
+        raise FileNotFoundError(
+            errno.ENOENT,
+            os.strerror(errno.ENOENT),
+            &#34;/tmp/data/input/br. Please, check if br is the value of FOLDER arg in crawler task&#34;,
+        )
     for arq in arquivos:
         dataframe = pd.read_csv(arq, skipfooter=14, skiprows=2, sep=&#34;;&#34;, dtype=&#34;str&#34;)
         # renomear colunas
@@ -277,7 +289,20 @@ def clean_mes_brasil(indice: str) -&gt; None:
             dataframe = dataframe[ordem]
             geral = pd.DataFrame(dataframe)
 
-    dataframe = pd.concat([grupo, subgrupo, item, subitem, geral])
+    # pylint: disable=E0602
+    # Add only dataframes defined in previous loop. Download failure leads to some dataframe not being defined
+    files_dict = {
+        &#34;grupo&#34;: grupo if &#34;grupo&#34; in locals() else &#34;&#34;,
+        &#34;subgrupo&#34;: subgrupo if &#34;subgrupo&#34; in locals() else &#34;&#34;,
+        &#34;item&#34;: item if &#34;item&#34; in locals() else &#34;&#34;,
+        &#34;subitem&#34;: subitem if &#34;subitem&#34; in locals() else &#34;&#34;,
+        &#34;geral&#34;: geral if &#34;geral&#34; in locals() else &#34;&#34;,
+    }
+
+    downloaded = [
+        k for k in files_dict.keys() if isinstance(files_dict[k], pd.DataFrame)
+    ]
+    dataframe = pd.concat([files_dict[k] for k in downloaded])
     filepath = f&#34;/tmp/data/output/{indice}/categoria_brasil.csv&#34;
     dataframe.to_csv(filepath, index=False)
     log(os.system(&#34;tree /tmp/data&#34;))
@@ -345,7 +370,16 @@ def clean_mes_rm(indice: str):
         for arquivo in glob.iglob(&#34;/tmp/data/input/rm/*&#34;)
         if arquivo.split(&#34;/&#34;)[-1].split(&#34;_&#34;)[0] == indice
     ]
+
+    if len(arquivos) == 0:
+        raise FileNotFoundError(
+            errno.ENOENT,
+            os.strerror(errno.ENOENT),
+            &#34;/tmp/data/input/rm. Please, check if rm is the value of FOLDER arg in crawler task&#34;,
+        )
+
     for arq in arquivos:
+        log(arq)
         dataframe = pd.read_csv(arq, skipfooter=14, skiprows=2, sep=&#34;;&#34;, dtype=&#34;str&#34;)
         # renomear colunas
         dataframe.rename(columns=rename, inplace=True)
@@ -402,10 +436,22 @@ def clean_mes_rm(indice: str):
             dataframe = dataframe[ordem]
             geral = pd.DataFrame(dataframe)
 
-    dataframe = pd.concat([grupo, subgrupo, item, subitem_1, subitem_2, geral])
+    # Add only dataframes defined in previous loop. Download failure leads to some dataframe not being defined
+    files_dict = {
+        &#34;grupo&#34;: grupo if &#34;grupo&#34; in locals() else &#34;&#34;,
+        &#34;subgrupo&#34;: subgrupo if &#34;subgrupo&#34; in locals() else &#34;&#34;,
+        &#34;item&#34;: item if &#34;item&#34; in locals() else &#34;&#34;,
+        &#34;subitem_1&#34;: subitem_1 if &#34;subitem_1&#34; in locals() else &#34;&#34;,
+        &#34;subitem_2&#34;: subitem_2 if &#34;subitem_2&#34; in locals() else &#34;&#34;,
+        &#34;geral&#34;: geral if &#34;geral&#34; in locals() else &#34;&#34;,
+    }
+
+    downloaded = [
+        k for k in files_dict.keys() if isinstance(files_dict[k], pd.DataFrame)
+    ]
+    dataframe = pd.concat([files_dict[k] for k in downloaded])
     filepath = f&#34;/tmp/data/output/{indice}/categoria_rm.csv&#34;
     dataframe.to_csv(filepath, index=False)
-    log(os.system(&#34;tree /tmp/data&#34;))
 
     return filepath
 
@@ -470,6 +516,14 @@ def clean_mes_municipio(indice: str):
         for arquivo in glob.iglob(&#34;/tmp/data/input/mun/*&#34;)
         if arquivo.split(&#34;/&#34;)[-1].split(&#34;_&#34;)[0] == indice
     ]
+
+    if len(arquivos) == 0:
+        raise FileNotFoundError(
+            errno.ENOENT,
+            os.strerror(errno.ENOENT),
+            &#34;/tmp/data/input/mun. Please, check if mun is the value of FOLDER arg in crawler task&#34;,
+        )
+
     for arq in arquivos:
         dataframe = pd.read_csv(arq, skipfooter=14, skiprows=2, sep=&#34;;&#34;, dtype=&#34;str&#34;)
         # renomear colunas
@@ -527,11 +581,23 @@ def clean_mes_municipio(indice: str):
             dataframe = dataframe[ordem]
             geral = pd.DataFrame(dataframe)
 
-    dataframe = pd.concat([grupo, subgrupo, item, subitem_1, subitem_2, geral])
+    # Add only dataframes defined in previous loop. Download failure leads to some dataframe not being defined
+    files_dict = {
+        &#34;grupo&#34;: grupo if &#34;grupo&#34; in locals() else &#34;&#34;,
+        &#34;subgrupo&#34;: subgrupo if &#34;subgrupo&#34; in locals() else &#34;&#34;,
+        &#34;item&#34;: item if &#34;item&#34; in locals() else &#34;&#34;,
+        &#34;subitem_1&#34;: subitem_1 if &#34;subitem_1&#34; in locals() else &#34;&#34;,
+        &#34;subitem_2&#34;: subitem_2 if &#34;subitem_2&#34; in locals() else &#34;&#34;,
+        &#34;geral&#34;: geral if &#34;geral&#34; in locals() else &#34;&#34;,
+    }
+
+    downloaded = [
+        k for k in files_dict.keys() if isinstance(files_dict[k], pd.DataFrame)
+    ]
+    dataframe = pd.concat([files_dict[k] for k in downloaded])
     filepath = f&#34;/tmp/data/output/{indice}/categoria_municipio.csv&#34;
     dataframe.to_csv(filepath, index=False)
 
-    log(os.system(&#34;tree /tmp/data&#34;))
     return filepath
 
 
@@ -595,6 +661,14 @@ def clean_mes_geral(indice: str):
         for arquivo in glob.iglob(&#34;/tmp/data/input/mes/*&#34;)
         if arquivo.split(&#34;/&#34;)[-1].split(&#34;_&#34;)[0] == indice
     ]
+
+    if len(arquivos) == 0:
+        raise FileNotFoundError(
+            errno.ENOENT,
+            os.strerror(errno.ENOENT),
+            &#34;/tmp/data/input/mes. Please, check if mes is the value of FOLDER arg in crawler task&#34;,
+        )
+
     for arq in arquivos:
         if indice == &#34;ip15&#34;:
             dataframe = pd.read_csv(arq, skiprows=2, skipfooter=11, sep=&#34;;&#34;)
@@ -696,6 +770,13 @@ def clean_mes_brasil(indice: str) -&gt; None:
         for arquivo in glob.iglob(&#34;/tmp/data/input/br/*&#34;)
         if arquivo.split(&#34;/&#34;)[-1].split(&#34;_&#34;)[0] == indice
     ]
+
+    if len(arquivos) == 0:
+        raise FileNotFoundError(
+            errno.ENOENT,
+            os.strerror(errno.ENOENT),
+            &#34;/tmp/data/input/br. Please, check if br is the value of FOLDER arg in crawler task&#34;,
+        )
     for arq in arquivos:
         dataframe = pd.read_csv(arq, skipfooter=14, skiprows=2, sep=&#34;;&#34;, dtype=&#34;str&#34;)
         # renomear colunas
@@ -750,7 +831,20 @@ def clean_mes_brasil(indice: str) -&gt; None:
             dataframe = dataframe[ordem]
             geral = pd.DataFrame(dataframe)
 
-    dataframe = pd.concat([grupo, subgrupo, item, subitem, geral])
+    # pylint: disable=E0602
+    # Add only dataframes defined in previous loop. Download failure leads to some dataframe not being defined
+    files_dict = {
+        &#34;grupo&#34;: grupo if &#34;grupo&#34; in locals() else &#34;&#34;,
+        &#34;subgrupo&#34;: subgrupo if &#34;subgrupo&#34; in locals() else &#34;&#34;,
+        &#34;item&#34;: item if &#34;item&#34; in locals() else &#34;&#34;,
+        &#34;subitem&#34;: subitem if &#34;subitem&#34; in locals() else &#34;&#34;,
+        &#34;geral&#34;: geral if &#34;geral&#34; in locals() else &#34;&#34;,
+    }
+
+    downloaded = [
+        k for k in files_dict.keys() if isinstance(files_dict[k], pd.DataFrame)
+    ]
+    dataframe = pd.concat([files_dict[k] for k in downloaded])
     filepath = f&#34;/tmp/data/output/{indice}/categoria_brasil.csv&#34;
     dataframe.to_csv(filepath, index=False)
     log(os.system(&#34;tree /tmp/data&#34;))
@@ -827,6 +921,14 @@ def clean_mes_geral(indice: str):
         for arquivo in glob.iglob(&#34;/tmp/data/input/mes/*&#34;)
         if arquivo.split(&#34;/&#34;)[-1].split(&#34;_&#34;)[0] == indice
     ]
+
+    if len(arquivos) == 0:
+        raise FileNotFoundError(
+            errno.ENOENT,
+            os.strerror(errno.ENOENT),
+            &#34;/tmp/data/input/mes. Please, check if mes is the value of FOLDER arg in crawler task&#34;,
+        )
+
     for arq in arquivos:
         if indice == &#34;ip15&#34;:
             dataframe = pd.read_csv(arq, skiprows=2, skipfooter=11, sep=&#34;;&#34;)
@@ -923,6 +1025,14 @@ def clean_mes_municipio(indice: str):
         for arquivo in glob.iglob(&#34;/tmp/data/input/mun/*&#34;)
         if arquivo.split(&#34;/&#34;)[-1].split(&#34;_&#34;)[0] == indice
     ]
+
+    if len(arquivos) == 0:
+        raise FileNotFoundError(
+            errno.ENOENT,
+            os.strerror(errno.ENOENT),
+            &#34;/tmp/data/input/mun. Please, check if mun is the value of FOLDER arg in crawler task&#34;,
+        )
+
     for arq in arquivos:
         dataframe = pd.read_csv(arq, skipfooter=14, skiprows=2, sep=&#34;;&#34;, dtype=&#34;str&#34;)
         # renomear colunas
@@ -980,11 +1090,23 @@ def clean_mes_municipio(indice: str):
             dataframe = dataframe[ordem]
             geral = pd.DataFrame(dataframe)
 
-    dataframe = pd.concat([grupo, subgrupo, item, subitem_1, subitem_2, geral])
+    # Add only dataframes defined in previous loop. Download failure leads to some dataframe not being defined
+    files_dict = {
+        &#34;grupo&#34;: grupo if &#34;grupo&#34; in locals() else &#34;&#34;,
+        &#34;subgrupo&#34;: subgrupo if &#34;subgrupo&#34; in locals() else &#34;&#34;,
+        &#34;item&#34;: item if &#34;item&#34; in locals() else &#34;&#34;,
+        &#34;subitem_1&#34;: subitem_1 if &#34;subitem_1&#34; in locals() else &#34;&#34;,
+        &#34;subitem_2&#34;: subitem_2 if &#34;subitem_2&#34; in locals() else &#34;&#34;,
+        &#34;geral&#34;: geral if &#34;geral&#34; in locals() else &#34;&#34;,
+    }
+
+    downloaded = [
+        k for k in files_dict.keys() if isinstance(files_dict[k], pd.DataFrame)
+    ]
+    dataframe = pd.concat([files_dict[k] for k in downloaded])
     filepath = f&#34;/tmp/data/output/{indice}/categoria_municipio.csv&#34;
     dataframe.to_csv(filepath, index=False)
 
-    log(os.system(&#34;tree /tmp/data&#34;))
     return filepath</code></pre>
 </details>
 </dd>
@@ -1057,7 +1179,16 @@ def clean_mes_rm(indice: str):
         for arquivo in glob.iglob(&#34;/tmp/data/input/rm/*&#34;)
         if arquivo.split(&#34;/&#34;)[-1].split(&#34;_&#34;)[0] == indice
     ]
+
+    if len(arquivos) == 0:
+        raise FileNotFoundError(
+            errno.ENOENT,
+            os.strerror(errno.ENOENT),
+            &#34;/tmp/data/input/rm. Please, check if rm is the value of FOLDER arg in crawler task&#34;,
+        )
+
     for arq in arquivos:
+        log(arq)
         dataframe = pd.read_csv(arq, skipfooter=14, skiprows=2, sep=&#34;;&#34;, dtype=&#34;str&#34;)
         # renomear colunas
         dataframe.rename(columns=rename, inplace=True)
@@ -1114,10 +1245,22 @@ def clean_mes_rm(indice: str):
             dataframe = dataframe[ordem]
             geral = pd.DataFrame(dataframe)
 
-    dataframe = pd.concat([grupo, subgrupo, item, subitem_1, subitem_2, geral])
+    # Add only dataframes defined in previous loop. Download failure leads to some dataframe not being defined
+    files_dict = {
+        &#34;grupo&#34;: grupo if &#34;grupo&#34; in locals() else &#34;&#34;,
+        &#34;subgrupo&#34;: subgrupo if &#34;subgrupo&#34; in locals() else &#34;&#34;,
+        &#34;item&#34;: item if &#34;item&#34; in locals() else &#34;&#34;,
+        &#34;subitem_1&#34;: subitem_1 if &#34;subitem_1&#34; in locals() else &#34;&#34;,
+        &#34;subitem_2&#34;: subitem_2 if &#34;subitem_2&#34; in locals() else &#34;&#34;,
+        &#34;geral&#34;: geral if &#34;geral&#34; in locals() else &#34;&#34;,
+    }
+
+    downloaded = [
+        k for k in files_dict.keys() if isinstance(files_dict[k], pd.DataFrame)
+    ]
+    dataframe = pd.concat([files_dict[k] for k in downloaded])
     filepath = f&#34;/tmp/data/output/{indice}/categoria_rm.csv&#34;
     dataframe.to_csv(filepath, index=False)
-    log(os.system(&#34;tree /tmp/data&#34;))
 
     return filepath</code></pre>
 </details>
