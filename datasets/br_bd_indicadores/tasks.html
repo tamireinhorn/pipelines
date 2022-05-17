@@ -233,51 +233,7 @@ def crawler_metricas(
     os.system(f&#34;mkdir -p {folder}&#34;)
     df.to_csv(full_filepath, index=False)
 
-    return f&#34;/tmp/data/{table_id}/&#34;
-
-
-@task(
-    max_retries=constants.TASK_MAX_RETRIES.value,
-    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
-)
-def crawler_metricas_agg(table_to_agg: str):
-    &#34;&#34;&#34;
-    Task to weekly capture aggregate data from previously created daily twitter data
-    &#34;&#34;&#34;
-    os.system(f&#34;mkdir -p /tmp/data/{table_to_agg}_agg/&#34;)
-
-    dfs = []
-    blobs = get_storage_blobs(dataset_id=&#34;br_bd_indicadores&#34;, table_id=table_to_agg)
-    for blob in blobs:
-        url_data = blob.public_url
-        date = blob.time_created.strftime(&#34;%Y-%m-%d&#34;)
-        df = pd.read_csv(url_data, dtype={&#34;id&#34;: str}, parse_dates=[&#34;created_at&#34;])
-        df[&#34;upload_date&#34;] = date
-        dfs.append(df)
-
-    df = dfs[0].append(dfs[1:])
-    df = df.drop_duplicates(subset=&#34;id&#34;, keep=&#34;first&#34;)
-
-    df = df.groupby(&#34;upload_date&#34;).agg(
-        {
-            &#34;retweet_count&#34;: &#34;sum&#34;,
-            &#34;reply_count&#34;: &#34;sum&#34;,
-            &#34;like_count&#34;: &#34;sum&#34;,
-            &#34;quote_count&#34;: &#34;sum&#34;,
-            &#34;impression_count&#34;: &#34;sum&#34;,
-            &#34;user_profile_clicks&#34;: &#34;sum&#34;,
-            &#34;url_link_clicks&#34;: &#34;sum&#34;,
-            &#34;followers_count&#34;: &#34;first&#34;,
-            &#34;following_count&#34;: &#34;first&#34;,
-            &#34;tweet_count&#34;: &#34;first&#34;,
-            &#34;listed_count&#34;: &#34;first&#34;,
-        }
-    )
-
-    filepath = f&#34;/tmp/data/{table_to_agg}_agg/{table_to_agg}_agg.csv&#34;
-    df.to_csv(filepath)
-
-    return filepath</code></pre>
+    return f&#34;/tmp/data/{table_id}/&#34;</code></pre>
 </details>
 </section>
 <section>
@@ -404,59 +360,6 @@ def crawler_metricas(
     return f&#34;/tmp/data/{table_id}/&#34;</code></pre>
 </details>
 </dd>
-<dt id="pipelines.datasets.br_bd_indicadores.tasks.crawler_metricas_agg"><code class="name flex">
-<span>def <span class="ident">crawler_metricas_agg</span></span>(<span>table_to_agg: str)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Task to weekly capture aggregate data from previously created daily twitter data</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@task(
-    max_retries=constants.TASK_MAX_RETRIES.value,
-    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
-)
-def crawler_metricas_agg(table_to_agg: str):
-    &#34;&#34;&#34;
-    Task to weekly capture aggregate data from previously created daily twitter data
-    &#34;&#34;&#34;
-    os.system(f&#34;mkdir -p /tmp/data/{table_to_agg}_agg/&#34;)
-
-    dfs = []
-    blobs = get_storage_blobs(dataset_id=&#34;br_bd_indicadores&#34;, table_id=table_to_agg)
-    for blob in blobs:
-        url_data = blob.public_url
-        date = blob.time_created.strftime(&#34;%Y-%m-%d&#34;)
-        df = pd.read_csv(url_data, dtype={&#34;id&#34;: str}, parse_dates=[&#34;created_at&#34;])
-        df[&#34;upload_date&#34;] = date
-        dfs.append(df)
-
-    df = dfs[0].append(dfs[1:])
-    df = df.drop_duplicates(subset=&#34;id&#34;, keep=&#34;first&#34;)
-
-    df = df.groupby(&#34;upload_date&#34;).agg(
-        {
-            &#34;retweet_count&#34;: &#34;sum&#34;,
-            &#34;reply_count&#34;: &#34;sum&#34;,
-            &#34;like_count&#34;: &#34;sum&#34;,
-            &#34;quote_count&#34;: &#34;sum&#34;,
-            &#34;impression_count&#34;: &#34;sum&#34;,
-            &#34;user_profile_clicks&#34;: &#34;sum&#34;,
-            &#34;url_link_clicks&#34;: &#34;sum&#34;,
-            &#34;followers_count&#34;: &#34;first&#34;,
-            &#34;following_count&#34;: &#34;first&#34;,
-            &#34;tweet_count&#34;: &#34;first&#34;,
-            &#34;listed_count&#34;: &#34;first&#34;,
-        }
-    )
-
-    filepath = f&#34;/tmp/data/{table_to_agg}_agg/{table_to_agg}_agg.csv&#34;
-    df.to_csv(filepath)
-
-    return filepath</code></pre>
-</details>
-</dd>
 <dt id="pipelines.datasets.br_bd_indicadores.tasks.echo"><code class="name flex">
 <span>def <span class="ident">echo</span></span>(<span>message: str) ‑> None</span>
 </code></dt>
@@ -574,7 +477,6 @@ def has_new_tweets(bearer_token: str, table_id: str) -&gt; bool:
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.crawler_metricas" href="#pipelines.datasets.br_bd_indicadores.tasks.crawler_metricas">crawler_metricas</a></code></li>
-<li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.crawler_metricas_agg" href="#pipelines.datasets.br_bd_indicadores.tasks.crawler_metricas_agg">crawler_metricas_agg</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.echo" href="#pipelines.datasets.br_bd_indicadores.tasks.echo">echo</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.get_credentials" href="#pipelines.datasets.br_bd_indicadores.tasks.get_credentials">get_credentials</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.has_new_tweets" href="#pipelines.datasets.br_bd_indicadores.tasks.has_new_tweets">has_new_tweets</a></code></li>
