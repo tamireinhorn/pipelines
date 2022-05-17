@@ -31,28 +31,33 @@
 &#34;&#34;&#34;
 Flows for botdosdados
 &#34;&#34;&#34;
-from prefect import case
+from prefect import case, Parameter
 from prefect.run_configs import KubernetesRun
 from prefect.storage import GCS
 from pipelines.constants import constants
 from pipelines.datasets.botdosdados.tasks import (
     was_table_updated,
     get_credentials,
-    send_tweet,
+    message_last_tables,
+    message_inflation_plot,
+    send_media,
+    send_thread,
     echo,
 )
-from pipelines.datasets.botdosdados.schedules import every_hour
+from pipelines.datasets.botdosdados.schedules import every_day
 from pipelines.utils.decorators import Flow
 from pipelines.utils.tasks import rename_current_flow_run, get_date_time_str
 
-with Flow(
-    name=&#34;botdosdados.send_tweets&#34;,
-) as bot_dados_flow:
+with Flow(name=&#34;botdosdados.message_inflation&#34;) as inflation_flow:
+    dataset_id = Parameter(&#34;dataset_id&#34;, default=&#34;br_ibge_ipca&#34;, required=True)
+    table_id = Parameter(&#34;table_id&#34;, default=&#34;mes_brasil&#34;, required=True)
     # pylint: disable=C0103
     now = get_date_time_str()
     rename_flow_run = rename_current_flow_run(msg=f&#34;botdosdados - {now}&#34;, wait=now)
 
-    cond = was_table_updated(page_size=100, hours=24, wait=rename_flow_run)
+    cond = was_table_updated(
+        page_size=100, hours=24, subset=&#34;inflation&#34;, wait=rename_flow_run
+    )
 
     with case(cond, False):
         echo(&#34;No table updated&#34;)
@@ -68,18 +73,38 @@ with Flow(
             secret_path=&#34;botdosdados_credentials&#34;, upstream_tasks=[cond]
         )
 
-        send_tweet(
-            access_token,
-            access_token_secret,
-            consumer_key,
-            consumer_secret,
-            bearer_token,
-            upstream_tasks=[access_token],
+        text = message_inflation_plot(
+            dataset_id=dataset_id, table_id=table_id, upstream_tasks=[access_token]
+        )
+
+        twt_media_id = send_media(
+            access_token=access_token,
+            access_token_secret=access_token_secret,
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret,
+            text=text,
+            image=&#34;/tmp/plots/inflation.jpeg&#34;,
+            upstream_tasks=[text],
+        )
+
+        texts = message_last_tables(upstream_tasks=[twt_media_id])
+
+        id_last_twt = send_thread(
+            access_token=access_token,
+            access_token_secret=access_token_secret,
+            consumer_key=consumer_key,
+            consumer_secret=consumer_secret,
+            bearer_token=bearer_token,
+            texts=texts,
+            is_reply=True,
+            reply_id=twt_media_id,
+            upstream_tasks=[texts],
         )  # pylint: disable=C0103
 
-bot_dados_flow.storage = GCS(constants.GCS_FLOWS_BUCKET.value)
-bot_dados_flow.run_config = KubernetesRun(image=constants.DOCKER_IMAGE.value)
-bot_dados_flow.schedule = every_hour</code></pre>
+
+inflation_flow.storage = GCS(constants.GCS_FLOWS_BUCKET.value)
+inflation_flow.run_config = KubernetesRun(image=constants.DOCKER_IMAGE.value)
+inflation_flow.schedule = every_day</code></pre>
 </details>
 </section>
 <section>
