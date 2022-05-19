@@ -48,7 +48,9 @@ from pipelines.datasets.botdosdados.schedules import every_day
 from pipelines.utils.decorators import Flow
 from pipelines.utils.tasks import rename_current_flow_run, get_date_time_str
 
-with Flow(name=&#34;botdosdados.message_inflation&#34;) as inflation_flow:
+with Flow(
+    name=&#34;botdosdados.message_inflation&#34;, code_owners=[&#34;lucas_cr&#34;]
+) as inflation_flow:
     dataset_id = Parameter(&#34;dataset_id&#34;, default=&#34;br_ibge_ipca&#34;, required=True)
     table_id = Parameter(&#34;table_id&#34;, default=&#34;mes_brasil&#34;, required=True)
     # pylint: disable=C0103

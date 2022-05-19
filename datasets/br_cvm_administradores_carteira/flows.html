@@ -65,7 +65,9 @@ from pipelines.datasets.br_cvm_administradores_carteira.schedules import (
 ROOT = &#34;/tmp/data&#34;
 URL = &#34;http://dados.cvm.gov.br/dados/ADM_CART/CAD/DADOS/cad_adm_cart.zip&#34;
 
-with Flow(name=&#34;br_cvm_administradores_carteira.responsavel&#34;) as br_cvm_adm_car_res:
+with Flow(
+    name=&#34;br_cvm_administradores_carteira.responsavel&#34;, code_owners=[&#34;lucas_cr&#34;]
+) as br_cvm_adm_car_res:
     # Parameters
     dataset_id = Parameter(
         &#34;dataset_id&#34;, default=&#34;br_cvm_administradores_carteira&#34;, required=True
@@ -137,7 +139,9 @@ br_cvm_adm_car_res.storage = GCS(constants.GCS_FLOWS_BUCKET.value)
 br_cvm_adm_car_res.run_config = KubernetesRun(image=constants.DOCKER_IMAGE.value)
 br_cvm_adm_car_res.schedule = schedule_responsavel
 
-with Flow(&#34;br_cvm_administradores_carteira.pessoa_fisica&#34;) as br_cvm_adm_car_pes_fis:
+with Flow(
+    &#34;br_cvm_administradores_carteira.pessoa_fisica&#34;, code_owners=[&#34;lucas_cr&#34;]
+) as br_cvm_adm_car_pes_fis:
     # Parameters
     dataset_id = Parameter(
         &#34;dataset_id&#34;, default=&#34;br_cvm_administradores_carteira&#34;, required=True
@@ -218,7 +222,9 @@ br_cvm_adm_car_pes_fis.storage = GCS(constants.GCS_FLOWS_BUCKET.value)
 br_cvm_adm_car_pes_fis.run_config = KubernetesRun(image=constants.DOCKER_IMAGE.value)
 br_cvm_adm_car_pes_fis.schedule = schedule_fisica
 
-with Flow(&#34;br_cvm_administradores_carteira.pessoa_juridica&#34;) as br_cvm_adm_car_pes_jur:
+with Flow(
+    &#34;br_cvm_administradores_carteira.pessoa_juridica&#34;, code_owners=[&#34;lucas_cr&#34;]
+) as br_cvm_adm_car_pes_jur:
     # Parameters
     dataset_id = Parameter(
         &#34;dataset_id&#34;, default=&#34;br_cvm_administradores_carteira&#34;, required=True
