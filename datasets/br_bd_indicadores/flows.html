@@ -56,7 +56,12 @@ from pipelines.utils.tasks import (
 
 from pipelines.datasets.br_bd_indicadores.schedules import every_day, every_week
 
-with Flow(name=&#34;br_bd_indicadores.twitter_metrics&#34;) as bd_twt_metricas:
+with Flow(
+        name=&#34;br_bd_indicadores.twitter_metrics&#34;,
+        code_owners=[
+        &#34;lucas_cr&#34;,
+    ],
+) as bd_twt_metricas:
     # Parameters
     materialization_mode = Parameter(
         &#34;materialization_mode&#34;, default=&#34;dev&#34;, required=False
