@@ -35,20 +35,6 @@ import collections
 from typing import Tuple
 
 import requests
-import hvac
-
-from pipelines.utils.utils import get_vault_secret
-
-
-def get_credentials_from_secret(
-    secret_path: str,
-    client: hvac.Client = None,
-) -&gt; dict:
-    &#34;&#34;&#34;
-    Returns a username and password from a secret in Vault.
-    &#34;&#34;&#34;
-    secret = get_vault_secret(secret_path, client)
-    return secret[&#34;data&#34;]
 
 
 def create_headers(bearer_token: str) -&gt; dict:
@@ -203,26 +189,6 @@ def flatten(d: dict, parent_key=&#34;&#34;, sep=&#34;_&#34;) -&gt; dict:
     return dict(items)</code></pre>
 </details>
 </dd>
-<dt id="pipelines.datasets.br_bd_indicadores.utils.get_credentials_from_secret"><code class="name flex">
-<span>def <span class="ident">get_credentials_from_secret</span></span>(<span>secret_path: str, client: hvac.v1.Client = None) ‑> dict</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Returns a username and password from a secret in Vault.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def get_credentials_from_secret(
-    secret_path: str,
-    client: hvac.Client = None,
-) -&gt; dict:
-    &#34;&#34;&#34;
-    Returns a username and password from a secret in Vault.
-    &#34;&#34;&#34;
-    secret = get_vault_secret(secret_path, client)
-    return secret[&#34;data&#34;]</code></pre>
-</details>
-</dd>
 </dl>
 </section>
 <section>
@@ -245,7 +211,6 @@ def flatten(d: dict, parent_key=&#34;&#34;, sep=&#34;_&#34;) -&gt; dict:
 <li><code><a title="pipelines.datasets.br_bd_indicadores.utils.create_headers" href="#pipelines.datasets.br_bd_indicadores.utils.create_headers">create_headers</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.utils.create_url" href="#pipelines.datasets.br_bd_indicadores.utils.create_url">create_url</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.utils.flatten" href="#pipelines.datasets.br_bd_indicadores.utils.flatten">flatten</a></code></li>
-<li><code><a title="pipelines.datasets.br_bd_indicadores.utils.get_credentials_from_secret" href="#pipelines.datasets.br_bd_indicadores.utils.get_credentials_from_secret">get_credentials_from_secret</a></code></li>
 </ul>
 </li>
 </ul>

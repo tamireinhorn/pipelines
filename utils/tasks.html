@@ -36,8 +36,6 @@ Helper tasks that could fit any pipeline.
 from datetime import timedelta, datetime
 from pathlib import Path
 from typing import Union, List
-import inspect
-import textwrap
 
 import basedosdados as bd
 import prefect
@@ -222,13 +220,13 @@ def update_metadata(dataset_id: str, table_id: str, fields_to_update: list) -&gt
     fields_to_update: list of dictionaries with key and values to be updated
     &#34;&#34;&#34;
     # add credentials to config.toml
-    (api_key, url) = get_credentials_from_secret(secret_path=&#34;ckan_credentials&#34;)
+    dict_credentials = get_credentials_from_secret(secret_path=&#34;ckan_credentials&#34;)
 
     handle = bd.Metadata(dataset_id=dataset_id, table_id=table_id)
     handle.create(if_exists=&#34;replace&#34;)
 
-    handle.CKAN_API_KEY = api_key
-    handle.CKAN_URL = url
+    handle.CKAN_API_KEY = dict_credentials[&#34;api_key&#34;]
+    handle.CKAN_URL = dict_credentials[&#34;url&#34;]
 
     yaml = ryaml.YAML()
     yaml.preserve_quotes = True
@@ -256,53 +254,6 @@ def update_metadata(dataset_id: str, table_id: str, fields_to_update: list) -&gt
         log(f&#34;Metadata for {table_id} updated&#34;)
     else:
         log(&#34;Fail to validate metadata.&#34;)
-
-
-@task(
-    max_retries=constants.TASK_MAX_RETRIES.value,
-    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
-)
-def publish_table(
-    path: Union[str, Path],  # pylint: disable=unused-argument
-    dataset_id: str,
-    table_id: str,
-    if_exists=&#34;raise&#34;,
-    wait=None,  # pylint: disable=unused-argument
-) -&gt; None:
-    &#34;&#34;&#34;Creates BigQuery table at production dataset.
-    Table should be located at `&lt;dataset_id&gt;.&lt;table_id&gt;`.
-    It creates a view that uses the query from
-    `&lt;metadata_path&gt;/&lt;dataset_id&gt;/&lt;table_id&gt;/publish.sql`.
-    Make sure that all columns from the query also exists at
-    `&lt;metadata_path&gt;/&lt;dataset_id&gt;/&lt;table_id&gt;/table_config.sql`, including
-    the partitions.
-    Args:
-        if_exists (str): Optional.
-            What to do if table exists.
-            * &#39;raise&#39; : Raises Conflict exception
-            * &#39;replace&#39; : Replace table
-            * &#39;pass&#39; : Do nothing
-    Todo:
-        * Check if all required fields are filled
-    &#34;&#34;&#34;
-
-    # pylint: disable=C0103
-    tb = bd.Table(dataset_id=dataset_id, table_id=table_id)
-
-    if if_exists == &#34;replace&#34;:
-        tb.delete(mode=&#34;prod&#34;)
-
-    tb.client[&#34;bigquery_prod&#34;].query(
-        (tb.table_folder / &#34;publish.sql&#34;).open(&#34;r&#34;, encoding=&#34;utf-8&#34;).read()
-    ).result()
-
-    tb.update()
-
-    if tb.table_exists(mode=&#34;prod&#34;):
-        log(f&#34;Successfully uploaded {table_id} to prod.&#34;)
-    else:
-
-        log(&#34;I cannot upload {table_id} in prod.&#34;)
 
 
 @task(
@@ -384,102 +335,6 @@ def get_temporal_coverage(
         return start_date + &#34;(&#34; + interval + &#34;)&#34; + end_date
 
     raise ValueError(&#34;time_unit must be one of the following: day, month, year&#34;)
-
-
-@task(
-    max_retries=constants.TASK_MAX_RETRIES.value,
-    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
-)
-def update_publish_sql(dataset_id: str, table_id: str, dtype: dict, columns: list):
-    &#34;&#34;&#34;Edit publish.sql with columns and bigquery_type&#34;&#34;&#34;
-
-    # pylint: disable=C0103
-    tb = bd.Table(dataset_id=dataset_id, table_id=table_id)
-
-    # publish.sql header and instructions
-    publish_txt = &#34;&#34;&#34;
-    /*
-    Query para publicar a tabela.
-
-    Esse é o lugar para:
-    - modificar nomes, ordem e tipos de colunas
-    - dar join com outras tabelas
-    - criar colunas extras (e.g. logs, proporções, etc.)
-
-    Qualquer coluna definida aqui deve também existir em `table_config.yaml`.
-
-    # Além disso, sinta-se à vontade para alterar alguns nomes obscuros
-    # para algo um pouco mais explícito.
-
-    TIPOS:
-    - Para modificar tipos de colunas, basta substituir STRING por outro tipo válido.
-    - Exemplo: `SAFE_CAST(column_name AS NUMERIC) column_name`
-    - Mais detalhes: https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types
-    */
-    &#34;&#34;&#34;
-    accepted_types = [
-        &#34;INT64&#34;,
-        &#34;NUMERIC&#34;,
-        &#34;FLOAT64&#34;,
-        &#34;BOOL&#34;,
-        &#34;STRING&#34;,
-        &#34;BYTES&#34;,
-        &#34;ARRAY&#34;,
-        &#34;DATE&#34;,
-        &#34;TIME&#34;,
-        &#34;DATETIME&#34;,
-        &#34;TIMESTAMP&#34;,
-        &#34;STRUCT&#34;,
-        &#34;GEOGRAPHY&#34;,
-    ]
-    if not set(dtype.values()).issubset(accepted_types):
-        non_type = list(set(accepted_types) - set(dtype))[0]
-        raise ValueError(
-            f&#34;Big Query types must be one of the following &#39;INT64&#39;, &#39;NUMERIC&#39;, &#39;FLOAT64&#39;, &#39;BOOL&#39;, &#39;STRING&#39;, &#39;BYTES&#39;, &#39;ARRAY&#39;, &#39;DATE&#39;, &#39;TIME&#39;, &#39;DATETIME&#39;, &#39;TIMESTAMP&#39;, &#39;STRUCT&#39;, &#39;GEOGRAPHY&#39;.\n{non_type} was found&#34;
-        )
-
-    # remove triple quotes extra space
-    publish_txt = inspect.cleandoc(publish_txt)
-    publish_txt = textwrap.dedent(publish_txt)
-
-    # add create table statement
-    project_id_prod = tb.client[&#34;bigquery_prod&#34;].project
-    publish_txt += (
-        f&#34;\n\nCREATE VIEW {project_id_prod}.{tb.dataset_id}.{tb.table_id} AS\nSELECT \n&#34;
-    )
-
-    # sort columns by is_partition, partitions_columns come first
-
-    # pylint: disable=W0212
-    md = bd.Metadata(dataset_id=dataset_id, table_id=table_id)
-    md.create(columns=columns, if_exists=&#34;replace&#34;)
-    tb._make_publish_sql()
-
-    columns = tb.table_config[&#34;columns&#34;]
-
-    # add columns in publish.sql
-    for col in columns:
-        name = col[&#34;name&#34;]
-        if name in dtype.keys():
-            bigquery_type = dtype[name]
-        else:
-            if col[&#34;bigquery_type&#34;] is None:
-                bigquery_type = &#34;STRING&#34;
-            else:
-                bigquery_type = col[&#34;bigquery_type&#34;].upper()
-
-        publish_txt += f&#34;SAFE_CAST({name} AS {bigquery_type}) {name},\n&#34;
-    # remove last comma
-    publish_txt = publish_txt[:-2] + &#34;\n&#34;
-
-    # add from statement
-    project_id_staging = tb.client[&#34;bigquery_staging&#34;].project
-    publish_txt += (
-        f&#34;FROM {project_id_staging}.{tb.dataset_id}_staging.{tb.table_id} AS t&#34;
-    )
-
-    # save publish.sql in table_folder
-    (tb.table_folder / &#34;publish.sql&#34;).open(&#34;w&#34;, encoding=&#34;utf-8&#34;).write(publish_txt)
 
 
 # pylint: disable=W0613
@@ -821,81 +676,6 @@ def get_temporal_coverage(
     raise ValueError(&#34;time_unit must be one of the following: day, month, year&#34;)</code></pre>
 </details>
 </dd>
-<dt id="pipelines.utils.tasks.publish_table"><code class="name flex">
-<span>def <span class="ident">publish_table</span></span>(<span>path: Union[str, pathlib.Path], dataset_id: str, table_id: str, if_exists='raise', wait=None) ‑> None</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Creates BigQuery table at production dataset.
-Table should be located at <code>&lt;dataset_id&gt;.&lt;table_id&gt;</code>.
-It creates a view that uses the query from
-<code>&lt;metadata_path&gt;/&lt;dataset_id&gt;/&lt;table_id&gt;/publish.sql</code>.
-Make sure that all columns from the query also exists at
-<code>&lt;metadata_path&gt;/&lt;dataset_id&gt;/&lt;table_id&gt;/table_config.sql</code>, including
-the partitions.</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>if_exists</code></strong> :&ensp;<code>str</code></dt>
-<dd>Optional.
-What to do if table exists.
-* 'raise' : Raises Conflict exception
-* 'replace' : Replace table
-* 'pass' : Do nothing</dd>
-</dl>
-<h2 id="todo">Todo</h2>
-<ul>
-<li>Check if all required fields are filled</li>
-</ul></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@task(
-    max_retries=constants.TASK_MAX_RETRIES.value,
-    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
-)
-def publish_table(
-    path: Union[str, Path],  # pylint: disable=unused-argument
-    dataset_id: str,
-    table_id: str,
-    if_exists=&#34;raise&#34;,
-    wait=None,  # pylint: disable=unused-argument
-) -&gt; None:
-    &#34;&#34;&#34;Creates BigQuery table at production dataset.
-    Table should be located at `&lt;dataset_id&gt;.&lt;table_id&gt;`.
-    It creates a view that uses the query from
-    `&lt;metadata_path&gt;/&lt;dataset_id&gt;/&lt;table_id&gt;/publish.sql`.
-    Make sure that all columns from the query also exists at
-    `&lt;metadata_path&gt;/&lt;dataset_id&gt;/&lt;table_id&gt;/table_config.sql`, including
-    the partitions.
-    Args:
-        if_exists (str): Optional.
-            What to do if table exists.
-            * &#39;raise&#39; : Raises Conflict exception
-            * &#39;replace&#39; : Replace table
-            * &#39;pass&#39; : Do nothing
-    Todo:
-        * Check if all required fields are filled
-    &#34;&#34;&#34;
-
-    # pylint: disable=C0103
-    tb = bd.Table(dataset_id=dataset_id, table_id=table_id)
-
-    if if_exists == &#34;replace&#34;:
-        tb.delete(mode=&#34;prod&#34;)
-
-    tb.client[&#34;bigquery_prod&#34;].query(
-        (tb.table_folder / &#34;publish.sql&#34;).open(&#34;r&#34;, encoding=&#34;utf-8&#34;).read()
-    ).result()
-
-    tb.update()
-
-    if tb.table_exists(mode=&#34;prod&#34;):
-        log(f&#34;Successfully uploaded {table_id} to prod.&#34;)
-    else:
-
-        log(&#34;I cannot upload {table_id} in prod.&#34;)</code></pre>
-</details>
-</dd>
 <dt id="pipelines.utils.tasks.rename_current_flow_run"><code class="name flex">
 <span>def <span class="ident">rename_current_flow_run</span></span>(<span>msg: str, wait=None) ‑> None</span>
 </code></dt>
@@ -962,13 +742,13 @@ def update_metadata(dataset_id: str, table_id: str, fields_to_update: list) -&gt
     fields_to_update: list of dictionaries with key and values to be updated
     &#34;&#34;&#34;
     # add credentials to config.toml
-    (api_key, url) = get_credentials_from_secret(secret_path=&#34;ckan_credentials&#34;)
+    dict_credentials = get_credentials_from_secret(secret_path=&#34;ckan_credentials&#34;)
 
     handle = bd.Metadata(dataset_id=dataset_id, table_id=table_id)
     handle.create(if_exists=&#34;replace&#34;)
 
-    handle.CKAN_API_KEY = api_key
-    handle.CKAN_URL = url
+    handle.CKAN_API_KEY = dict_credentials[&#34;api_key&#34;]
+    handle.CKAN_URL = dict_credentials[&#34;url&#34;]
 
     yaml = ryaml.YAML()
     yaml.preserve_quotes = True
@@ -998,111 +778,6 @@ def update_metadata(dataset_id: str, table_id: str, fields_to_update: list) -&gt
         log(&#34;Fail to validate metadata.&#34;)</code></pre>
 </details>
 </dd>
-<dt id="pipelines.utils.tasks.update_publish_sql"><code class="name flex">
-<span>def <span class="ident">update_publish_sql</span></span>(<span>dataset_id: str, table_id: str, dtype: dict, columns: list)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Edit publish.sql with columns and bigquery_type</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@task(
-    max_retries=constants.TASK_MAX_RETRIES.value,
-    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
-)
-def update_publish_sql(dataset_id: str, table_id: str, dtype: dict, columns: list):
-    &#34;&#34;&#34;Edit publish.sql with columns and bigquery_type&#34;&#34;&#34;
-
-    # pylint: disable=C0103
-    tb = bd.Table(dataset_id=dataset_id, table_id=table_id)
-
-    # publish.sql header and instructions
-    publish_txt = &#34;&#34;&#34;
-    /*
-    Query para publicar a tabela.
-
-    Esse é o lugar para:
-    - modificar nomes, ordem e tipos de colunas
-    - dar join com outras tabelas
-    - criar colunas extras (e.g. logs, proporções, etc.)
-
-    Qualquer coluna definida aqui deve também existir em `table_config.yaml`.
-
-    # Além disso, sinta-se à vontade para alterar alguns nomes obscuros
-    # para algo um pouco mais explícito.
-
-    TIPOS:
-    - Para modificar tipos de colunas, basta substituir STRING por outro tipo válido.
-    - Exemplo: `SAFE_CAST(column_name AS NUMERIC) column_name`
-    - Mais detalhes: https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types
-    */
-    &#34;&#34;&#34;
-    accepted_types = [
-        &#34;INT64&#34;,
-        &#34;NUMERIC&#34;,
-        &#34;FLOAT64&#34;,
-        &#34;BOOL&#34;,
-        &#34;STRING&#34;,
-        &#34;BYTES&#34;,
-        &#34;ARRAY&#34;,
-        &#34;DATE&#34;,
-        &#34;TIME&#34;,
-        &#34;DATETIME&#34;,
-        &#34;TIMESTAMP&#34;,
-        &#34;STRUCT&#34;,
-        &#34;GEOGRAPHY&#34;,
-    ]
-    if not set(dtype.values()).issubset(accepted_types):
-        non_type = list(set(accepted_types) - set(dtype))[0]
-        raise ValueError(
-            f&#34;Big Query types must be one of the following &#39;INT64&#39;, &#39;NUMERIC&#39;, &#39;FLOAT64&#39;, &#39;BOOL&#39;, &#39;STRING&#39;, &#39;BYTES&#39;, &#39;ARRAY&#39;, &#39;DATE&#39;, &#39;TIME&#39;, &#39;DATETIME&#39;, &#39;TIMESTAMP&#39;, &#39;STRUCT&#39;, &#39;GEOGRAPHY&#39;.\n{non_type} was found&#34;
-        )
-
-    # remove triple quotes extra space
-    publish_txt = inspect.cleandoc(publish_txt)
-    publish_txt = textwrap.dedent(publish_txt)
-
-    # add create table statement
-    project_id_prod = tb.client[&#34;bigquery_prod&#34;].project
-    publish_txt += (
-        f&#34;\n\nCREATE VIEW {project_id_prod}.{tb.dataset_id}.{tb.table_id} AS\nSELECT \n&#34;
-    )
-
-    # sort columns by is_partition, partitions_columns come first
-
-    # pylint: disable=W0212
-    md = bd.Metadata(dataset_id=dataset_id, table_id=table_id)
-    md.create(columns=columns, if_exists=&#34;replace&#34;)
-    tb._make_publish_sql()
-
-    columns = tb.table_config[&#34;columns&#34;]
-
-    # add columns in publish.sql
-    for col in columns:
-        name = col[&#34;name&#34;]
-        if name in dtype.keys():
-            bigquery_type = dtype[name]
-        else:
-            if col[&#34;bigquery_type&#34;] is None:
-                bigquery_type = &#34;STRING&#34;
-            else:
-                bigquery_type = col[&#34;bigquery_type&#34;].upper()
-
-        publish_txt += f&#34;SAFE_CAST({name} AS {bigquery_type}) {name},\n&#34;
-    # remove last comma
-    publish_txt = publish_txt[:-2] + &#34;\n&#34;
-
-    # add from statement
-    project_id_staging = tb.client[&#34;bigquery_staging&#34;].project
-    publish_txt += (
-        f&#34;FROM {project_id_staging}.{tb.dataset_id}_staging.{tb.table_id} AS t&#34;
-    )
-
-    # save publish.sql in table_folder
-    (tb.table_folder / &#34;publish.sql&#34;).open(&#34;w&#34;, encoding=&#34;utf-8&#34;).write(publish_txt)</code></pre>
-</details>
-</dd>
 </dl>
 </section>
 <section>
@@ -1126,11 +801,9 @@ def update_publish_sql(dataset_id: str, table_id: str, dtype: dict, columns: lis
 <li><code><a title="pipelines.utils.tasks.get_current_flow_labels" href="#pipelines.utils.tasks.get_current_flow_labels">get_current_flow_labels</a></code></li>
 <li><code><a title="pipelines.utils.tasks.get_date_time_str" href="#pipelines.utils.tasks.get_date_time_str">get_date_time_str</a></code></li>
 <li><code><a title="pipelines.utils.tasks.get_temporal_coverage" href="#pipelines.utils.tasks.get_temporal_coverage">get_temporal_coverage</a></code></li>
-<li><code><a title="pipelines.utils.tasks.publish_table" href="#pipelines.utils.tasks.publish_table">publish_table</a></code></li>
 <li><code><a title="pipelines.utils.tasks.rename_current_flow_run" href="#pipelines.utils.tasks.rename_current_flow_run">rename_current_flow_run</a></code></li>
 <li><code><a title="pipelines.utils.tasks.rename_current_flow_run_dataset_table" href="#pipelines.utils.tasks.rename_current_flow_run_dataset_table">rename_current_flow_run_dataset_table</a></code></li>
 <li><code><a title="pipelines.utils.tasks.update_metadata" href="#pipelines.utils.tasks.update_metadata">update_metadata</a></code></li>
-<li><code><a title="pipelines.utils.tasks.update_publish_sql" href="#pipelines.utils.tasks.update_publish_sql">update_publish_sql</a></code></li>
 </ul>
 </li>
 </ul>

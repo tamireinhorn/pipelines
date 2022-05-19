@@ -43,7 +43,13 @@ every_four_months = Schedule(
         CronClock(
             cron=&#34;0 0 28 2/4 *&#34;,
             start_date=datetime(2021, 1, 1),
-            labels=[constants.BASEDOSDADOS_PROD_AGENT_LABEL.value],
+            labels=[constants.BASEDOSDADOS_DEV_AGENT_LABEL.value],
+            parameter_defaults={
+                &#34;dataset_id&#34;: &#34;br_cgu_pessoal_executivo_federal&#34;,
+                &#34;materialization_mode&#34;: &#34;dev&#34;,
+                &#34;materialize after dump&#34;: True,
+                &#34;table_id&#34;: &#34;terceirizados&#34;,
+            },
         )
     ]
 )</code></pre>

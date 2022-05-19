@@ -106,16 +106,12 @@ def get_vault_secret(secret_path: str, client: hvac.Client = None) -&gt; dict:
 def get_credentials_from_secret(
     secret_path: str,
     client: hvac.Client = None,
-) -&gt; Tuple[str, str]:
+) -&gt; dict:
     &#34;&#34;&#34;
     Returns a username and password from a secret in Vault.
     &#34;&#34;&#34;
     secret = get_vault_secret(secret_path, client)
-    keys = list(secret[&#34;data&#34;].keys())
-    return (
-        secret[&#34;data&#34;][keys[0]],
-        secret[&#34;data&#34;][keys[1]],
-    )
+    return secret[&#34;data&#34;]
 
 
 def set_default_parameters(
@@ -237,23 +233,6 @@ def notify_discord_on_failure(
         message=message,
         webhook_url=url,
     )
-
-
-# def send_telegram_message(
-#     message: str,
-#     token: str,
-#     chat_id: int,
-#     parse_mode: str = telegram.ParseMode.HTML,
-# ):
-#     &#34;&#34;&#34;
-#     Sends a message to a Telegram chat.
-#     &#34;&#34;&#34;
-#     bot = telegram.Bot(token=token)
-#     bot.send_message(
-#         chat_id=chat_id,
-#         text=message,
-#         parse_mode=parse_mode,
-#     )
 
 
 def smart_split(
@@ -653,7 +632,7 @@ def dump_header_to_csv(
 </details>
 </dd>
 <dt id="pipelines.utils.utils.get_credentials_from_secret"><code class="name flex">
-<span>def <span class="ident">get_credentials_from_secret</span></span>(<span>secret_path: str, client: hvac.v1.Client = None) ‑> Tuple[str, str]</span>
+<span>def <span class="ident">get_credentials_from_secret</span></span>(<span>secret_path: str, client: hvac.v1.Client = None) ‑> dict</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Returns a username and password from a secret in Vault.</p></div>
@@ -664,16 +643,12 @@ def dump_header_to_csv(
 <pre><code class="python">def get_credentials_from_secret(
     secret_path: str,
     client: hvac.Client = None,
-) -&gt; Tuple[str, str]:
+) -&gt; dict:
     &#34;&#34;&#34;
     Returns a username and password from a secret in Vault.
     &#34;&#34;&#34;
     secret = get_vault_secret(secret_path, client)
-    keys = list(secret[&#34;data&#34;].keys())
-    return (
-        secret[&#34;data&#34;][keys[0]],
-        secret[&#34;data&#34;][keys[1]],
-    )</code></pre>
+    return secret[&#34;data&#34;]</code></pre>
 </details>
 </dd>
 <dt id="pipelines.utils.utils.get_storage_blobs"><code class="name flex">

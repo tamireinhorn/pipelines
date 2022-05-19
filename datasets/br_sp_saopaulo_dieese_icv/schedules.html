@@ -45,8 +45,14 @@ every_month = Schedule(
             labels=[
                 constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
             ],
+            parameter_defaults={
+                &#34;dataset_id&#34;: &#34;br_bd_indicadores&#34;,
+                &#34;materialization_mode&#34;: &#34;dev&#34;,
+                &#34;materialize after dump&#34;: True,
+                &#34;table_id&#34;: &#34;mes&#34;,
+            },
         )
-    ]
+    ],
 )</code></pre>
 </details>
 </section>
