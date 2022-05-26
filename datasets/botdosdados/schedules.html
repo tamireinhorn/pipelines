@@ -34,7 +34,7 @@ Schedules for botdosdados
 
 from datetime import datetime
 
-from prefect.schedules import Schedule
+from prefect.schedules import Schedule, filters, adjustments
 from prefect.schedules.clocks import CronClock
 
 from pipelines.constants import constants
@@ -49,7 +49,9 @@ every_day = Schedule(
                 constants.BASEDOSDADOS_PROD_AGENT_LABEL.value,
             ],
         )
-    ]
+    ],
+    filters=[filters.is_weekday],
+    adjustments=[adjustments.next_weekday],
 )</code></pre>
 </details>
 </section>

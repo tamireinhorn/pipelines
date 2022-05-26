@@ -33,15 +33,15 @@ Schedules for bd_tweet_data
 &#34;&#34;&#34;
 
 from datetime import timedelta, datetime
-from prefect.schedules import Schedule
+from prefect.schedules import Schedule, filters, adjustments
 from prefect.schedules.clocks import IntervalClock
 from pipelines.constants import constants
 
 every_week = Schedule(
     clocks=[
         IntervalClock(
-            interval=timedelta(weeks=2),
-            start_date=datetime(2021, 1, 1),
+            interval=timedelta(weeks=1),
+            start_date=datetime(2021, 1, 1, 17, 35),
             labels=[
                 constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
             ],
@@ -52,7 +52,9 @@ every_week = Schedule(
                 &#34;table_id&#34;: &#34;twitter_metrics_agg&#34;,
             },
         ),
-    ]
+    ],
+    filters=[filters.is_weekday],
+    adjustments=[adjustments.next_weekday],
 )
 
 every_day = Schedule(
@@ -70,7 +72,8 @@ every_day = Schedule(
                 &#34;table_id&#34;: &#34;twitter_metrics&#34;,
             },
         ),
-    ]
+    ],
+    filters=[filters.is_weekday],
 )</code></pre>
 </details>
 </section>
