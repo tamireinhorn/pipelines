@@ -53,7 +53,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 
 @task
-def crawler(indice: str, folder: str) -&gt; None:
+def crawler(indice: str, folder: str) -&gt; bool:
     &#34;&#34;&#34;
     Crawler for IBGE Inflacao
 
@@ -162,15 +162,16 @@ def crawler(indice: str, folder: str) -&gt; None:
             except Exception:
                 pass
 
+    log(os.system(&#34;tree /tmp/data&#34;))
     if len(links_keys) == len(success_dwnl):
         log(&#34;All files were successfully downloaded&#34;)
-    else:
-        log(&#34;The folowing files failed to download:&#34;)
-        rems = set(links_keys) - set(success_dwnl)
-        for rem in rems:
-            log(rem)
+        return True
 
-    log(os.system(&#34;tree /tmp/data&#34;))
+    log(&#34;The folowing files failed to download:&#34;)
+    rems = set(links_keys) - set(success_dwnl)
+    for rem in rems:
+        log(rem)
+    return False
 
 
 @task
@@ -1269,7 +1270,7 @@ def clean_mes_rm(indice: str):
 </details>
 </dd>
 <dt id="pipelines.utils.crawler_ibge_inflacao.tasks.crawler"><code class="name flex">
-<span>def <span class="ident">crawler</span></span>(<span>indice: str, folder: str) ‑> None</span>
+<span>def <span class="ident">crawler</span></span>(<span>indice: str, folder: str) ‑> bool</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Crawler for IBGE Inflacao</p>
@@ -1280,7 +1281,7 @@ folder: br | rm | mun | mes</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@task
-def crawler(indice: str, folder: str) -&gt; None:
+def crawler(indice: str, folder: str) -&gt; bool:
     &#34;&#34;&#34;
     Crawler for IBGE Inflacao
 
@@ -1389,15 +1390,16 @@ def crawler(indice: str, folder: str) -&gt; None:
             except Exception:
                 pass
 
+    log(os.system(&#34;tree /tmp/data&#34;))
     if len(links_keys) == len(success_dwnl):
         log(&#34;All files were successfully downloaded&#34;)
-    else:
-        log(&#34;The folowing files failed to download:&#34;)
-        rems = set(links_keys) - set(success_dwnl)
-        for rem in rems:
-            log(rem)
+        return True
 
-    log(os.system(&#34;tree /tmp/data&#34;))</code></pre>
+    log(&#34;The folowing files failed to download:&#34;)
+    rems = set(links_keys) - set(success_dwnl)
+    for rem in rems:
+        log(rem)
+    return False</code></pre>
 </details>
 </dd>
 </dl>

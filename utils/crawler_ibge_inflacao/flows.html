@@ -49,6 +49,7 @@ from pipelines.utils.crawler_ibge_inflacao.tasks import (
     clean_mes_municipio,
     clean_mes_geral,
 )
+from pipelines.utils.utils import log
 from pipelines.utils.decorators import Flow
 from pipelines.utils.tasks import (
     create_table_and_upload_to_gcs,
@@ -78,63 +79,72 @@ with Flow(
         prefix=&#34;Dump: &#34;, dataset_id=dataset_id, table_id=table_id, wait=table_id
     )
 
-    wait_crawler = crawler(indice=INDICE, folder=FOLDER)
+    was_downloaded = crawler(indice=INDICE, folder=FOLDER)
     # pylint: disable=E1123
-    filepath = clean_mes_brasil(indice=INDICE, upstream_tasks=[wait_crawler])
 
-    wait_upload_table = create_table_and_upload_to_gcs(
-        data_path=filepath,
-        dataset_id=dataset_id,
-        table_id=table_id,
-        dump_mode=&#34;overwrite&#34;,
-        wait=filepath,
-    )
+    with case(was_downloaded, False):
+        log(&#34;The files download failed&#34;)
 
-    temporal_coverage = get_temporal_coverage(
-        filepath=filepath,
-        date_cols=[&#34;ano&#34;, &#34;mes&#34;],
-        time_unit=&#34;month&#34;,
-        interval=&#34;1&#34;,
-        upstream_tasks=[wait_upload_table],
-    )
+    with case(was_downloaded, True):
+        filepath = clean_mes_brasil(indice=INDICE, upstream_tasks=[was_downloaded])
 
-    wait_update_metadata = update_metadata(
-        dataset_id=dataset_id,
-        table_id=table_id,
-        fields_to_update=[
-            {&#34;last_updated&#34;: {&#34;data&#34;: datetime.now().strftime(&#34;%Y-%m-%d %H:%M:%S&#34;)}},
-            {&#34;temporal_coverage&#34;: [temporal_coverage]},
-        ],
-        upstream_tasks=[temporal_coverage],
-    )
-
-    with case(materialize_after_dump, True):
-        # Trigger DBT flow run
-        current_flow_labels = get_current_flow_labels()
-        materialization_flow = create_flow_run(
-            flow_name=utils_constants.FLOW_EXECUTE_DBT_MODEL_NAME.value,
-            project_name=constants.PREFECT_DEFAULT_PROJECT.value,
-            parameters={
-                &#34;dataset_id&#34;: dataset_id,
-                &#34;table_id&#34;: table_id,
-                &#34;mode&#34;: materialization_mode,
-            },
-            labels=current_flow_labels,
-            run_name=f&#34;Materialize {dataset_id}.{table_id}&#34;,
+        wait_upload_table = create_table_and_upload_to_gcs(
+            data_path=filepath,
+            dataset_id=dataset_id,
+            table_id=table_id,
+            dump_mode=&#34;overwrite&#34;,
+            wait=filepath,
         )
 
-        wait_for_materialization = wait_for_flow_run(
-            materialization_flow,
-            stream_states=True,
-            stream_logs=True,
-            raise_final_state=True,
+        temporal_coverage = get_temporal_coverage(
+            filepath=filepath,
+            date_cols=[&#34;ano&#34;, &#34;mes&#34;],
+            time_unit=&#34;month&#34;,
+            interval=&#34;1&#34;,
+            upstream_tasks=[wait_upload_table],
         )
-        wait_for_materialization.max_retries = (
-            dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_ATTEMPTS.value
+
+        wait_update_metadata = update_metadata(
+            dataset_id=dataset_id,
+            table_id=table_id,
+            fields_to_update=[
+                {
+                    &#34;last_updated&#34;: {
+                        &#34;data&#34;: datetime.now().strftime(&#34;%Y-%m-%d %H:%M:%S&#34;)
+                    }
+                },
+                {&#34;temporal_coverage&#34;: [temporal_coverage]},
+            ],
+            upstream_tasks=[temporal_coverage],
         )
-        wait_for_materialization.retry_delay = timedelta(
-            seconds=dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_INTERVAL.value
-        )
+
+        with case(materialize_after_dump, True):
+            # Trigger DBT flow run
+            current_flow_labels = get_current_flow_labels()
+            materialization_flow = create_flow_run(
+                flow_name=utils_constants.FLOW_EXECUTE_DBT_MODEL_NAME.value,
+                project_name=constants.PREFECT_DEFAULT_PROJECT.value,
+                parameters={
+                    &#34;dataset_id&#34;: dataset_id,
+                    &#34;table_id&#34;: table_id,
+                    &#34;mode&#34;: materialization_mode,
+                },
+                labels=current_flow_labels,
+                run_name=f&#34;Materialize {dataset_id}.{table_id}&#34;,
+            )
+
+            wait_for_materialization = wait_for_flow_run(
+                materialization_flow,
+                stream_states=True,
+                stream_logs=True,
+                raise_final_state=True,
+            )
+            wait_for_materialization.max_retries = (
+                dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_ATTEMPTS.value
+            )
+            wait_for_materialization.retry_delay = timedelta(
+                seconds=dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_INTERVAL.value
+            )
 
 flow_ibge_inflacao_mes_brasil.storage = GCS(constants.GCS_FLOWS_BUCKET.value)
 flow_ibge_inflacao_mes_brasil.run_config = KubernetesRun(
@@ -159,63 +169,73 @@ with Flow(&#34;BD Template - IBGE Inflação: mes_rm&#34;) as flow_ibge_inflacao
         prefix=&#34;Dump: &#34;, dataset_id=dataset_id, table_id=table_id, wait=table_id
     )
 
-    wait_crawler = crawler(indice=INDICE, folder=FOLDER)
+    was_downloaded = crawler(indice=INDICE, folder=FOLDER)
     # pylint: disable=E1123
-    filepath = clean_mes_rm(indice=INDICE, upstream_tasks=[wait_crawler])
 
-    wait_upload_table = create_table_and_upload_to_gcs(
-        data_path=filepath,
-        dataset_id=dataset_id,
-        table_id=table_id,
-        dump_mode=&#34;overwrite&#34;,
-        wait=filepath,
-    )
+    with case(was_downloaded, False):
+        log(&#34;The files download failed&#34;)
 
-    temporal_coverage = get_temporal_coverage(
-        filepath=filepath,
-        date_cols=[&#34;ano&#34;, &#34;mes&#34;],
-        time_unit=&#34;month&#34;,
-        interval=&#34;1&#34;,
-        upstream_tasks=[wait_upload_table],
-    )
+    with case(was_downloaded, True):
+        # pylint: disable=E1123
+        filepath = clean_mes_rm(indice=INDICE, upstream_tasks=[was_downloaded])
 
-    wait_update_metadata = update_metadata(
-        dataset_id=dataset_id,
-        table_id=table_id,
-        fields_to_update=[
-            {&#34;last_updated&#34;: {&#34;data&#34;: datetime.now().strftime(&#34;%Y-%m-%d %H:%M:%S&#34;)}},
-            {&#34;temporal_coverage&#34;: [temporal_coverage]},
-        ],
-        upstream_tasks=[temporal_coverage],
-    )
-
-    with case(materialize_after_dump, True):
-        # Trigger DBT flow run
-        current_flow_labels = get_current_flow_labels()
-        materialization_flow = create_flow_run(
-            flow_name=utils_constants.FLOW_EXECUTE_DBT_MODEL_NAME.value,
-            project_name=constants.PREFECT_DEFAULT_PROJECT.value,
-            parameters={
-                &#34;dataset_id&#34;: dataset_id,
-                &#34;table_id&#34;: table_id,
-                &#34;mode&#34;: materialization_mode,
-            },
-            labels=current_flow_labels,
-            run_name=f&#34;Materialize {dataset_id}.{table_id}&#34;,
+        wait_upload_table = create_table_and_upload_to_gcs(
+            data_path=filepath,
+            dataset_id=dataset_id,
+            table_id=table_id,
+            dump_mode=&#34;overwrite&#34;,
+            wait=filepath,
         )
 
-        wait_for_materialization = wait_for_flow_run(
-            materialization_flow,
-            stream_states=True,
-            stream_logs=True,
-            raise_final_state=True,
+        temporal_coverage = get_temporal_coverage(
+            filepath=filepath,
+            date_cols=[&#34;ano&#34;, &#34;mes&#34;],
+            time_unit=&#34;month&#34;,
+            interval=&#34;1&#34;,
+            upstream_tasks=[wait_upload_table],
         )
-        wait_for_materialization.max_retries = (
-            dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_ATTEMPTS.value
+
+        wait_update_metadata = update_metadata(
+            dataset_id=dataset_id,
+            table_id=table_id,
+            fields_to_update=[
+                {
+                    &#34;last_updated&#34;: {
+                        &#34;data&#34;: datetime.now().strftime(&#34;%Y-%m-%d %H:%M:%S&#34;)
+                    }
+                },
+                {&#34;temporal_coverage&#34;: [temporal_coverage]},
+            ],
+            upstream_tasks=[temporal_coverage],
         )
-        wait_for_materialization.retry_delay = timedelta(
-            seconds=dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_INTERVAL.value
-        )
+
+        with case(materialize_after_dump, True):
+            # Trigger DBT flow run
+            current_flow_labels = get_current_flow_labels()
+            materialization_flow = create_flow_run(
+                flow_name=utils_constants.FLOW_EXECUTE_DBT_MODEL_NAME.value,
+                project_name=constants.PREFECT_DEFAULT_PROJECT.value,
+                parameters={
+                    &#34;dataset_id&#34;: dataset_id,
+                    &#34;table_id&#34;: table_id,
+                    &#34;mode&#34;: materialization_mode,
+                },
+                labels=current_flow_labels,
+                run_name=f&#34;Materialize {dataset_id}.{table_id}&#34;,
+            )
+
+            wait_for_materialization = wait_for_flow_run(
+                materialization_flow,
+                stream_states=True,
+                stream_logs=True,
+                raise_final_state=True,
+            )
+            wait_for_materialization.max_retries = (
+                dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_ATTEMPTS.value
+            )
+            wait_for_materialization.retry_delay = timedelta(
+                seconds=dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_INTERVAL.value
+            )
 
 flow_ibge_inflacao_mes_rm.storage = GCS(constants.GCS_FLOWS_BUCKET.value)
 flow_ibge_inflacao_mes_rm.run_config = KubernetesRun(image=constants.DOCKER_IMAGE.value)
@@ -241,63 +261,73 @@ with Flow(
         prefix=&#34;Dump: &#34;, dataset_id=dataset_id, table_id=table_id, wait=table_id
     )
 
-    wait_crawler = crawler(indice=INDICE, folder=FOLDER)
+    was_downloaded = crawler(indice=INDICE, folder=FOLDER)
     # pylint: disable=E1123
-    filepath = clean_mes_municipio(indice=INDICE, upstream_tasks=[wait_crawler])
 
-    wait_upload_table = create_table_and_upload_to_gcs(
-        data_path=filepath,
-        dataset_id=dataset_id,
-        table_id=table_id,
-        dump_mode=&#34;overwrite&#34;,
-        wait=filepath,
-    )
+    with case(was_downloaded, False):
+        log(&#34;The files download failed&#34;)
 
-    temporal_coverage = get_temporal_coverage(
-        filepath=filepath,
-        date_cols=[&#34;ano&#34;, &#34;mes&#34;],
-        time_unit=&#34;month&#34;,
-        interval=&#34;1&#34;,
-        upstream_tasks=[wait_upload_table],
-    )
+    with case(was_downloaded, True):
+        # pylint: disable=E1123
+        filepath = clean_mes_municipio(indice=INDICE, upstream_tasks=[was_downloaded])
 
-    wait_update_metadata = update_metadata(
-        dataset_id=dataset_id,
-        table_id=table_id,
-        fields_to_update=[
-            {&#34;last_updated&#34;: {&#34;data&#34;: datetime.now().strftime(&#34;%Y-%m-%d %H:%M:%S&#34;)}},
-            {&#34;temporal_coverage&#34;: [temporal_coverage]},
-        ],
-        upstream_tasks=[temporal_coverage],
-    )
-
-    with case(materialize_after_dump, True):
-        # Trigger DBT flow run
-        current_flow_labels = get_current_flow_labels()
-        materialization_flow = create_flow_run(
-            flow_name=utils_constants.FLOW_EXECUTE_DBT_MODEL_NAME.value,
-            project_name=constants.PREFECT_DEFAULT_PROJECT.value,
-            parameters={
-                &#34;dataset_id&#34;: dataset_id,
-                &#34;table_id&#34;: table_id,
-                &#34;mode&#34;: materialization_mode,
-            },
-            labels=current_flow_labels,
-            run_name=f&#34;Materialize {dataset_id}.{table_id}&#34;,
+        wait_upload_table = create_table_and_upload_to_gcs(
+            data_path=filepath,
+            dataset_id=dataset_id,
+            table_id=table_id,
+            dump_mode=&#34;overwrite&#34;,
+            wait=filepath,
         )
 
-        wait_for_materialization = wait_for_flow_run(
-            materialization_flow,
-            stream_states=True,
-            stream_logs=True,
-            raise_final_state=True,
+        temporal_coverage = get_temporal_coverage(
+            filepath=filepath,
+            date_cols=[&#34;ano&#34;, &#34;mes&#34;],
+            time_unit=&#34;month&#34;,
+            interval=&#34;1&#34;,
+            upstream_tasks=[wait_upload_table],
         )
-        wait_for_materialization.max_retries = (
-            dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_ATTEMPTS.value
+
+        wait_update_metadata = update_metadata(
+            dataset_id=dataset_id,
+            table_id=table_id,
+            fields_to_update=[
+                {
+                    &#34;last_updated&#34;: {
+                        &#34;data&#34;: datetime.now().strftime(&#34;%Y-%m-%d %H:%M:%S&#34;)
+                    }
+                },
+                {&#34;temporal_coverage&#34;: [temporal_coverage]},
+            ],
+            upstream_tasks=[temporal_coverage],
         )
-        wait_for_materialization.retry_delay = timedelta(
-            seconds=dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_INTERVAL.value
-        )
+
+        with case(materialize_after_dump, True):
+            # Trigger DBT flow run
+            current_flow_labels = get_current_flow_labels()
+            materialization_flow = create_flow_run(
+                flow_name=utils_constants.FLOW_EXECUTE_DBT_MODEL_NAME.value,
+                project_name=constants.PREFECT_DEFAULT_PROJECT.value,
+                parameters={
+                    &#34;dataset_id&#34;: dataset_id,
+                    &#34;table_id&#34;: table_id,
+                    &#34;mode&#34;: materialization_mode,
+                },
+                labels=current_flow_labels,
+                run_name=f&#34;Materialize {dataset_id}.{table_id}&#34;,
+            )
+
+            wait_for_materialization = wait_for_flow_run(
+                materialization_flow,
+                stream_states=True,
+                stream_logs=True,
+                raise_final_state=True,
+            )
+            wait_for_materialization.max_retries = (
+                dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_ATTEMPTS.value
+            )
+            wait_for_materialization.retry_delay = timedelta(
+                seconds=dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_INTERVAL.value
+            )
 
 
 flow_ibge_inflacao_mes_municipio.storage = GCS(constants.GCS_FLOWS_BUCKET.value)
@@ -324,63 +354,73 @@ with Flow(&#34;BD Template - IBGE Inflação: mes_geral&#34;) as flow_ibge_infla
         prefix=&#34;Dump: &#34;, dataset_id=dataset_id, table_id=table_id, wait=table_id
     )
 
-    wait_crawler = crawler(indice=INDICE, folder=FOLDER)
+    was_downloaded = crawler(indice=INDICE, folder=FOLDER)
     # pylint: disable=E1123
-    filepath = clean_mes_geral(indice=INDICE, upstream_tasks=[wait_crawler])
 
-    wait_upload_table = create_table_and_upload_to_gcs(
-        data_path=filepath,
-        dataset_id=dataset_id,
-        table_id=table_id,
-        dump_mode=&#34;overwrite&#34;,
-        wait=filepath,
-    )
+    with case(was_downloaded, False):
+        log(&#34;The files download failed&#34;)
 
-    temporal_coverage = get_temporal_coverage(
-        filepath=filepath,
-        date_cols=[&#34;ano&#34;, &#34;mes&#34;],
-        time_unit=&#34;month&#34;,
-        interval=&#34;1&#34;,
-        upstream_tasks=[wait_upload_table],
-    )
+    with case(was_downloaded, True):
+        # pylint: disable=E1123
+        filepath = clean_mes_geral(indice=INDICE, upstream_tasks=[was_downloaded])
 
-    wait_update_metadata = update_metadata(
-        dataset_id=dataset_id,
-        table_id=table_id,
-        fields_to_update=[
-            {&#34;last_updated&#34;: {&#34;data&#34;: datetime.now().strftime(&#34;%Y-%m-%d %H:%M:%S&#34;)}},
-            {&#34;temporal_coverage&#34;: [temporal_coverage]},
-        ],
-        upstream_tasks=[temporal_coverage],
-    )
-
-    with case(materialize_after_dump, True):
-        # Trigger DBT flow run
-        current_flow_labels = get_current_flow_labels()
-        materialization_flow = create_flow_run(
-            flow_name=utils_constants.FLOW_EXECUTE_DBT_MODEL_NAME.value,
-            project_name=constants.PREFECT_DEFAULT_PROJECT.value,
-            parameters={
-                &#34;dataset_id&#34;: dataset_id,
-                &#34;table_id&#34;: table_id,
-                &#34;mode&#34;: materialization_mode,
-            },
-            labels=current_flow_labels,
-            run_name=f&#34;Materialize {dataset_id}.{table_id}&#34;,
+        wait_upload_table = create_table_and_upload_to_gcs(
+            data_path=filepath,
+            dataset_id=dataset_id,
+            table_id=table_id,
+            dump_mode=&#34;overwrite&#34;,
+            wait=filepath,
         )
 
-        wait_for_materialization = wait_for_flow_run(
-            materialization_flow,
-            stream_states=True,
-            stream_logs=True,
-            raise_final_state=True,
+        temporal_coverage = get_temporal_coverage(
+            filepath=filepath,
+            date_cols=[&#34;ano&#34;, &#34;mes&#34;],
+            time_unit=&#34;month&#34;,
+            interval=&#34;1&#34;,
+            upstream_tasks=[wait_upload_table],
         )
-        wait_for_materialization.max_retries = (
-            dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_ATTEMPTS.value
+
+        wait_update_metadata = update_metadata(
+            dataset_id=dataset_id,
+            table_id=table_id,
+            fields_to_update=[
+                {
+                    &#34;last_updated&#34;: {
+                        &#34;data&#34;: datetime.now().strftime(&#34;%Y-%m-%d %H:%M:%S&#34;)
+                    }
+                },
+                {&#34;temporal_coverage&#34;: [temporal_coverage]},
+            ],
+            upstream_tasks=[temporal_coverage],
         )
-        wait_for_materialization.retry_delay = timedelta(
-            seconds=dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_INTERVAL.value
-        )
+
+        with case(materialize_after_dump, True):
+            # Trigger DBT flow run
+            current_flow_labels = get_current_flow_labels()
+            materialization_flow = create_flow_run(
+                flow_name=utils_constants.FLOW_EXECUTE_DBT_MODEL_NAME.value,
+                project_name=constants.PREFECT_DEFAULT_PROJECT.value,
+                parameters={
+                    &#34;dataset_id&#34;: dataset_id,
+                    &#34;table_id&#34;: table_id,
+                    &#34;mode&#34;: materialization_mode,
+                },
+                labels=current_flow_labels,
+                run_name=f&#34;Materialize {dataset_id}.{table_id}&#34;,
+            )
+
+            wait_for_materialization = wait_for_flow_run(
+                materialization_flow,
+                stream_states=True,
+                stream_logs=True,
+                raise_final_state=True,
+            )
+            wait_for_materialization.max_retries = (
+                dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_ATTEMPTS.value
+            )
+            wait_for_materialization.retry_delay = timedelta(
+                seconds=dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_INTERVAL.value
+            )
 
 flow_ibge_inflacao_mes_geral.storage = GCS(constants.GCS_FLOWS_BUCKET.value)
 flow_ibge_inflacao_mes_geral.run_config = KubernetesRun(
