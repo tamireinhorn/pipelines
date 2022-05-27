@@ -49,7 +49,6 @@ from pipelines.utils.crawler_ibge_inflacao.tasks import (
     clean_mes_municipio,
     clean_mes_geral,
 )
-from pipelines.utils.utils import log
 from pipelines.utils.decorators import Flow
 from pipelines.utils.tasks import (
     create_table_and_upload_to_gcs,
@@ -81,9 +80,6 @@ with Flow(
 
     was_downloaded = crawler(indice=INDICE, folder=FOLDER)
     # pylint: disable=E1123
-
-    with case(was_downloaded, False):
-        log(&#34;The files download failed&#34;)
 
     with case(was_downloaded, True):
         filepath = clean_mes_brasil(indice=INDICE, upstream_tasks=[was_downloaded])
@@ -171,9 +167,6 @@ with Flow(&#34;BD Template - IBGE Inflação: mes_rm&#34;) as flow_ibge_inflacao
 
     was_downloaded = crawler(indice=INDICE, folder=FOLDER)
     # pylint: disable=E1123
-
-    with case(was_downloaded, False):
-        log(&#34;The files download failed&#34;)
 
     with case(was_downloaded, True):
         # pylint: disable=E1123
@@ -264,9 +257,6 @@ with Flow(
     was_downloaded = crawler(indice=INDICE, folder=FOLDER)
     # pylint: disable=E1123
 
-    with case(was_downloaded, False):
-        log(&#34;The files download failed&#34;)
-
     with case(was_downloaded, True):
         # pylint: disable=E1123
         filepath = clean_mes_municipio(indice=INDICE, upstream_tasks=[was_downloaded])
@@ -356,9 +346,6 @@ with Flow(&#34;BD Template - IBGE Inflação: mes_geral&#34;) as flow_ibge_infla
 
     was_downloaded = crawler(indice=INDICE, folder=FOLDER)
     # pylint: disable=E1123
-
-    with case(was_downloaded, False):
-        log(&#34;The files download failed&#34;)
 
     with case(was_downloaded, True):
         # pylint: disable=E1123
