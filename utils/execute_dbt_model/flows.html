@@ -52,6 +52,7 @@ with Flow(name=utils_constants.FLOW_EXECUTE_DBT_MODEL_NAME.value) as run_dbt_mod
     dataset_id = Parameter(&#34;dataset_id&#34;)
     table_id = Parameter(&#34;table_id&#34;)
     mode = Parameter(&#34;mode&#34;, default=&#34;dev&#34;, required=False)
+    dbt_alias = Parameter(&#34;dbt_alias&#34;, default=False, required=False)
 
     #################   ####################
     #
@@ -70,6 +71,7 @@ with Flow(name=utils_constants.FLOW_EXECUTE_DBT_MODEL_NAME.value) as run_dbt_mod
         dbt_client=dbt_client,
         dataset_id=dataset_id,
         table_id=table_id,
+        dbt_alias=dbt_alias,
         sync=True,
     )
 

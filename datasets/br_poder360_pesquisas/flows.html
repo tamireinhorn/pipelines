@@ -66,6 +66,7 @@ with Flow(
     materialize_after_dump = Parameter(
         &#34;materialize after dump&#34;, default=True, required=False
     )
+    dbt_alias = Parameter(&#34;dbt_alias&#34;, default=False, required=False)
 
     rename_flow_run = rename_current_flow_run_dataset_table(
         prefix=&#34;Dump: &#34;, dataset_id=dataset_id, table_id=table_id, wait=table_id
@@ -109,6 +110,7 @@ with Flow(
                 &#34;dataset_id&#34;: dataset_id,
                 &#34;table_id&#34;: table_id,
                 &#34;mode&#34;: materialization_mode,
+                &#34;dbt_alias&#34;: dbt_alias,
             },
             labels=current_flow_labels,
             run_name=f&#34;Materialize {dataset_id}.{table_id}&#34;,
