@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>pipelines.datasets API documentation</title>
-<meta name="description" content="Prefect flows for basedosdados project" />
+<title>pipelines.datasets.fundacao_lemann.flows API documentation</title>
+<meta name="description" content="Flows for fundacao_lemann" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,86 +19,87 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>pipelines.datasets</code></h1>
+<h1 class="title">Module <code>pipelines.datasets.fundacao_lemann.flows</code></h1>
 </header>
 <section id="section-intro">
-<p>Prefect flows for basedosdados project</p>
+<p>Flows for fundacao_lemann</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python"># -*- coding: utf-8 -*-
 &#34;&#34;&#34;
-Prefect flows for basedosdados project
+Flows for fundacao_lemann
 &#34;&#34;&#34;
-###############################################################################
-# Automatically managed, please do not touch
-###############################################################################
-from pipelines.datasets.br_cvm_administradores_carteira.flows import *
-from pipelines.datasets.br_cvm_oferta_publica_distribuicao.flows import *
-from pipelines.datasets.br_ibge_inpc.flows import *
-from pipelines.datasets.br_ibge_ipca.flows import *
-from pipelines.datasets.br_ibge_ipca15.flows import *
-from pipelines.datasets.br_sp_saopaulo_dieese_icv.flows import *
-from pipelines.datasets.br_bd_indicadores.flows import *
-from pipelines.datasets.br_poder360_pesquisas.flows import *
-from pipelines.datasets.botdosdados.flows import *
-from pipelines.datasets.br_cgu_pessoal_executivo_federal.flows import *
-from pipelines.datasets.fundacao_lemann.flows import *</code></pre>
+
+from datetime import timedelta
+
+from prefect import Parameter
+from prefect.run_configs import KubernetesRun
+from prefect.storage import GCS
+from prefect.tasks.prefect import create_flow_run, wait_for_flow_run
+
+from pipelines.constants import constants
+from pipelines.utils.constants import constants as utils_constants
+from pipelines.utils.decorators import Flow
+from pipelines.utils.execute_dbt_model.constants import constants as dump_db_constants
+
+from pipelines.utils.tasks import get_current_flow_labels
+
+from pipelines.datasets.fundacao_lemann.schedules import every_year
+
+with Flow(
+    name=&#34;fundacao_lemann.ano_escola_serie_educacao_aprendizagem_adequada&#34;,
+    code_owners=[&#34;crislanealves&#34;],
+) as ano_escola_serie_educacao_aprendizagem_adequada:
+    dataset_id = Parameter(&#34;dataset_id&#34;, default=&#34;fundacao_lemann&#34;, required=True)
+    table_id = Parameter(
+        &#34;table_id&#34;,
+        default=&#34;ano_escola_serie_educacao_aprendizagem_adequada&#34;,
+        required=True,
+    )
+    materialization_mode = Parameter(
+        &#34;materialization_mode&#34;, default=&#34;dev&#34;, required=False
+    )
+    dbt_alias = Parameter(&#34;dbt_alias&#34;, default=False, required=False)
+
+    current_flow_labels = get_current_flow_labels()
+    materialization_flow = create_flow_run(
+        flow_name=utils_constants.FLOW_EXECUTE_DBT_MODEL_NAME.value,
+        project_name=constants.PREFECT_DEFAULT_PROJECT.value,
+        parameters={
+            &#34;dataset_id&#34;: dataset_id,
+            &#34;table_id&#34;: table_id,
+            &#34;mode&#34;: materialization_mode,
+            &#34;dbt_alias&#34;: dbt_alias,
+        },
+        labels=current_flow_labels,
+        run_name=f&#34;Materialize {dataset_id}.{table_id}&#34;,
+    )
+
+    wait_for_materialization = wait_for_flow_run(
+        materialization_flow,
+        stream_states=True,
+        stream_logs=True,
+        raise_final_state=True,
+    )
+    wait_for_materialization.max_retries = (
+        dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_ATTEMPTS.value
+    )
+    wait_for_materialization.retry_delay = timedelta(
+        seconds=dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_INTERVAL.value
+    )
+
+ano_escola_serie_educacao_aprendizagem_adequada.storage = GCS(
+    constants.GCS_FLOWS_BUCKET.value
+)
+ano_escola_serie_educacao_aprendizagem_adequada.run_config = KubernetesRun(
+    image=constants.DOCKER_IMAGE.value
+)
+ano_escola_serie_educacao_aprendizagem_adequada.schedule = every_year</code></pre>
 </details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
-<dl>
-<dt><code class="name"><a title="pipelines.datasets.botdosdados" href="botdosdados/index.html">pipelines.datasets.botdosdados</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="pipelines.datasets.br_bd_indicadores" href="br_bd_indicadores/index.html">pipelines.datasets.br_bd_indicadores</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="pipelines.datasets.br_cgu_pessoal_executivo_federal" href="br_cgu_pessoal_executivo_federal/index.html">pipelines.datasets.br_cgu_pessoal_executivo_federal</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="pipelines.datasets.br_cvm_administradores_carteira" href="br_cvm_administradores_carteira/index.html">pipelines.datasets.br_cvm_administradores_carteira</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="pipelines.datasets.br_cvm_oferta_publica_distribuicao" href="br_cvm_oferta_publica_distribuicao/index.html">pipelines.datasets.br_cvm_oferta_publica_distribuicao</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="pipelines.datasets.br_ibge_inpc" href="br_ibge_inpc/index.html">pipelines.datasets.br_ibge_inpc</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="pipelines.datasets.br_ibge_ipca" href="br_ibge_ipca/index.html">pipelines.datasets.br_ibge_ipca</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="pipelines.datasets.br_ibge_ipca15" href="br_ibge_ipca15/index.html">pipelines.datasets.br_ibge_ipca15</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="pipelines.datasets.br_poder360_pesquisas" href="br_poder360_pesquisas/index.html">pipelines.datasets.br_poder360_pesquisas</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="pipelines.datasets.br_sp_saopaulo_dieese_icv" href="br_sp_saopaulo_dieese_icv/index.html">pipelines.datasets.br_sp_saopaulo_dieese_icv</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="pipelines.datasets.fundacao_lemann" href="fundacao_lemann/index.html">pipelines.datasets.fundacao_lemann</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="pipelines.datasets.test_pipeline" href="test_pipeline/index.html">pipelines.datasets.test_pipeline</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-</dl>
 </section>
 <section>
 </section>
@@ -115,23 +116,7 @@ from pipelines.datasets.fundacao_lemann.flows import *</code></pre>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="pipelines" href="../index.html">pipelines</a></code></li>
-</ul>
-</li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
-<ul>
-<li><code><a title="pipelines.datasets.botdosdados" href="botdosdados/index.html">pipelines.datasets.botdosdados</a></code></li>
-<li><code><a title="pipelines.datasets.br_bd_indicadores" href="br_bd_indicadores/index.html">pipelines.datasets.br_bd_indicadores</a></code></li>
-<li><code><a title="pipelines.datasets.br_cgu_pessoal_executivo_federal" href="br_cgu_pessoal_executivo_federal/index.html">pipelines.datasets.br_cgu_pessoal_executivo_federal</a></code></li>
-<li><code><a title="pipelines.datasets.br_cvm_administradores_carteira" href="br_cvm_administradores_carteira/index.html">pipelines.datasets.br_cvm_administradores_carteira</a></code></li>
-<li><code><a title="pipelines.datasets.br_cvm_oferta_publica_distribuicao" href="br_cvm_oferta_publica_distribuicao/index.html">pipelines.datasets.br_cvm_oferta_publica_distribuicao</a></code></li>
-<li><code><a title="pipelines.datasets.br_ibge_inpc" href="br_ibge_inpc/index.html">pipelines.datasets.br_ibge_inpc</a></code></li>
-<li><code><a title="pipelines.datasets.br_ibge_ipca" href="br_ibge_ipca/index.html">pipelines.datasets.br_ibge_ipca</a></code></li>
-<li><code><a title="pipelines.datasets.br_ibge_ipca15" href="br_ibge_ipca15/index.html">pipelines.datasets.br_ibge_ipca15</a></code></li>
-<li><code><a title="pipelines.datasets.br_poder360_pesquisas" href="br_poder360_pesquisas/index.html">pipelines.datasets.br_poder360_pesquisas</a></code></li>
-<li><code><a title="pipelines.datasets.br_sp_saopaulo_dieese_icv" href="br_sp_saopaulo_dieese_icv/index.html">pipelines.datasets.br_sp_saopaulo_dieese_icv</a></code></li>
-<li><code><a title="pipelines.datasets.fundacao_lemann" href="fundacao_lemann/index.html">pipelines.datasets.fundacao_lemann</a></code></li>
-<li><code><a title="pipelines.datasets.test_pipeline" href="test_pipeline/index.html">pipelines.datasets.test_pipeline</a></code></li>
+<li><code><a title="pipelines.datasets.fundacao_lemann" href="index.html">pipelines.datasets.fundacao_lemann</a></code></li>
 </ul>
 </li>
 </ul>
