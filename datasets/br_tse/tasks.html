@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>pipelines.datasets.br_tse_eleicoes.tasks API documentation</title>
-<meta name="description" content="Tasks for br_tse_eleicoes" />
+<title>pipelines.datasets.br_tse.tasks API documentation</title>
+<meta name="description" content="Tasks for br_tse" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,17 +19,17 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>pipelines.datasets.br_tse_eleicoes.tasks</code></h1>
+<h1 class="title">Module <code>pipelines.datasets.br_tse.tasks</code></h1>
 </header>
 <section id="section-intro">
-<p>Tasks for br_tse_eleicoes</p>
+<p>Tasks for br_tse</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python"># -*- coding: utf-8 -*-
 &#34;&#34;&#34;
-Tasks for br_tse_eleicoes
+Tasks for br_tse
 &#34;&#34;&#34;
 # pylint: disable=invalid-name
 import zipfile
@@ -50,7 +50,7 @@ def build_partitions_votacao_zona(anos: list, ufs: list) -&gt; str:
     ufs_anos = product(ufs, anos)
     current_path = os.getcwd()
     for uf, ano in ufs_anos:
-        dest = f&#34;/tmp/br_tse_eleicoes/detalhes_votacao_secao/ano={ano}/sigla_uf={uf}&#34;
+        dest = f&#34;/tmp/br_tse/detalhes_votacao_secao/ano={ano}/sigla_uf={uf}&#34;
         os.system(f&#34;mkdir -p {dest}&#34;)
         os.chdir(dest)
         curl_command = f&#34;&#34;&#34;
@@ -66,14 +66,20 @@ def build_partitions_votacao_zona(anos: list, ufs: list) -&gt; str:
         df = pd.read_csv(&#34;detalhes_votacao_secao.csv&#34;, sep=&#34;;&#34;)
         df.columns = [unidecode(col).lower() for col in df.columns]
         df.drop([&#34;ano_eleicao&#34;, &#34;sg_uf&#34;], axis=1, inplace=True)
+
+        text_cols = [&#39;nm_tipo_eleicao&#39;, &#39;ds_eleicao&#39;, &#39;nm_municipio&#39;, &#39;nm_ue&#39;, &#39;nm_votavel&#39;]
+
+        for col in text_cols:
+            df[col] = df[col].apply(unidecode)
+
         df.to_csv(&#34;detalhes_votacao_secao.csv&#34;, sep=&#34;,&#34;, index=False)
 
         os.system(&#34;find . -type f ! -iname \&#34;*.csv\&#34; -delete&#34;)
 
-    log(os.system(&#34;tree /tmp/br_tse_eleicoes/detalhes_votacao_secao/&#34;))
+    log(os.system(&#34;tree /tmp/br_tse/detalhes_votacao_secao/&#34;))
     os.chdir(current_path)
 
-    return &#34;/tmp/br_tse_eleicoes/detalhes_votacao_secao/&#34;</code></pre>
+    return &#34;/tmp/br_tse/detalhes_votacao_secao/&#34;</code></pre>
 </details>
 </section>
 <section>
@@ -83,7 +89,7 @@ def build_partitions_votacao_zona(anos: list, ufs: list) -&gt; str:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="pipelines.datasets.br_tse_eleicoes.tasks.build_partitions_votacao_zona"><code class="name flex">
+<dt id="pipelines.datasets.br_tse.tasks.build_partitions_votacao_zona"><code class="name flex">
 <span>def <span class="ident">build_partitions_votacao_zona</span></span>(<span>anos: list, ufs: list) ‑> str</span>
 </code></dt>
 <dd>
@@ -100,7 +106,7 @@ def build_partitions_votacao_zona(anos: list, ufs: list) -&gt; str:
     ufs_anos = product(ufs, anos)
     current_path = os.getcwd()
     for uf, ano in ufs_anos:
-        dest = f&#34;/tmp/br_tse_eleicoes/detalhes_votacao_secao/ano={ano}/sigla_uf={uf}&#34;
+        dest = f&#34;/tmp/br_tse/detalhes_votacao_secao/ano={ano}/sigla_uf={uf}&#34;
         os.system(f&#34;mkdir -p {dest}&#34;)
         os.chdir(dest)
         curl_command = f&#34;&#34;&#34;
@@ -116,14 +122,20 @@ def build_partitions_votacao_zona(anos: list, ufs: list) -&gt; str:
         df = pd.read_csv(&#34;detalhes_votacao_secao.csv&#34;, sep=&#34;;&#34;)
         df.columns = [unidecode(col).lower() for col in df.columns]
         df.drop([&#34;ano_eleicao&#34;, &#34;sg_uf&#34;], axis=1, inplace=True)
+
+        text_cols = [&#39;nm_tipo_eleicao&#39;, &#39;ds_eleicao&#39;, &#39;nm_municipio&#39;, &#39;nm_ue&#39;, &#39;nm_votavel&#39;]
+
+        for col in text_cols:
+            df[col] = df[col].apply(unidecode)
+
         df.to_csv(&#34;detalhes_votacao_secao.csv&#34;, sep=&#34;,&#34;, index=False)
 
         os.system(&#34;find . -type f ! -iname \&#34;*.csv\&#34; -delete&#34;)
 
-    log(os.system(&#34;tree /tmp/br_tse_eleicoes/detalhes_votacao_secao/&#34;))
+    log(os.system(&#34;tree /tmp/br_tse/detalhes_votacao_secao/&#34;))
     os.chdir(current_path)
 
-    return &#34;/tmp/br_tse_eleicoes/detalhes_votacao_secao/&#34;</code></pre>
+    return &#34;/tmp/br_tse/detalhes_votacao_secao/&#34;</code></pre>
 </details>
 </dd>
 </dl>
@@ -139,12 +151,12 @@ def build_partitions_votacao_zona(anos: list, ufs: list) -&gt; str:
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="pipelines.datasets.br_tse_eleicoes" href="index.html">pipelines.datasets.br_tse_eleicoes</a></code></li>
+<li><code><a title="pipelines.datasets.br_tse" href="index.html">pipelines.datasets.br_tse</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="pipelines.datasets.br_tse_eleicoes.tasks.build_partitions_votacao_zona" href="#pipelines.datasets.br_tse_eleicoes.tasks.build_partitions_votacao_zona">build_partitions_votacao_zona</a></code></li>
+<li><code><a title="pipelines.datasets.br_tse.tasks.build_partitions_votacao_zona" href="#pipelines.datasets.br_tse.tasks.build_partitions_votacao_zona">build_partitions_votacao_zona</a></code></li>
 </ul>
 </li>
 </ul>

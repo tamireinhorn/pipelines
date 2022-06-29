@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>pipelines.datasets.br_tse_eleicoes.flows API documentation</title>
-<meta name="description" content="Flows for br_tse_eleicoes" />
+<title>pipelines.datasets.br_tse.flows API documentation</title>
+<meta name="description" content="Flows for br_tse" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,17 +19,17 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>pipelines.datasets.br_tse_eleicoes.flows</code></h1>
+<h1 class="title">Module <code>pipelines.datasets.br_tse.flows</code></h1>
 </header>
 <section id="section-intro">
-<p>Flows for br_tse_eleicoes</p>
+<p>Flows for br_tse</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python"># -*- coding: utf-8 -*-
 &#34;&#34;&#34;
-Flows for br_tse_eleicoes
+Flows for br_tse
 &#34;&#34;&#34;
 
 from datetime import timedelta
@@ -42,21 +42,51 @@ from prefect.tasks.prefect import create_flow_run, wait_for_flow_run
 from pipelines.utils.execute_dbt_model.constants import constants as dump_db_constants
 from pipelines.utils.constants import constants as utils_constants
 from pipelines.constants import constants
-from pipelines.datasets.br_tse_eleicoes.tasks import build_partitions_votacao_zona
+from pipelines.datasets.br_tse.tasks import build_partitions_votacao_zona
 from pipelines.utils.decorators import Flow
 from pipelines.utils.tasks import (
     create_table_and_upload_to_gcs,
     rename_current_flow_run_dataset_table,
     get_current_flow_labels,
 )
-from pipelines.datasets.br_tse_eleicoes.schedules import every_monday_thursday
+from pipelines.datasets.br_tse.schedules import every_monday_thursday
 
+UFS = [
+&#34;AC&#34;,
+&#34;AL&#34;,
+&#34;AM&#34;,
+&#34;AP&#34;,
+&#34;BA&#34;,
+&#34;CE&#34;,
+&#34;DF&#34;,
+&#34;ES&#34;,
+&#34;GO&#34;,
+&#34;MA&#34;,
+&#34;MG&#34;,
+&#34;MS&#34;,
+&#34;MT&#34;,
+&#34;PA&#34;,
+&#34;PB&#34;,
+&#34;PE&#34;,
+&#34;PI&#34;,
+&#34;PR&#34;,
+&#34;RJ&#34;,
+&#34;RN&#34;,
+&#34;RO&#34;,
+&#34;RR&#34;,
+&#34;SC&#34;,
+&#34;SE&#34;,
+&#34;RS&#34;,
+&#34;TO&#34;,
+&#34;SP&#34;]
+
+# UFS = [&#34;AC&#34;, &#34;RR&#34;]
 # pylint: disable=C0103
 with Flow(
-    name=&#34;br_tse_eleicoes.detalhes_votacao_secao&#34;, code_owners=[&#34;lucas_cr&#34;]
+    name=&#34;br_tse.detalhes_votacao_secao&#34;, code_owners=[&#34;lucas_cr&#34;]
 ) as votacao_secao_flow:
     # Parameters
-    dataset_id = Parameter(&#34;dataset_id&#34;, default=&#34;br_tse_eleicoes&#34;, required=True)
+    dataset_id = Parameter(&#34;dataset_id&#34;, default=&#34;br_tse&#34;, required=True)
     table_id = Parameter(&#34;table_id&#34;, default=&#34;detalhes_votacao_secao&#34;, required=True)
     materialization_mode = Parameter(
         &#34;materialization_mode&#34;, default=&#34;dev&#34;, required=False
@@ -70,7 +100,10 @@ with Flow(
         prefix=&#34;Dump: &#34;, dataset_id=dataset_id, table_id=table_id, wait=table_id
     )
 
-    filepath = build_partitions_votacao_zona(anos=[2020], ufs=[&#34;AC&#34;, &#34;RR&#34;])
+    filepath = build_partitions_votacao_zona(
+        anos=[2020],
+        ufs=UFS
+    )
 
     wait_upload_table = create_table_and_upload_to_gcs(
         data_path=filepath,
@@ -131,7 +164,7 @@ votacao_secao_flow.schedule = every_monday_thursday</code></pre>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="pipelines.datasets.br_tse_eleicoes" href="index.html">pipelines.datasets.br_tse_eleicoes</a></code></li>
+<li><code><a title="pipelines.datasets.br_tse" href="index.html">pipelines.datasets.br_tse</a></code></li>
 </ul>
 </li>
 </ul>
