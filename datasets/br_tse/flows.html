@@ -51,36 +51,7 @@ from pipelines.utils.tasks import (
 )
 from pipelines.datasets.br_tse.schedules import every_monday_thursday
 
-UFS = [
-&#34;AC&#34;,
-&#34;AL&#34;,
-&#34;AM&#34;,
-&#34;AP&#34;,
-&#34;BA&#34;,
-&#34;CE&#34;,
-&#34;DF&#34;,
-&#34;ES&#34;,
-&#34;GO&#34;,
-&#34;MA&#34;,
-&#34;MG&#34;,
-&#34;MS&#34;,
-&#34;MT&#34;,
-&#34;PA&#34;,
-&#34;PB&#34;,
-&#34;PE&#34;,
-&#34;PI&#34;,
-&#34;PR&#34;,
-&#34;RJ&#34;,
-&#34;RN&#34;,
-&#34;RO&#34;,
-&#34;RR&#34;,
-&#34;SC&#34;,
-&#34;SE&#34;,
-&#34;RS&#34;,
-&#34;TO&#34;,
-&#34;SP&#34;]
 
-# UFS = [&#34;AC&#34;, &#34;RR&#34;]
 # pylint: disable=C0103
 with Flow(
     name=&#34;br_tse.detalhes_votacao_secao&#34;, code_owners=[&#34;lucas_cr&#34;]
@@ -95,14 +66,16 @@ with Flow(
         &#34;materialize after dump&#34;, default=False, required=False
     )
     dbt_alias = Parameter(&#34;dbt_alias&#34;, default=False, required=False)
+    ufs = Parameter(&#34;ufs&#34;, default=[&#34;AC&#34;,&#34;AL&#34;,&#34;AM&#34;,&#34;AP&#34;,&#34;BA&#34;,&#34;CE&#34;,&#34;DF&#34;,&#34;ES&#34;,&#34;GO&#34;,&#34;MA&#34;,&#34;MG&#34;,&#34;MS&#34;,&#34;MT&#34;,&#34;PA&#34;,&#34;PB&#34;,&#34;PE&#34;,&#34;PI&#34;,&#34;PR&#34;,&#34;RJ&#34;,&#34;RN&#34;,&#34;RO&#34;,&#34;RR&#34;,&#34;SC&#34;,&#34;SE&#34;,&#34;RS&#34;,&#34;TO&#34;,&#34;SP&#34;], required=False)
+    anos = Parameter(&#34;anos&#34;, default=[2020], required=False)
 
     rename_flow_run = rename_current_flow_run_dataset_table(
         prefix=&#34;Dump: &#34;, dataset_id=dataset_id, table_id=table_id, wait=table_id
     )
 
     filepath = crawler_votacao_secao(
-        anos=[2020],
-        ufs=UFS
+        anos=anos,
+        ufs=ufs
     )
 
     wait_upload_table = create_table_and_upload_to_gcs(

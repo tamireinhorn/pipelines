@@ -74,6 +74,8 @@ def crawler_votacao_secao(anos: list, ufs: list) -&gt; str:
 
         df.to_csv(&#34;detalhes_votacao_secao.csv&#34;, sep=&#34;,&#34;, index=False)
 
+        del df
+
         os.system(&#34;find . -type f ! -iname \&#34;*.csv\&#34; -delete&#34;)
 
     log(os.system(&#34;tree /tmp/br_tse/detalhes_votacao_secao/&#34;))
@@ -129,6 +131,8 @@ def crawler_votacao_secao(anos: list, ufs: list) -&gt; str:
             df[col] = df[col].apply(unidecode)
 
         df.to_csv(&#34;detalhes_votacao_secao.csv&#34;, sep=&#34;,&#34;, index=False)
+
+        del df
 
         os.system(&#34;find . -type f ! -iname \&#34;*.csv\&#34; -delete&#34;)
 
