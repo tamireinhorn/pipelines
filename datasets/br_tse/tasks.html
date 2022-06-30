@@ -43,7 +43,7 @@ from pipelines.utils.tasks import log
 
 
 @task
-def build_partitions_votacao_zona(anos: list, ufs: list) -&gt; str:
+def crawler_votacao_secao(anos: list, ufs: list) -&gt; str:
     &#34;&#34;&#34;
     Build csvs from votacao_zona zip files partitioned by uf and ano
     &#34;&#34;&#34;
@@ -89,8 +89,8 @@ def build_partitions_votacao_zona(anos: list, ufs: list) -&gt; str:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="pipelines.datasets.br_tse.tasks.build_partitions_votacao_zona"><code class="name flex">
-<span>def <span class="ident">build_partitions_votacao_zona</span></span>(<span>anos: list, ufs: list) ‑> str</span>
+<dt id="pipelines.datasets.br_tse.tasks.crawler_votacao_secao"><code class="name flex">
+<span>def <span class="ident">crawler_votacao_secao</span></span>(<span>anos: list, ufs: list) ‑> str</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Build csvs from votacao_zona zip files partitioned by uf and ano</p></div>
@@ -99,7 +99,7 @@ def build_partitions_votacao_zona(anos: list, ufs: list) -&gt; str:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@task
-def build_partitions_votacao_zona(anos: list, ufs: list) -&gt; str:
+def crawler_votacao_secao(anos: list, ufs: list) -&gt; str:
     &#34;&#34;&#34;
     Build csvs from votacao_zona zip files partitioned by uf and ano
     &#34;&#34;&#34;
@@ -156,7 +156,7 @@ def build_partitions_votacao_zona(anos: list, ufs: list) -&gt; str:
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="pipelines.datasets.br_tse.tasks.build_partitions_votacao_zona" href="#pipelines.datasets.br_tse.tasks.build_partitions_votacao_zona">build_partitions_votacao_zona</a></code></li>
+<li><code><a title="pipelines.datasets.br_tse.tasks.crawler_votacao_secao" href="#pipelines.datasets.br_tse.tasks.crawler_votacao_secao">crawler_votacao_secao</a></code></li>
 </ul>
 </li>
 </ul>
