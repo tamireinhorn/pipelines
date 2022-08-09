@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>pipelines.datasets API documentation</title>
-<meta name="description" content="Prefect flows for basedosdados project" />
+<title>pipelines.datasets.br_tse_eleicoes API documentation</title>
+<meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,89 +19,28 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>pipelines.datasets</code></h1>
+<h1 class="title">Module <code>pipelines.datasets.br_tse_eleicoes</code></h1>
 </header>
 <section id="section-intro">
-<p>Prefect flows for basedosdados project</p>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python"># -*- coding: utf-8 -*-
-&#34;&#34;&#34;
-Prefect flows for basedosdados project
-&#34;&#34;&#34;
-###############################################################################
-# Automatically managed, please do not touch
-###############################################################################
-from pipelines.datasets.br_cvm_administradores_carteira.flows import *
-from pipelines.datasets.br_cvm_oferta_publica_distribuicao.flows import *
-from pipelines.datasets.br_ibge_inpc.flows import *
-from pipelines.datasets.br_ibge_ipca.flows import *
-from pipelines.datasets.br_ibge_ipca15.flows import *
-from pipelines.datasets.br_sp_saopaulo_dieese_icv.flows import *
-from pipelines.datasets.br_bd_indicadores.flows import *
-from pipelines.datasets.br_poder360_pesquisas.flows import *
-from pipelines.datasets.botdosdados.flows import *
-from pipelines.datasets.br_cgu_pessoal_executivo_federal.flows import *
-from pipelines.datasets.fundacao_lemann.flows import *
-from pipelines.datasets.br_tse_eleicoes.flows import *</code></pre>
-</details>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="pipelines.datasets.botdosdados" href="botdosdados/index.html">pipelines.datasets.botdosdados</a></code></dt>
+<dt><code class="name"><a title="pipelines.datasets.br_tse_eleicoes.flows" href="flows.html">pipelines.datasets.br_tse_eleicoes.flows</a></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Flows for br_tse_eleicoes</p></div>
 </dd>
-<dt><code class="name"><a title="pipelines.datasets.br_bd_indicadores" href="br_bd_indicadores/index.html">pipelines.datasets.br_bd_indicadores</a></code></dt>
+<dt><code class="name"><a title="pipelines.datasets.br_tse_eleicoes.schedules" href="schedules.html">pipelines.datasets.br_tse_eleicoes.schedules</a></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Schedules for br_tse_eleicoes</p></div>
 </dd>
-<dt><code class="name"><a title="pipelines.datasets.br_cgu_pessoal_executivo_federal" href="br_cgu_pessoal_executivo_federal/index.html">pipelines.datasets.br_cgu_pessoal_executivo_federal</a></code></dt>
+<dt><code class="name"><a title="pipelines.datasets.br_tse_eleicoes.tasks" href="tasks.html">pipelines.datasets.br_tse_eleicoes.tasks</a></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Tasks for br_tse_eleicoes</p></div>
 </dd>
-<dt><code class="name"><a title="pipelines.datasets.br_cvm_administradores_carteira" href="br_cvm_administradores_carteira/index.html">pipelines.datasets.br_cvm_administradores_carteira</a></code></dt>
+<dt><code class="name"><a title="pipelines.datasets.br_tse_eleicoes.utils" href="utils.html">pipelines.datasets.br_tse_eleicoes.utils</a></code></dt>
 <dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="pipelines.datasets.br_cvm_oferta_publica_distribuicao" href="br_cvm_oferta_publica_distribuicao/index.html">pipelines.datasets.br_cvm_oferta_publica_distribuicao</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="pipelines.datasets.br_ibge_inpc" href="br_ibge_inpc/index.html">pipelines.datasets.br_ibge_inpc</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="pipelines.datasets.br_ibge_ipca" href="br_ibge_ipca/index.html">pipelines.datasets.br_ibge_ipca</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="pipelines.datasets.br_ibge_ipca15" href="br_ibge_ipca15/index.html">pipelines.datasets.br_ibge_ipca15</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="pipelines.datasets.br_poder360_pesquisas" href="br_poder360_pesquisas/index.html">pipelines.datasets.br_poder360_pesquisas</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="pipelines.datasets.br_sp_saopaulo_dieese_icv" href="br_sp_saopaulo_dieese_icv/index.html">pipelines.datasets.br_sp_saopaulo_dieese_icv</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="pipelines.datasets.br_tse_eleicoes" href="br_tse_eleicoes/index.html">pipelines.datasets.br_tse_eleicoes</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="pipelines.datasets.fundacao_lemann" href="fundacao_lemann/index.html">pipelines.datasets.fundacao_lemann</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="pipelines.datasets.test_pipeline" href="test_pipeline/index.html">pipelines.datasets.test_pipeline</a></code></dt>
-<dd>
-<div class="desc"></div>
+<div class="desc"><p>General purpose functions for the br_tse_eleicoes project</p></div>
 </dd>
 </dl>
 </section>
@@ -120,24 +59,15 @@ from pipelines.datasets.br_tse_eleicoes.flows import *</code></pre>
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="pipelines" href="../index.html">pipelines</a></code></li>
+<li><code><a title="pipelines.datasets" href="../index.html">pipelines.datasets</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="pipelines.datasets.botdosdados" href="botdosdados/index.html">pipelines.datasets.botdosdados</a></code></li>
-<li><code><a title="pipelines.datasets.br_bd_indicadores" href="br_bd_indicadores/index.html">pipelines.datasets.br_bd_indicadores</a></code></li>
-<li><code><a title="pipelines.datasets.br_cgu_pessoal_executivo_federal" href="br_cgu_pessoal_executivo_federal/index.html">pipelines.datasets.br_cgu_pessoal_executivo_federal</a></code></li>
-<li><code><a title="pipelines.datasets.br_cvm_administradores_carteira" href="br_cvm_administradores_carteira/index.html">pipelines.datasets.br_cvm_administradores_carteira</a></code></li>
-<li><code><a title="pipelines.datasets.br_cvm_oferta_publica_distribuicao" href="br_cvm_oferta_publica_distribuicao/index.html">pipelines.datasets.br_cvm_oferta_publica_distribuicao</a></code></li>
-<li><code><a title="pipelines.datasets.br_ibge_inpc" href="br_ibge_inpc/index.html">pipelines.datasets.br_ibge_inpc</a></code></li>
-<li><code><a title="pipelines.datasets.br_ibge_ipca" href="br_ibge_ipca/index.html">pipelines.datasets.br_ibge_ipca</a></code></li>
-<li><code><a title="pipelines.datasets.br_ibge_ipca15" href="br_ibge_ipca15/index.html">pipelines.datasets.br_ibge_ipca15</a></code></li>
-<li><code><a title="pipelines.datasets.br_poder360_pesquisas" href="br_poder360_pesquisas/index.html">pipelines.datasets.br_poder360_pesquisas</a></code></li>
-<li><code><a title="pipelines.datasets.br_sp_saopaulo_dieese_icv" href="br_sp_saopaulo_dieese_icv/index.html">pipelines.datasets.br_sp_saopaulo_dieese_icv</a></code></li>
-<li><code><a title="pipelines.datasets.br_tse_eleicoes" href="br_tse_eleicoes/index.html">pipelines.datasets.br_tse_eleicoes</a></code></li>
-<li><code><a title="pipelines.datasets.fundacao_lemann" href="fundacao_lemann/index.html">pipelines.datasets.fundacao_lemann</a></code></li>
-<li><code><a title="pipelines.datasets.test_pipeline" href="test_pipeline/index.html">pipelines.datasets.test_pipeline</a></code></li>
+<li><code><a title="pipelines.datasets.br_tse_eleicoes.flows" href="flows.html">pipelines.datasets.br_tse_eleicoes.flows</a></code></li>
+<li><code><a title="pipelines.datasets.br_tse_eleicoes.schedules" href="schedules.html">pipelines.datasets.br_tse_eleicoes.schedules</a></code></li>
+<li><code><a title="pipelines.datasets.br_tse_eleicoes.tasks" href="tasks.html">pipelines.datasets.br_tse_eleicoes.tasks</a></code></li>
+<li><code><a title="pipelines.datasets.br_tse_eleicoes.utils" href="utils.html">pipelines.datasets.br_tse_eleicoes.utils</a></code></li>
 </ul>
 </li>
 </ul>

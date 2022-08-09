@@ -112,7 +112,7 @@ def create_table_and_upload_to_gcs(
             )
         else:
             # the header is needed to create a table when dosen&#39;t exist
-            log(&#34;MODE APPEND: Table DOSEN&#39;T EXISTS\n&#34; &#34;Start to CREATE HEADER file&#34;)
+            log(&#34;MODE APPEND: Table DOSEN&#39;T EXISTS\n&#34; + &#34;Start to CREATE HEADER file&#34;)
             header_path = dump_header_to_csv(data_path=data_path)
             log(&#34;MODE APPEND: Created HEADER file:\n&#34; f&#34;{header_path}&#34;)
 
@@ -161,7 +161,7 @@ def create_table_and_upload_to_gcs(
 
         # the header is needed to create a table when dosen&#39;t exist
         # in overwrite mode the header is always created
-        log(&#34;MODE OVERWRITE: Table DOSEN&#39;T EXISTS\n&#34; &#34;Start to CREATE HEADER file&#34;)
+        log(&#34;MODE OVERWRITE: Table DOSEN&#39;T EXISTS\n&#34; + &#34;Start to CREATE HEADER file&#34;)
         header_path = dump_header_to_csv(data_path=data_path)
         log(&#34;MODE OVERWRITE: Created HEADER file:\n&#34; f&#34;{header_path}&#34;)
 
@@ -431,7 +431,7 @@ def create_table_and_upload_to_gcs(
             )
         else:
             # the header is needed to create a table when dosen&#39;t exist
-            log(&#34;MODE APPEND: Table DOSEN&#39;T EXISTS\n&#34; &#34;Start to CREATE HEADER file&#34;)
+            log(&#34;MODE APPEND: Table DOSEN&#39;T EXISTS\n&#34; + &#34;Start to CREATE HEADER file&#34;)
             header_path = dump_header_to_csv(data_path=data_path)
             log(&#34;MODE APPEND: Created HEADER file:\n&#34; f&#34;{header_path}&#34;)
 
@@ -480,7 +480,7 @@ def create_table_and_upload_to_gcs(
 
         # the header is needed to create a table when dosen&#39;t exist
         # in overwrite mode the header is always created
-        log(&#34;MODE OVERWRITE: Table DOSEN&#39;T EXISTS\n&#34; &#34;Start to CREATE HEADER file&#34;)
+        log(&#34;MODE OVERWRITE: Table DOSEN&#39;T EXISTS\n&#34; + &#34;Start to CREATE HEADER file&#34;)
         header_path = dump_header_to_csv(data_path=data_path)
         log(&#34;MODE OVERWRITE: Created HEADER file:\n&#34; f&#34;{header_path}&#34;)
 

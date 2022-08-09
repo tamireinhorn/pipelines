@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>pipelines.datasets.br_tse_eleicoes.tasks API documentation</title>
+<meta name="description" content="Tasks for br_tse_eleicoes" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>pipelines.datasets.br_tse_eleicoes.tasks</code></h1>
+</header>
+<section id="section-intro">
+<p>Tasks for br_tse_eleicoes</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python"># -*- coding: utf-8 -*-
+&#34;&#34;&#34;
+Tasks for br_tse_eleicoes
+&#34;&#34;&#34;
+# pylint: disable=invalid-name,line-too-long
+from datetime import timedelta
+import zipfile
+import os
+from glob import glob
+
+import requests
+from unidecode import unidecode
+from tqdm import tqdm
+import numpy as np
+import pandas as pd
+from prefect import task
+from pipelines.constants import constants
+
+from pipelines.datasets.br_tse_eleicoes.utils import (
+    get_id_candidato_bd,
+    get_blobs_from_raw,
+)
+
+
+@task(
+    max_retries=constants.TASK_MAX_RETRIES.value,
+    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
+)
+def download_before22(table_id: str) -&gt; None:
+    &#34;&#34;&#34;
+    Download external data from previous elections
+    &#34;&#34;&#34;
+    os.system(&#34;mkdir -p /tmp/data/input&#34;)
+    blobs = get_blobs_from_raw(dataset_id=&#34;br_tse_eleicoes&#34;, table_id=table_id)
+    for blob in tqdm(blobs):
+        df = pd.read_csv(blob.public_url, encoding=&#34;utf-8&#34;)
+        os.system(f&#34;mkdir -p /tmp/data/{&#39;/&#39;.join(blob.name.split(&#39;/&#39;)[:-1])}&#34;)
+        df.to_csv(f&#34;/tmp/data/{blob.name}&#34;, sep=&#34;;&#34;, index=False)
+        del df
+
+
+@task(
+    max_retries=constants.TASK_MAX_RETRIES.value,
+    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
+)
+def get_csv_files(url, save_path, chunk_size=128) -&gt; None:
+    &#34;&#34;&#34;
+    Gets all csv files from a url and saves them to a directory.
+    &#34;&#34;&#34;
+    request_headers = {
+        &#34;User-Agent&#34;: &#34;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36&#34;,
+    }
+    r = requests.get(url, headers=request_headers, stream=True)
+    save_path = save_path + url.split(&#34;/&#34;)[-1]
+    with open(save_path, &#34;wb&#34;) as fd:
+        for chunk in r.iter_content(chunk_size=chunk_size):
+            fd.write(chunk)
+
+    with zipfile.ZipFile(save_path) as z:
+        z.extractall(&#34;/tmp/data/input&#34;)
+    os.system(&#39;cd /tmp/data/input; find . -type f ! -iname &#34;*.csv&#34; -delete&#39;)
+    os.system(&#34;tree /tmp/data/input&#34;)
+
+
+@task(
+    max_retries=constants.TASK_MAX_RETRIES.value,
+    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
+)
+def clean_candidatos22(folder: str):
+    &#34;&#34;&#34;
+    Cleans the candidatos csv file.
+    &#34;&#34;&#34;
+
+    dfs = []
+
+    files = glob(f&#34;{folder}/*.csv&#34;)
+
+    for file in files:
+        df = pd.read_csv(file, sep=&#34;;&#34;, encoding=&#34;latin-1&#34;)
+        dfs.append(df)
+
+    df = pd.concat(dfs)
+
+    n = df.shape[0]
+
+    table = pd.DataFrame(
+        {
+            &#34;tipo_eleicao&#34;: [
+                unidecode(unidecode(k.lower())) if isinstance(k, str) else k
+                for k in df[&#34;NM_TIPO_ELEICAO&#34;].to_list()
+            ],
+            &#34;sigla_uf&#34;: df[&#34;SG_UF&#34;].to_list(),
+            &#34;id_municipio&#34;: n * [np.nan],
+            &#34;id_municipio_tse&#34;: n * [np.nan],
+            &#34;id_candidato_bd&#34;: n * [np.nan],
+            &#34;cpf&#34;: [
+                str(k).zfill(11) if isinstance(k, int) else k
+                for k in df[&#34;NR_CPF_CANDIDATO&#34;].to_list()
+            ],
+            &#34;titulo_eleitoral&#34;: [
+                str(k).zfill(12) if isinstance(k, int) else k
+                for k in df[&#34;NR_TITULO_ELEITORAL_CANDIDATO&#34;].to_list()
+            ],
+            &#34;sequencial&#34;: df[&#34;SQ_CANDIDATO&#34;].to_list(),
+            &#34;numero&#34;: df[&#34;NR_CANDIDATO&#34;].to_list(),
+            &#34;nome&#34;: [
+                unidecode(k.title()) if isinstance(k, str) else k
+                for k in df[&#34;NM_CANDIDATO&#34;].to_list()
+            ],
+            &#34;nome_urna&#34;: [
+                unidecode(k.title()) if isinstance(k, str) else k
+                for k in df[&#34;NM_URNA_CANDIDATO&#34;].to_list()
+            ],
+            &#34;numero_partido&#34;: df[&#34;NR_PARTIDO&#34;].to_list(),
+            &#34;sigla_partido&#34;: df[&#34;SG_PARTIDO&#34;].to_list(),
+            &#34;cargo&#34;: [
+                unidecode(k.lower()) if isinstance(k, str) else k
+                for k in df[&#34;DS_CARGO&#34;].to_list()
+            ],
+            &#34;situacao&#34;: [
+                unidecode(k.lower()) if isinstance(k, str) else k
+                for k in df[&#34;DS_SITUACAO_CANDIDATURA&#34;].to_list()
+            ],
+            &#34;ocupacao&#34;: [
+                unidecode(k.lower()) if isinstance(k, str) else k
+                for k in df[&#34;DS_OCUPACAO&#34;].to_list()
+            ],
+            &#34;data_nascimento&#34;: [
+                k.replace(&#34;/&#34;, &#34;-&#34;) if isinstance(k, str) else k
+                for k in df[&#34;DT_NASCIMENTO&#34;].to_list()
+            ],
+            &#34;idade&#34;: df[&#34;NR_IDADE_DATA_POSSE&#34;].to_list(),
+            &#34;genero&#34;: [
+                unidecode(k.lower()) if isinstance(k, str) else k
+                for k in df[&#34;DS_GENERO&#34;].to_list()
+            ],
+            &#34;instrucao&#34;: [
+                unidecode(k.lower()) if isinstance(k, str) else k
+                for k in df[&#34;DS_GRAU_INSTRUCAO&#34;].to_list()
+            ],
+            &#34;estado_civil&#34;: [
+                unidecode(k.lower()) if isinstance(k, str) else k
+                for k in df[&#34;DS_ESTADO_CIVIL&#34;].to_list()
+            ],
+            &#34;nacionalidade&#34;: [
+                unidecode(k.lower()) if isinstance(k, str) else k
+                for k in df[&#34;DS_NACIONALIDADE&#34;].to_list()
+            ],
+            &#34;sigla_uf_nascimento&#34;: df[&#34;SG_UF_NASCIMENTO&#34;].to_list(),
+            &#34;municipio_nascimento&#34;: [
+                unidecode(k.title()) if isinstance(k, str) else k
+                for k in df[&#34;NM_MUNICIPIO_NASCIMENTO&#34;].to_list()
+            ],
+            &#34;email&#34;: [
+                k.lower() if isinstance(k, str) else k for k in df[&#34;NM_EMAIL&#34;].to_list()
+            ],
+            &#34;raca&#34;: [
+                unidecode(k.lower()) if isinstance(k, str) else k
+                for k in df[&#34;DS_COR_RACA&#34;].to_list()
+            ],
+            &#34;situacao_totalizacao&#34;: df[&#34;DS_SITUACAO_CANDIDATO_TOT&#34;].to_list(),
+            &#34;numero_federacao&#34;: df[&#34;NR_FEDERACAO&#34;].to_list(),
+            &#34;nome_federacao&#34;: [
+                unidecode(k.title()) if isinstance(k, str) else k
+                for k in df[&#34;NM_FEDERACAO&#34;].to_list()
+            ],
+            &#34;sigla_federacao&#34;: df[&#34;SG_FEDERACAO&#34;].to_list(),
+            &#34;composicao_federacao&#34;: [
+                unidecode(k.lower()) if isinstance(k, str) else k
+                for k in df[&#34;DS_COMPOSICAO_FEDERACAO&#34;].to_list()
+            ],
+            &#34;prestou_contas&#34;: df[&#34;ST_PREST_CONTAS&#34;].to_list(),
+        }
+    )
+
+    del df
+    df = table.copy()
+    del table
+
+    df.replace(&#34;#NULO#&#34;, np.nan, inplace=True)
+    df.replace(&#34;#Nulo#&#34;, np.nan, inplace=True)
+    df.replace(&#34;#nulo#&#34;, np.nan, inplace=True)
+
+    os.system(&#34;mkdir -p /tmp/data/staging/br_tse_eleicoes/candidatos/ano=2022/&#34;)
+
+    df.to_csv(
+        &#34;/tmp/data/staging/br_tse_eleicoes/candidatos/ano=2022/candidatos.csv&#34;,
+        sep=&#34;;&#34;,
+        index=False,
+    )
+
+    os.system(&#34;tree /tmp/data/&#34;)
+
+
+@task(
+    max_retries=constants.TASK_MAX_RETRIES.value,
+    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
+)
+def build_candidatos(folder: str):
+    &#34;&#34;&#34;
+    Builds the candidatos csv file.
+    &#34;&#34;&#34;
+
+    dfs = []
+
+    files = [f&#34;{folder}/ano={ano}/candidatos.csv&#34; for ano in range(2022, 1992, -2)]
+
+    for file in files:
+        df = pd.read_csv(
+            file,
+            sep=&#34;;&#34;,
+            encoding=&#34;latin-1&#34;,
+            dtype={
+                &#34;id_candidato_bd&#34;: str,
+                &#34;cpf&#34;: str,
+                &#34;titulo_eleitoral&#34;: str,
+                &#34;sequencial&#34;: str,
+                &#34;numero&#34;: str,
+            },
+        )
+        df[&#34;ano&#34;] = int(file.split(&#34;/&#34;)[-2].split(&#34;=&#34;)[-1])
+        dfs.append(df)
+
+    df = pd.concat(dfs)
+
+    df = get_id_candidato_bd(df)
+
+    for ano in range(2022, 1992, -2):
+        os.system(f&#34;mkdir -p /tmp/data/output/ano={ano}/&#34;)
+        table = df[df[&#34;ano&#34;] == ano]
+        table.drop_duplicates(inplace=True)
+        table.drop(&#34;ano&#34;, axis=1, inplace=True)
+        table.to_csv(f&#34;/tmp/data/output/ano={ano}/candidatos.csv&#34;, index=False)
+
+    os.system(&#34;tree /tmp/data/&#34;)
+
+    return &#34;/tmp/data/output/&#34;</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="pipelines.datasets.br_tse_eleicoes.tasks.build_candidatos"><code class="name flex">
+<span>def <span class="ident">build_candidatos</span></span>(<span>folder: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Builds the candidatos csv file.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@task(
+    max_retries=constants.TASK_MAX_RETRIES.value,
+    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
+)
+def build_candidatos(folder: str):
+    &#34;&#34;&#34;
+    Builds the candidatos csv file.
+    &#34;&#34;&#34;
+
+    dfs = []
+
+    files = [f&#34;{folder}/ano={ano}/candidatos.csv&#34; for ano in range(2022, 1992, -2)]
+
+    for file in files:
+        df = pd.read_csv(
+            file,
+            sep=&#34;;&#34;,
+            encoding=&#34;latin-1&#34;,
+            dtype={
+                &#34;id_candidato_bd&#34;: str,
+                &#34;cpf&#34;: str,
+                &#34;titulo_eleitoral&#34;: str,
+                &#34;sequencial&#34;: str,
+                &#34;numero&#34;: str,
+            },
+        )
+        df[&#34;ano&#34;] = int(file.split(&#34;/&#34;)[-2].split(&#34;=&#34;)[-1])
+        dfs.append(df)
+
+    df = pd.concat(dfs)
+
+    df = get_id_candidato_bd(df)
+
+    for ano in range(2022, 1992, -2):
+        os.system(f&#34;mkdir -p /tmp/data/output/ano={ano}/&#34;)
+        table = df[df[&#34;ano&#34;] == ano]
+        table.drop_duplicates(inplace=True)
+        table.drop(&#34;ano&#34;, axis=1, inplace=True)
+        table.to_csv(f&#34;/tmp/data/output/ano={ano}/candidatos.csv&#34;, index=False)
+
+    os.system(&#34;tree /tmp/data/&#34;)
+
+    return &#34;/tmp/data/output/&#34;</code></pre>
+</details>
+</dd>
+<dt id="pipelines.datasets.br_tse_eleicoes.tasks.clean_candidatos22"><code class="name flex">
+<span>def <span class="ident">clean_candidatos22</span></span>(<span>folder: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Cleans the candidatos csv file.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@task(
+    max_retries=constants.TASK_MAX_RETRIES.value,
+    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
+)
+def clean_candidatos22(folder: str):
+    &#34;&#34;&#34;
+    Cleans the candidatos csv file.
+    &#34;&#34;&#34;
+
+    dfs = []
+
+    files = glob(f&#34;{folder}/*.csv&#34;)
+
+    for file in files:
+        df = pd.read_csv(file, sep=&#34;;&#34;, encoding=&#34;latin-1&#34;)
+        dfs.append(df)
+
+    df = pd.concat(dfs)
+
+    n = df.shape[0]
+
+    table = pd.DataFrame(
+        {
+            &#34;tipo_eleicao&#34;: [
+                unidecode(unidecode(k.lower())) if isinstance(k, str) else k
+                for k in df[&#34;NM_TIPO_ELEICAO&#34;].to_list()
+            ],
+            &#34;sigla_uf&#34;: df[&#34;SG_UF&#34;].to_list(),
+            &#34;id_municipio&#34;: n * [np.nan],
+            &#34;id_municipio_tse&#34;: n * [np.nan],
+            &#34;id_candidato_bd&#34;: n * [np.nan],
+            &#34;cpf&#34;: [
+                str(k).zfill(11) if isinstance(k, int) else k
+                for k in df[&#34;NR_CPF_CANDIDATO&#34;].to_list()
+            ],
+            &#34;titulo_eleitoral&#34;: [
+                str(k).zfill(12) if isinstance(k, int) else k
+                for k in df[&#34;NR_TITULO_ELEITORAL_CANDIDATO&#34;].to_list()
+            ],
+            &#34;sequencial&#34;: df[&#34;SQ_CANDIDATO&#34;].to_list(),
+            &#34;numero&#34;: df[&#34;NR_CANDIDATO&#34;].to_list(),
+            &#34;nome&#34;: [
+                unidecode(k.title()) if isinstance(k, str) else k
+                for k in df[&#34;NM_CANDIDATO&#34;].to_list()
+            ],
+            &#34;nome_urna&#34;: [
+                unidecode(k.title()) if isinstance(k, str) else k
+                for k in df[&#34;NM_URNA_CANDIDATO&#34;].to_list()
+            ],
+            &#34;numero_partido&#34;: df[&#34;NR_PARTIDO&#34;].to_list(),
+            &#34;sigla_partido&#34;: df[&#34;SG_PARTIDO&#34;].to_list(),
+            &#34;cargo&#34;: [
+                unidecode(k.lower()) if isinstance(k, str) else k
+                for k in df[&#34;DS_CARGO&#34;].to_list()
+            ],
+            &#34;situacao&#34;: [
+                unidecode(k.lower()) if isinstance(k, str) else k
+                for k in df[&#34;DS_SITUACAO_CANDIDATURA&#34;].to_list()
+            ],
+            &#34;ocupacao&#34;: [
+                unidecode(k.lower()) if isinstance(k, str) else k
+                for k in df[&#34;DS_OCUPACAO&#34;].to_list()
+            ],
+            &#34;data_nascimento&#34;: [
+                k.replace(&#34;/&#34;, &#34;-&#34;) if isinstance(k, str) else k
+                for k in df[&#34;DT_NASCIMENTO&#34;].to_list()
+            ],
+            &#34;idade&#34;: df[&#34;NR_IDADE_DATA_POSSE&#34;].to_list(),
+            &#34;genero&#34;: [
+                unidecode(k.lower()) if isinstance(k, str) else k
+                for k in df[&#34;DS_GENERO&#34;].to_list()
+            ],
+            &#34;instrucao&#34;: [
+                unidecode(k.lower()) if isinstance(k, str) else k
+                for k in df[&#34;DS_GRAU_INSTRUCAO&#34;].to_list()
+            ],
+            &#34;estado_civil&#34;: [
+                unidecode(k.lower()) if isinstance(k, str) else k
+                for k in df[&#34;DS_ESTADO_CIVIL&#34;].to_list()
+            ],
+            &#34;nacionalidade&#34;: [
+                unidecode(k.lower()) if isinstance(k, str) else k
+                for k in df[&#34;DS_NACIONALIDADE&#34;].to_list()
+            ],
+            &#34;sigla_uf_nascimento&#34;: df[&#34;SG_UF_NASCIMENTO&#34;].to_list(),
+            &#34;municipio_nascimento&#34;: [
+                unidecode(k.title()) if isinstance(k, str) else k
+                for k in df[&#34;NM_MUNICIPIO_NASCIMENTO&#34;].to_list()
+            ],
+            &#34;email&#34;: [
+                k.lower() if isinstance(k, str) else k for k in df[&#34;NM_EMAIL&#34;].to_list()
+            ],
+            &#34;raca&#34;: [
+                unidecode(k.lower()) if isinstance(k, str) else k
+                for k in df[&#34;DS_COR_RACA&#34;].to_list()
+            ],
+            &#34;situacao_totalizacao&#34;: df[&#34;DS_SITUACAO_CANDIDATO_TOT&#34;].to_list(),
+            &#34;numero_federacao&#34;: df[&#34;NR_FEDERACAO&#34;].to_list(),
+            &#34;nome_federacao&#34;: [
+                unidecode(k.title()) if isinstance(k, str) else k
+                for k in df[&#34;NM_FEDERACAO&#34;].to_list()
+            ],
+            &#34;sigla_federacao&#34;: df[&#34;SG_FEDERACAO&#34;].to_list(),
+            &#34;composicao_federacao&#34;: [
+                unidecode(k.lower()) if isinstance(k, str) else k
+                for k in df[&#34;DS_COMPOSICAO_FEDERACAO&#34;].to_list()
+            ],
+            &#34;prestou_contas&#34;: df[&#34;ST_PREST_CONTAS&#34;].to_list(),
+        }
+    )
+
+    del df
+    df = table.copy()
+    del table
+
+    df.replace(&#34;#NULO#&#34;, np.nan, inplace=True)
+    df.replace(&#34;#Nulo#&#34;, np.nan, inplace=True)
+    df.replace(&#34;#nulo#&#34;, np.nan, inplace=True)
+
+    os.system(&#34;mkdir -p /tmp/data/staging/br_tse_eleicoes/candidatos/ano=2022/&#34;)
+
+    df.to_csv(
+        &#34;/tmp/data/staging/br_tse_eleicoes/candidatos/ano=2022/candidatos.csv&#34;,
+        sep=&#34;;&#34;,
+        index=False,
+    )
+
+    os.system(&#34;tree /tmp/data/&#34;)</code></pre>
+</details>
+</dd>
+<dt id="pipelines.datasets.br_tse_eleicoes.tasks.download_before22"><code class="name flex">
+<span>def <span class="ident">download_before22</span></span>(<span>table_id: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Download external data from previous elections</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@task(
+    max_retries=constants.TASK_MAX_RETRIES.value,
+    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
+)
+def download_before22(table_id: str) -&gt; None:
+    &#34;&#34;&#34;
+    Download external data from previous elections
+    &#34;&#34;&#34;
+    os.system(&#34;mkdir -p /tmp/data/input&#34;)
+    blobs = get_blobs_from_raw(dataset_id=&#34;br_tse_eleicoes&#34;, table_id=table_id)
+    for blob in tqdm(blobs):
+        df = pd.read_csv(blob.public_url, encoding=&#34;utf-8&#34;)
+        os.system(f&#34;mkdir -p /tmp/data/{&#39;/&#39;.join(blob.name.split(&#39;/&#39;)[:-1])}&#34;)
+        df.to_csv(f&#34;/tmp/data/{blob.name}&#34;, sep=&#34;;&#34;, index=False)
+        del df</code></pre>
+</details>
+</dd>
+<dt id="pipelines.datasets.br_tse_eleicoes.tasks.get_csv_files"><code class="name flex">
+<span>def <span class="ident">get_csv_files</span></span>(<span>url, save_path, chunk_size=128) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Gets all csv files from a url and saves them to a directory.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@task(
+    max_retries=constants.TASK_MAX_RETRIES.value,
+    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
+)
+def get_csv_files(url, save_path, chunk_size=128) -&gt; None:
+    &#34;&#34;&#34;
+    Gets all csv files from a url and saves them to a directory.
+    &#34;&#34;&#34;
+    request_headers = {
+        &#34;User-Agent&#34;: &#34;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36&#34;,
+    }
+    r = requests.get(url, headers=request_headers, stream=True)
+    save_path = save_path + url.split(&#34;/&#34;)[-1]
+    with open(save_path, &#34;wb&#34;) as fd:
+        for chunk in r.iter_content(chunk_size=chunk_size):
+            fd.write(chunk)
+
+    with zipfile.ZipFile(save_path) as z:
+        z.extractall(&#34;/tmp/data/input&#34;)
+    os.system(&#39;cd /tmp/data/input; find . -type f ! -iname &#34;*.csv&#34; -delete&#39;)
+    os.system(&#34;tree /tmp/data/input&#34;)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="pipelines.datasets.br_tse_eleicoes" href="index.html">pipelines.datasets.br_tse_eleicoes</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="pipelines.datasets.br_tse_eleicoes.tasks.build_candidatos" href="#pipelines.datasets.br_tse_eleicoes.tasks.build_candidatos">build_candidatos</a></code></li>
+<li><code><a title="pipelines.datasets.br_tse_eleicoes.tasks.clean_candidatos22" href="#pipelines.datasets.br_tse_eleicoes.tasks.clean_candidatos22">clean_candidatos22</a></code></li>
+<li><code><a title="pipelines.datasets.br_tse_eleicoes.tasks.download_before22" href="#pipelines.datasets.br_tse_eleicoes.tasks.download_before22">download_before22</a></code></li>
+<li><code><a title="pipelines.datasets.br_tse_eleicoes.tasks.get_csv_files" href="#pipelines.datasets.br_tse_eleicoes.tasks.get_csv_files">get_csv_files</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
