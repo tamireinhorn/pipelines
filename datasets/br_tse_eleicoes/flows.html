@@ -73,7 +73,7 @@ with Flow(
     c22_task = clean_candidatos22(&#34;/tmp/data/input&#34;, upstream_tasks=[gfiles_task])
 
     filepath = build_candidatos(
-        &#34;/tmp/data/staging/br_tse_eleicoes/candidatos&#34;, upstream_tasks=[c22_task]
+        &#34;/tmp/data/raw/br_tse_eleicoes/candidatos&#34;, upstream_tasks=[c22_task]
     )
 
     wait_upload_table = create_table_and_upload_to_gcs(

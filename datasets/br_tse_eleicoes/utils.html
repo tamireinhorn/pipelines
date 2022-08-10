@@ -200,7 +200,7 @@ def get_blobs_from_raw(dataset_id: str, table_id: str) -&gt; list:
     storage = bd.Storage(dataset_id=dataset_id, table_id=table_id)
     return list(
         storage.client[&#34;storage_staging&#34;]
-        .bucket(&#34;basedosdados&#34;)
+        .bucket(&#34;basedosdados-dev&#34;)
         .list_blobs(prefix=f&#34;raw/{storage.dataset_id}/{storage.table_id}/&#34;)
     )</code></pre>
 </details>
@@ -229,7 +229,7 @@ def get_blobs_from_raw(dataset_id: str, table_id: str) -&gt; list:
     storage = bd.Storage(dataset_id=dataset_id, table_id=table_id)
     return list(
         storage.client[&#34;storage_staging&#34;]
-        .bucket(&#34;basedosdados&#34;)
+        .bucket(&#34;basedosdados-dev&#34;)
         .list_blobs(prefix=f&#34;raw/{storage.dataset_id}/{storage.table_id}/&#34;)
     )</code></pre>
 </details>
