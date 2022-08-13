@@ -169,9 +169,7 @@ def run_cloud(
 
     # Print flow run link so user can check it
     print(f&#34;Run submitted: TEST RUN - {run_description} - {flow.name}&#34;)
-    print(
-        f&#34;Please check at: http://prefect-ui.prefect.svc.cluster.local:8080/flow-run/{flow_run_id}&#34;
-    )
+    print(f&#34;Please check at: https://prefect.basedosdados.org/flow-run/{flow_run_id}&#34;)
 
 
 def query_to_line(query: str) -&gt; str:
@@ -940,9 +938,7 @@ def log_task(
 
     # Print flow run link so user can check it
     print(f&#34;Run submitted: TEST RUN - {run_description} - {flow.name}&#34;)
-    print(
-        f&#34;Please check at: http://prefect-ui.prefect.svc.cluster.local:8080/flow-run/{flow_run_id}&#34;
-    )</code></pre>
+    print(f&#34;Please check at: https://prefect.basedosdados.org/flow-run/{flow_run_id}&#34;)</code></pre>
 </details>
 </dd>
 <dt id="pipelines.utils.utils.run_local"><code class="name flex">
