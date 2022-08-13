@@ -32,6 +32,8 @@
 General purpose functions for the br_tse_eleicoes project
 &#34;&#34;&#34;
 # pylint: disable=invalid-name,line-too-long
+import re
+
 import pandas as pd
 from unidecode import unidecode
 import basedosdados as bd
@@ -202,7 +204,95 @@ def get_blobs_from_raw(dataset_id: str, table_id: str) -&gt; list:
         storage.client[&#34;storage_staging&#34;]
         .bucket(&#34;basedosdados-dev&#34;)
         .list_blobs(prefix=f&#34;raw/{storage.dataset_id}/{storage.table_id}/&#34;)
-    )</code></pre>
+    )
+
+
+def get_data_from_prod(dataset_id: str, table_id: str, columns: list) -&gt; list:
+    &#34;&#34;&#34;
+    Get select columns from a table in prod.
+    &#34;&#34;&#34;
+
+    storage = bd.Storage(dataset_id=dataset_id, table_id=table_id)
+    blobs = list(
+        storage.client[&#34;storage_staging&#34;]
+        .bucket(&#34;basedosdados-dev&#34;)
+        .list_blobs(prefix=f&#34;staging/{storage.dataset_id}/{storage.table_id}/&#34;)
+    )
+
+    dfs = []
+
+    for blob in blobs:
+        partitions = re.findall(r&#34;\w+(?==)&#34;, blob.name)
+        if len(set(partitions) &amp; set(columns)) == 0:
+            df = pd.read_csv(blob.public_url, usecols=columns)
+            dfs.append(df)
+        else:
+            columns2add = list(set(partitions) &amp; set(columns))
+            for column in columns2add:
+                columns.remove(column)
+            df = pd.read_csv(blob.public_url, usecols=columns)
+            for column in columns2add:
+                df[column] = blob.name.split(column + &#34;=&#34;)[1].split(&#34;/&#34;)[0]
+            dfs.append(df)
+
+    df = pd.concat(dfs)
+
+    return df
+
+
+def normalize_dahis(df: pd.DataFrame) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;
+    Applies normalizations defined bt Ricardo Dahis (see: https://github.com/basedosdados/mais/blob/master/bases/br_tse_eleicoes/code/sub/normalizacao_particao.do)
+    &#34;&#34;&#34;
+    df = df[~df.id_candidato_bd.isna()]
+
+    df.drop_duplicates(
+        subset=[
+            &#34;ano&#34;,
+            &#34;tipo_eleicao&#34;,
+            &#34;sigla_uf&#34;,
+            &#34;id_municipio_tse&#34;,
+            &#34;numero&#34;,
+            &#34;cargo&#34;,
+            &#34;id_candidato_bd&#34;,
+        ],
+        inplace=True,
+    )
+
+    df[&#34;dup&#34;] = df.duplicated(
+        subset=[
+            &#34;ano&#34;,
+            &#34;tipo_eleicao&#34;,
+            &#34;sigla_uf&#34;,
+            &#34;id_municipio_tse&#34;,
+            &#34;numero&#34;,
+            &#34;cargo&#34;,
+        ],
+        keep=False,
+    )
+
+    df = df[(df.dup is not True) | (df.situacao == &#34;deferido&#34;)]
+
+    df.drop(columns=[&#34;dup&#34;], inplace=True)
+
+    df.drop_duplicates(
+        subset=[
+            &#34;ano&#34;,
+            &#34;tipo_eleicao&#34;,
+            &#34;sigla_uf&#34;,
+            &#34;id_municipio_tse&#34;,
+            &#34;numero&#34;,
+            &#34;cargo&#34;,
+        ],
+        inplace=True,
+    )
+
+    df.drop_duplicates(
+        subset=[&#34;ano&#34;, &#34;tipo_eleicao&#34;, &#34;id_candidato_bd&#34;],
+        inplace=True,
+    )
+
+    return df</code></pre>
 </details>
 </section>
 <section>
@@ -232,6 +322,48 @@ def get_blobs_from_raw(dataset_id: str, table_id: str) -&gt; list:
         .bucket(&#34;basedosdados-dev&#34;)
         .list_blobs(prefix=f&#34;raw/{storage.dataset_id}/{storage.table_id}/&#34;)
     )</code></pre>
+</details>
+</dd>
+<dt id="pipelines.datasets.br_tse_eleicoes.utils.get_data_from_prod"><code class="name flex">
+<span>def <span class="ident">get_data_from_prod</span></span>(<span>dataset_id: str, table_id: str, columns: list) ‑> list</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get select columns from a table in prod.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_data_from_prod(dataset_id: str, table_id: str, columns: list) -&gt; list:
+    &#34;&#34;&#34;
+    Get select columns from a table in prod.
+    &#34;&#34;&#34;
+
+    storage = bd.Storage(dataset_id=dataset_id, table_id=table_id)
+    blobs = list(
+        storage.client[&#34;storage_staging&#34;]
+        .bucket(&#34;basedosdados-dev&#34;)
+        .list_blobs(prefix=f&#34;staging/{storage.dataset_id}/{storage.table_id}/&#34;)
+    )
+
+    dfs = []
+
+    for blob in blobs:
+        partitions = re.findall(r&#34;\w+(?==)&#34;, blob.name)
+        if len(set(partitions) &amp; set(columns)) == 0:
+            df = pd.read_csv(blob.public_url, usecols=columns)
+            dfs.append(df)
+        else:
+            columns2add = list(set(partitions) &amp; set(columns))
+            for column in columns2add:
+                columns.remove(column)
+            df = pd.read_csv(blob.public_url, usecols=columns)
+            for column in columns2add:
+                df[column] = blob.name.split(column + &#34;=&#34;)[1].split(&#34;/&#34;)[0]
+            dfs.append(df)
+
+    df = pd.concat(dfs)
+
+    return df</code></pre>
 </details>
 </dd>
 <dt id="pipelines.datasets.br_tse_eleicoes.utils.get_id_candidato_bd"><code class="name flex">
@@ -398,6 +530,70 @@ def get_blobs_from_raw(dataset_id: str, table_id: str) -&gt; list:
     return data</code></pre>
 </details>
 </dd>
+<dt id="pipelines.datasets.br_tse_eleicoes.utils.normalize_dahis"><code class="name flex">
+<span>def <span class="ident">normalize_dahis</span></span>(<span>df: pandas.core.frame.DataFrame) ‑> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Applies normalizations defined bt Ricardo Dahis (see: <a href="https://github.com/basedosdados/mais/blob/master/bases/br_tse_eleicoes/code/sub/normalizacao_particao.do">https://github.com/basedosdados/mais/blob/master/bases/br_tse_eleicoes/code/sub/normalizacao_particao.do</a>)</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def normalize_dahis(df: pd.DataFrame) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;
+    Applies normalizations defined bt Ricardo Dahis (see: https://github.com/basedosdados/mais/blob/master/bases/br_tse_eleicoes/code/sub/normalizacao_particao.do)
+    &#34;&#34;&#34;
+    df = df[~df.id_candidato_bd.isna()]
+
+    df.drop_duplicates(
+        subset=[
+            &#34;ano&#34;,
+            &#34;tipo_eleicao&#34;,
+            &#34;sigla_uf&#34;,
+            &#34;id_municipio_tse&#34;,
+            &#34;numero&#34;,
+            &#34;cargo&#34;,
+            &#34;id_candidato_bd&#34;,
+        ],
+        inplace=True,
+    )
+
+    df[&#34;dup&#34;] = df.duplicated(
+        subset=[
+            &#34;ano&#34;,
+            &#34;tipo_eleicao&#34;,
+            &#34;sigla_uf&#34;,
+            &#34;id_municipio_tse&#34;,
+            &#34;numero&#34;,
+            &#34;cargo&#34;,
+        ],
+        keep=False,
+    )
+
+    df = df[(df.dup is not True) | (df.situacao == &#34;deferido&#34;)]
+
+    df.drop(columns=[&#34;dup&#34;], inplace=True)
+
+    df.drop_duplicates(
+        subset=[
+            &#34;ano&#34;,
+            &#34;tipo_eleicao&#34;,
+            &#34;sigla_uf&#34;,
+            &#34;id_municipio_tse&#34;,
+            &#34;numero&#34;,
+            &#34;cargo&#34;,
+        ],
+        inplace=True,
+    )
+
+    df.drop_duplicates(
+        subset=[&#34;ano&#34;, &#34;tipo_eleicao&#34;, &#34;id_candidato_bd&#34;],
+        inplace=True,
+    )
+
+    return df</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 <section>
@@ -417,7 +613,9 @@ def get_blobs_from_raw(dataset_id: str, table_id: str) -&gt; list:
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="pipelines.datasets.br_tse_eleicoes.utils.get_blobs_from_raw" href="#pipelines.datasets.br_tse_eleicoes.utils.get_blobs_from_raw">get_blobs_from_raw</a></code></li>
+<li><code><a title="pipelines.datasets.br_tse_eleicoes.utils.get_data_from_prod" href="#pipelines.datasets.br_tse_eleicoes.utils.get_data_from_prod">get_data_from_prod</a></code></li>
 <li><code><a title="pipelines.datasets.br_tse_eleicoes.utils.get_id_candidato_bd" href="#pipelines.datasets.br_tse_eleicoes.utils.get_id_candidato_bd">get_id_candidato_bd</a></code></li>
+<li><code><a title="pipelines.datasets.br_tse_eleicoes.utils.normalize_dahis" href="#pipelines.datasets.br_tse_eleicoes.utils.normalize_dahis">normalize_dahis</a></code></li>
 </ul>
 </li>
 </ul>

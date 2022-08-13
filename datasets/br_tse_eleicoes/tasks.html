@@ -36,6 +36,7 @@ from datetime import timedelta
 import zipfile
 import os
 from glob import glob
+from itertools import product
 
 import requests
 from unidecode import unidecode
@@ -48,6 +49,8 @@ from pipelines.utils.utils import log
 from pipelines.datasets.br_tse_eleicoes.utils import (
     get_id_candidato_bd,
     get_blobs_from_raw,
+    normalize_dahis,
+    get_data_from_prod,
 )
 
 
@@ -234,7 +237,7 @@ def build_candidatos(folder: str):
 
     dfs = []
 
-    files = [f&#34;{folder}/ano={ano}/candidatos.csv&#34; for ano in range(2022, 1992, -2)]
+    files = [f&#34;{folder}/ano={ano}/candidatos.csv&#34; for ano in range(2022, 2018, -2)]
 
     for file in files:
         df = pd.read_csv(
@@ -256,7 +259,9 @@ def build_candidatos(folder: str):
 
     df = get_id_candidato_bd(df)
 
-    for ano in range(2022, 1992, -2):
+    df = normalize_dahis(df)
+
+    for ano in range(2022, 2018, -2):
         os.system(f&#34;mkdir -p /tmp/data/output/ano={ano}/&#34;)
         table = df[df[&#34;ano&#34;] == ano]
         table.drop_duplicates(inplace=True)
@@ -265,7 +270,198 @@ def build_candidatos(folder: str):
 
     os.system(&#34;tree /tmp/data/&#34;)
 
-    return &#34;/tmp/data/output/&#34;</code></pre>
+    return &#34;/tmp/data/output/&#34;
+
+
+@task(
+    max_retries=constants.TASK_MAX_RETRIES.value,
+    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
+)
+def build_bens_candidato(folder: str) -&gt; str:
+    &#34;&#34;&#34;
+    Builds the bens_candidato csv file.
+    &#34;&#34;&#34;
+
+    dfs = []
+
+    ufs = [
+        &#34;AC&#34;,
+        &#34;AL&#34;,
+        &#34;AM&#34;,
+        &#34;AP&#34;,
+        &#34;BA&#34;,
+        &#34;BR&#34;,
+        &#34;CE&#34;,
+        &#34;DF&#34;,
+        &#34;ES&#34;,
+        &#34;GO&#34;,
+        &#34;MA&#34;,
+        &#34;MG&#34;,
+        &#34;MS&#34;,
+        &#34;MT&#34;,
+        &#34;PA&#34;,
+        &#34;PB&#34;,
+        &#34;PE&#34;,
+        &#34;PI&#34;,
+        &#34;PR&#34;,
+        &#34;RJ&#34;,
+        &#34;RN&#34;,
+        &#34;RO&#34;,
+        &#34;RR&#34;,
+        &#34;RS&#34;,
+        &#34;SC&#34;,
+        &#34;SE&#34;,
+        &#34;SP&#34;,
+        &#34;TO&#34;,
+        &#34;BR&#34;,
+        &#34;VT&#34;,
+        &#34;ZZ&#34;,
+    ]
+
+    files = [
+        f&#34;{folder}/ano={ano}/sigla_uf={uf}/bens_candidato.csv&#34;
+        for ano, uf in product(range(2022, 2018, -2), ufs)
+    ]
+
+    for file in files:
+        try:
+            df = pd.read_csv(file, sep=&#34;;&#34;, encoding=&#34;latin-1&#34;)
+            df[&#34;ano&#34;] = int(file.split(&#34;/&#34;)[-3].split(&#34;=&#34;)[-1])
+            df[&#34;sigla_uf&#34;] = file.split(&#34;/&#34;)[-2].split(&#34;=&#34;)[-1]
+            dfs.append(df)
+        except FileNotFoundError:
+            print(f&#34;File {file} not found&#34;)
+            continue
+
+    df = pd.concat(dfs)
+
+    candidatos = get_data_from_prod(
+        &#34;br_tse_eleicoes&#34;,
+        &#34;candidatos&#34;,
+        [&#34;ano&#34;, &#34;tipo_eleicao&#34;, &#34;sigla_uf&#34;, &#34;sequencial&#34;, &#34;id_candidato_bd&#34;],
+    )
+
+    candidatos.drop_duplicates(inplace=True)
+
+    print(candidatos.head())
+
+    print(&#34;\n\n&#34;)
+
+    df.rename(columns={&#34;sequencial_candidato&#34;: &#34;sequencial&#34;}, inplace=True)
+
+    df.drop(columns=[&#34;id_candidato_bd&#34;], inplace=True)
+
+    print(df.head())
+
+    df = df.set_index([&#34;ano&#34;, &#34;tipo_eleicao&#34;, &#34;sigla_uf&#34;, &#34;sequencial&#34;]).join(
+        candidatos.set_index([&#34;ano&#34;, &#34;tipo_eleicao&#34;, &#34;sigla_uf&#34;, &#34;sequencial&#34;])
+    )
+
+    df.reset_index(inplace=True)
+
+    df.rename(columns={&#34;sequencial&#34;: &#34;sequencial_candidato&#34;}, inplace=True)
+
+    df = df.reindex(
+        columns=[
+            &#34;ano&#34;,
+            &#34;sigla_uf&#34;,
+            &#34;tipo_eleicao&#34;,
+            &#34;sequencial_candidato&#34;,
+            &#34;id_candidato_bd&#34;,
+            &#34;id_tipo_item&#34;,
+            &#34;tipo_item&#34;,
+            &#34;descricao_item&#34;,
+            &#34;valor_item&#34;,
+        ]
+    )
+
+    print(&#34;\n\n&#34;)
+
+    print(df.head())
+
+    for ano, uf in product(range(2022, 2018, -2), ufs):
+        table = df[df[&#34;ano&#34;] == ano]
+        table = table[table[&#34;sigla_uf&#34;] == uf]
+        if table.shape[0] == 0:
+            continue
+        os.system(f&#34;mkdir -p /tmp/data/output/ano={ano}/sigla_uf={uf}/&#34;)
+        table.drop_duplicates(inplace=True)
+        table.drop(&#34;ano&#34;, axis=1, inplace=True)
+        table.drop(&#34;sigla_uf&#34;, axis=1, inplace=True)
+        table.to_csv(
+            f&#34;/tmp/data/output/ano={ano}/sigla_uf={uf}/bens_candidato.csv&#34;, index=False
+        )
+
+    os.system(&#34;tree /tmp/data/&#34;)
+
+    return &#34;/tmp/data/output/&#34;
+
+
+@task(
+    max_retries=constants.TASK_MAX_RETRIES.value,
+    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
+)
+def clean_bens22(folder) -&gt; None:
+    &#34;&#34;&#34;
+    Clean bens_canidadto.csv files for 2022
+    &#34;&#34;&#34;
+    dfs = []
+
+    files = glob(f&#34;{folder}/bem_candidato*.csv&#34;)
+
+    for file in files[:2]:
+        df = pd.read_csv(file, sep=&#34;;&#34;, encoding=&#34;latin-1&#34;)
+        dfs.append(df)
+
+    df = pd.concat(dfs)
+
+    n = df.shape[0]
+
+    table = pd.DataFrame(
+        {
+            &#34;tipo_eleicao&#34;: [
+                unidecode(unidecode(k.lower())) if isinstance(k, str) else k
+                for k in df[&#34;NM_TIPO_ELEICAO&#34;].to_list()
+            ],
+            &#34;sigla_uf&#34;: df[&#34;SG_UF&#34;].to_list(),
+            &#34;sequencial_candidato&#34;: df[&#34;SQ_CANDIDATO&#34;].to_list(),
+            &#34;id_tipo_item&#34;: df[&#34;CD_TIPO_BEM_CANDIDATO&#34;].to_list(),
+            &#34;id_candidato_bd&#34;: n * np.nan,
+            &#34;tipo_item&#34;: [
+                unidecode(unidecode(k.title())) if isinstance(k, str) else k
+                for k in df[&#34;DS_TIPO_BEM_CANDIDATO&#34;].to_list()
+            ],
+            &#34;descricao_item&#34;: [
+                unidecode(unidecode(k.title())) if isinstance(k, str) else k
+                for k in df[&#34;DS_BEM_CANDIDATO&#34;].to_list()
+            ],
+            &#34;valor_item&#34;: df[&#34;VR_BEM_CANDIDATO&#34;].to_list(),
+        }
+    )
+
+    del df
+    df = table.copy()
+    del table
+
+    df.replace(&#34;#NULO#&#34;, np.nan, inplace=True)
+    df.replace(&#34;#Nulo#&#34;, np.nan, inplace=True)
+    df.replace(&#34;#nulo#&#34;, np.nan, inplace=True)
+
+    ufs = df[&#34;sigla_uf&#34;].unique()
+
+    for uf in ufs:
+        df_uf = df[df[&#34;sigla_uf&#34;] == uf].copy()
+        os.system(
+            f&#34;mkdir -p /tmp/data/raw/br_tse_eleicoes/bens_candidato/ano=2022/sigla_uf={uf}/&#34;
+        )
+        df_uf.to_csv(
+            f&#34;/tmp/data/raw/br_tse_eleicoes/bens_candidato/ano=2022/sigla_uf={uf}/bens_candidato.csv&#34;,
+            index=False,
+            sep=&#34;;&#34;,
+        )
+        del df_uf
+
+    os.system(&#34;tree /tmp/data/&#34;)</code></pre>
 </details>
 </section>
 <section>
@@ -275,6 +471,139 @@ def build_candidatos(folder: str):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="pipelines.datasets.br_tse_eleicoes.tasks.build_bens_candidato"><code class="name flex">
+<span>def <span class="ident">build_bens_candidato</span></span>(<span>folder: str) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Builds the bens_candidato csv file.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@task(
+    max_retries=constants.TASK_MAX_RETRIES.value,
+    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
+)
+def build_bens_candidato(folder: str) -&gt; str:
+    &#34;&#34;&#34;
+    Builds the bens_candidato csv file.
+    &#34;&#34;&#34;
+
+    dfs = []
+
+    ufs = [
+        &#34;AC&#34;,
+        &#34;AL&#34;,
+        &#34;AM&#34;,
+        &#34;AP&#34;,
+        &#34;BA&#34;,
+        &#34;BR&#34;,
+        &#34;CE&#34;,
+        &#34;DF&#34;,
+        &#34;ES&#34;,
+        &#34;GO&#34;,
+        &#34;MA&#34;,
+        &#34;MG&#34;,
+        &#34;MS&#34;,
+        &#34;MT&#34;,
+        &#34;PA&#34;,
+        &#34;PB&#34;,
+        &#34;PE&#34;,
+        &#34;PI&#34;,
+        &#34;PR&#34;,
+        &#34;RJ&#34;,
+        &#34;RN&#34;,
+        &#34;RO&#34;,
+        &#34;RR&#34;,
+        &#34;RS&#34;,
+        &#34;SC&#34;,
+        &#34;SE&#34;,
+        &#34;SP&#34;,
+        &#34;TO&#34;,
+        &#34;BR&#34;,
+        &#34;VT&#34;,
+        &#34;ZZ&#34;,
+    ]
+
+    files = [
+        f&#34;{folder}/ano={ano}/sigla_uf={uf}/bens_candidato.csv&#34;
+        for ano, uf in product(range(2022, 2018, -2), ufs)
+    ]
+
+    for file in files:
+        try:
+            df = pd.read_csv(file, sep=&#34;;&#34;, encoding=&#34;latin-1&#34;)
+            df[&#34;ano&#34;] = int(file.split(&#34;/&#34;)[-3].split(&#34;=&#34;)[-1])
+            df[&#34;sigla_uf&#34;] = file.split(&#34;/&#34;)[-2].split(&#34;=&#34;)[-1]
+            dfs.append(df)
+        except FileNotFoundError:
+            print(f&#34;File {file} not found&#34;)
+            continue
+
+    df = pd.concat(dfs)
+
+    candidatos = get_data_from_prod(
+        &#34;br_tse_eleicoes&#34;,
+        &#34;candidatos&#34;,
+        [&#34;ano&#34;, &#34;tipo_eleicao&#34;, &#34;sigla_uf&#34;, &#34;sequencial&#34;, &#34;id_candidato_bd&#34;],
+    )
+
+    candidatos.drop_duplicates(inplace=True)
+
+    print(candidatos.head())
+
+    print(&#34;\n\n&#34;)
+
+    df.rename(columns={&#34;sequencial_candidato&#34;: &#34;sequencial&#34;}, inplace=True)
+
+    df.drop(columns=[&#34;id_candidato_bd&#34;], inplace=True)
+
+    print(df.head())
+
+    df = df.set_index([&#34;ano&#34;, &#34;tipo_eleicao&#34;, &#34;sigla_uf&#34;, &#34;sequencial&#34;]).join(
+        candidatos.set_index([&#34;ano&#34;, &#34;tipo_eleicao&#34;, &#34;sigla_uf&#34;, &#34;sequencial&#34;])
+    )
+
+    df.reset_index(inplace=True)
+
+    df.rename(columns={&#34;sequencial&#34;: &#34;sequencial_candidato&#34;}, inplace=True)
+
+    df = df.reindex(
+        columns=[
+            &#34;ano&#34;,
+            &#34;sigla_uf&#34;,
+            &#34;tipo_eleicao&#34;,
+            &#34;sequencial_candidato&#34;,
+            &#34;id_candidato_bd&#34;,
+            &#34;id_tipo_item&#34;,
+            &#34;tipo_item&#34;,
+            &#34;descricao_item&#34;,
+            &#34;valor_item&#34;,
+        ]
+    )
+
+    print(&#34;\n\n&#34;)
+
+    print(df.head())
+
+    for ano, uf in product(range(2022, 2018, -2), ufs):
+        table = df[df[&#34;ano&#34;] == ano]
+        table = table[table[&#34;sigla_uf&#34;] == uf]
+        if table.shape[0] == 0:
+            continue
+        os.system(f&#34;mkdir -p /tmp/data/output/ano={ano}/sigla_uf={uf}/&#34;)
+        table.drop_duplicates(inplace=True)
+        table.drop(&#34;ano&#34;, axis=1, inplace=True)
+        table.drop(&#34;sigla_uf&#34;, axis=1, inplace=True)
+        table.to_csv(
+            f&#34;/tmp/data/output/ano={ano}/sigla_uf={uf}/bens_candidato.csv&#34;, index=False
+        )
+
+    os.system(&#34;tree /tmp/data/&#34;)
+
+    return &#34;/tmp/data/output/&#34;</code></pre>
+</details>
+</dd>
 <dt id="pipelines.datasets.br_tse_eleicoes.tasks.build_candidatos"><code class="name flex">
 <span>def <span class="ident">build_candidatos</span></span>(<span>folder: str)</span>
 </code></dt>
@@ -295,7 +624,7 @@ def build_candidatos(folder: str):
 
     dfs = []
 
-    files = [f&#34;{folder}/ano={ano}/candidatos.csv&#34; for ano in range(2022, 1992, -2)]
+    files = [f&#34;{folder}/ano={ano}/candidatos.csv&#34; for ano in range(2022, 2018, -2)]
 
     for file in files:
         df = pd.read_csv(
@@ -317,7 +646,9 @@ def build_candidatos(folder: str):
 
     df = get_id_candidato_bd(df)
 
-    for ano in range(2022, 1992, -2):
+    df = normalize_dahis(df)
+
+    for ano in range(2022, 2018, -2):
         os.system(f&#34;mkdir -p /tmp/data/output/ano={ano}/&#34;)
         table = df[df[&#34;ano&#34;] == ano]
         table.drop_duplicates(inplace=True)
@@ -327,6 +658,82 @@ def build_candidatos(folder: str):
     os.system(&#34;tree /tmp/data/&#34;)
 
     return &#34;/tmp/data/output/&#34;</code></pre>
+</details>
+</dd>
+<dt id="pipelines.datasets.br_tse_eleicoes.tasks.clean_bens22"><code class="name flex">
+<span>def <span class="ident">clean_bens22</span></span>(<span>folder) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Clean bens_canidadto.csv files for 2022</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@task(
+    max_retries=constants.TASK_MAX_RETRIES.value,
+    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
+)
+def clean_bens22(folder) -&gt; None:
+    &#34;&#34;&#34;
+    Clean bens_canidadto.csv files for 2022
+    &#34;&#34;&#34;
+    dfs = []
+
+    files = glob(f&#34;{folder}/bem_candidato*.csv&#34;)
+
+    for file in files[:2]:
+        df = pd.read_csv(file, sep=&#34;;&#34;, encoding=&#34;latin-1&#34;)
+        dfs.append(df)
+
+    df = pd.concat(dfs)
+
+    n = df.shape[0]
+
+    table = pd.DataFrame(
+        {
+            &#34;tipo_eleicao&#34;: [
+                unidecode(unidecode(k.lower())) if isinstance(k, str) else k
+                for k in df[&#34;NM_TIPO_ELEICAO&#34;].to_list()
+            ],
+            &#34;sigla_uf&#34;: df[&#34;SG_UF&#34;].to_list(),
+            &#34;sequencial_candidato&#34;: df[&#34;SQ_CANDIDATO&#34;].to_list(),
+            &#34;id_tipo_item&#34;: df[&#34;CD_TIPO_BEM_CANDIDATO&#34;].to_list(),
+            &#34;id_candidato_bd&#34;: n * np.nan,
+            &#34;tipo_item&#34;: [
+                unidecode(unidecode(k.title())) if isinstance(k, str) else k
+                for k in df[&#34;DS_TIPO_BEM_CANDIDATO&#34;].to_list()
+            ],
+            &#34;descricao_item&#34;: [
+                unidecode(unidecode(k.title())) if isinstance(k, str) else k
+                for k in df[&#34;DS_BEM_CANDIDATO&#34;].to_list()
+            ],
+            &#34;valor_item&#34;: df[&#34;VR_BEM_CANDIDATO&#34;].to_list(),
+        }
+    )
+
+    del df
+    df = table.copy()
+    del table
+
+    df.replace(&#34;#NULO#&#34;, np.nan, inplace=True)
+    df.replace(&#34;#Nulo#&#34;, np.nan, inplace=True)
+    df.replace(&#34;#nulo#&#34;, np.nan, inplace=True)
+
+    ufs = df[&#34;sigla_uf&#34;].unique()
+
+    for uf in ufs:
+        df_uf = df[df[&#34;sigla_uf&#34;] == uf].copy()
+        os.system(
+            f&#34;mkdir -p /tmp/data/raw/br_tse_eleicoes/bens_candidato/ano=2022/sigla_uf={uf}/&#34;
+        )
+        df_uf.to_csv(
+            f&#34;/tmp/data/raw/br_tse_eleicoes/bens_candidato/ano=2022/sigla_uf={uf}/bens_candidato.csv&#34;,
+            index=False,
+            sep=&#34;;&#34;,
+        )
+        del df_uf
+
+    os.system(&#34;tree /tmp/data/&#34;)</code></pre>
 </details>
 </dd>
 <dt id="pipelines.datasets.br_tse_eleicoes.tasks.clean_candidatos22"><code class="name flex">
@@ -546,7 +953,9 @@ def get_csv_files(url, save_path, chunk_size=128) -&gt; None:
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="pipelines.datasets.br_tse_eleicoes.tasks.build_bens_candidato" href="#pipelines.datasets.br_tse_eleicoes.tasks.build_bens_candidato">build_bens_candidato</a></code></li>
 <li><code><a title="pipelines.datasets.br_tse_eleicoes.tasks.build_candidatos" href="#pipelines.datasets.br_tse_eleicoes.tasks.build_candidatos">build_candidatos</a></code></li>
+<li><code><a title="pipelines.datasets.br_tse_eleicoes.tasks.clean_bens22" href="#pipelines.datasets.br_tse_eleicoes.tasks.clean_bens22">clean_bens22</a></code></li>
 <li><code><a title="pipelines.datasets.br_tse_eleicoes.tasks.clean_candidatos22" href="#pipelines.datasets.br_tse_eleicoes.tasks.clean_candidatos22">clean_candidatos22</a></code></li>
 <li><code><a title="pipelines.datasets.br_tse_eleicoes.tasks.download_before22" href="#pipelines.datasets.br_tse_eleicoes.tasks.download_before22">download_before22</a></code></li>
 <li><code><a title="pipelines.datasets.br_tse_eleicoes.tasks.get_csv_files" href="#pipelines.datasets.br_tse_eleicoes.tasks.get_csv_files">get_csv_files</a></code></li>
