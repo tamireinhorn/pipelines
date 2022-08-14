@@ -91,6 +91,7 @@ with Flow(
             &#34;/tmp/data/raw/br_tse_eleicoes/candidatos&#34;,
             start=start,
             end=2022,
+            id_candidato_bd=id_candidato_bd,
             upstream_tasks=[c22_task],
         )
 
@@ -106,10 +107,19 @@ with Flow(
         gfiles_task = get_csv_files(
             url=tse_constants.CANDIDATOS22_ZIP.value,
             save_path=&#34;/tmp/data/&#34;,
+            mkdir=True,
             upstream_tasks=[rename_flow_run],
         )
 
-        filepath = clean_candidatos22(&#34;/tmp/data/input&#34;, upstream_tasks=[gfiles_task])
+        c22_task = clean_candidatos22(&#34;/tmp/data/input&#34;, upstream_tasks=[gfiles_task])
+
+        filepath = build_candidatos(
+            &#34;/tmp/data/raw/br_tse_eleicoes/candidatos&#34;,
+            start=start,
+            end=2022,
+            id_candidato_bd=id_candidato_bd,
+            upstream_tasks=[c22_task],
+        )
 
         wait_upload_table = create_table_and_upload_to_gcs(
             data_path=filepath,
@@ -201,7 +211,6 @@ with Flow(
     # Parameters
     dataset_id = Parameter(&#34;dataset_id&#34;, default=&#34;br_tse_eleicoes&#34;, required=True)
     table_id = Parameter(&#34;table_id&#34;, default=&#34;despesas_candidato&#34;, required=True)
-    start = Parameter(&#34;start&#34;, default=2018, required=True)
     id_candidato_bd = Parameter(&#34;id_candidato_bd&#34;, default=False, required=True)
 
     rename_flow_run = rename_current_flow_run_dataset_table(
@@ -237,7 +246,6 @@ with Flow(
     # Parameters
     dataset_id = Parameter(&#34;dataset_id&#34;, default=&#34;br_tse_eleicoes&#34;, required=True)
     table_id = Parameter(&#34;table_id&#34;, default=&#34;receitas_candidato&#34;, required=True)
-    start = Parameter(&#34;start&#34;, default=2018, required=True)
     id_candidato_bd = Parameter(&#34;id_candidato_bd&#34;, default=False, required=True)
 
     rename_flow_run = rename_current_flow_run_dataset_table(
