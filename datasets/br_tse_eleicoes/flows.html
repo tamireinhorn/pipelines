@@ -149,9 +149,10 @@ with Flow(
         c22_task = clean_bens22(&#34;/tmp/data/input&#34;, upstream_tasks=[gfiles_task])
 
         filepath = build_bens_candidato(
-            &#34;/tmp/data/raw/br_tse_eleicoes/candidatos&#34;,
+            &#34;/tmp/data/raw/br_tse_eleicoes/bens_candidato&#34;,
             start=start,
             end=2022,
+            id_candidato_bd=id_candidato_bd,
             upstream_tasks=[c22_task],
         )
 
@@ -168,10 +169,18 @@ with Flow(
             url=tse_constants.BENS22_ZIP.value,
             save_path=&#34;/tmp/data/&#34;,
             mkdir=True,
-            upstream_tasks=[d22_task],
+            upstream_tasks=[rename_flow_run],
         )
 
-        filepath = clean_bens22(&#34;/tmp/data/input&#34;, upstream_tasks=[gfiles_task])
+        c22_task = clean_bens22(&#34;/tmp/data/input&#34;, upstream_tasks=[gfiles_task])
+
+        filepath = build_bens_candidato(
+            &#34;/tmp/data/raw/br_tse_eleicoes/bens_candidato&#34;,
+            start=start,
+            end=2022,
+            id_candidato_bd=id_candidato_bd,
+            upstream_tasks=[c22_task],
+        )
 
         wait_upload_table = create_table_and_upload_to_gcs(
             data_path=filepath,
