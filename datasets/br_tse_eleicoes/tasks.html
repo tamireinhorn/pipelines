@@ -37,6 +37,7 @@ import zipfile
 import os
 from glob import glob
 from itertools import product
+import re
 
 import requests
 from unidecode import unidecode
@@ -478,7 +479,7 @@ def clean_despesa22(folder):
     &#34;&#34;&#34;
     Clean despesa_candidato.csv files for 2022
     &#34;&#34;&#34;
-    files = glob(f&#34;{folder}/*.csv&#34;)
+    files = glob(f&#34;{folder}/despesas_contratadas*.csv&#34;)
 
     for file in files:
         df = pd.read_csv(file, sep=&#34;;&#34;, encoding=&#34;latin-1&#34;)
@@ -560,7 +561,116 @@ def clean_despesa22(folder):
             index=False,
         )
 
-        return &#34;/tmp/data/output/ano=2018/&#34;</code></pre>
+        return &#34;/tmp/data/output/&#34;
+
+
+@task(
+    max_retries=constants.TASK_MAX_RETRIES.value,
+    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
+)
+def clean_receita22(folder):
+    &#34;&#34;&#34;
+    Clean receita candidatos data
+    &#34;&#34;&#34;
+
+    files = glob(f&#34;{folder}/*.csv&#34;)
+    files = list(
+        filter(
+            lambda x: bool(
+                re.match(r&#34;receitas_candidatos_\d{4}_[A-Z]{2}.csv&#34;, x.split(&#34;/&#34;)[-1])
+            ),
+            files,
+        )
+    )
+
+    for file in files:
+        df = pd.read_csv(file, sep=&#34;;&#34;, encoding=&#34;latin-1&#34;)
+        n = df.shape[0]
+        uf = &#34;&#34;.join([k for k in file if k.isupper()])
+
+        table = pd.DataFrame(
+            {
+                &#34;ano&#34;: int(&#34;&#34;.join([k for k in file if k.isdigit()])),
+                &#34;turno&#34;: df[&#34;ST_TURNO&#34;].to_list(),
+                &#34;tipo_eleicao&#34;: [
+                    unidecode(k.lower()) for k in df[&#34;NM_TIPO_ELEICAO&#34;].to_list()
+                ],
+                &#34;sigla_uf&#34;: uf,
+                &#34;id_municipio&#34;: n * [np.nan],
+                &#34;id_municipio_tse&#34;: n * [np.nan],
+                &#34;numero_candidato&#34;: df[&#34;NR_CANDIDATO&#34;].to_list(),
+                &#34;cpf_candidato&#34;: df[&#34;NR_CPF_CANDIDATO&#34;].to_list(),
+                &#34;cnpj_candidato&#34;: n * [np.nan],
+                &#34;titulo_eleitor_candidato&#34;: n * [np.nan],
+                &#34;sequencial_candidato&#34;: df[&#34;SQ_CANDIDATO&#34;].to_list(),
+                &#34;id_candidato_bd&#34;: n * [np.nan],
+                &#34;nome_candidato&#34;: df[&#34;NM_CANDIDATO&#34;].to_list(),
+                &#34;cpf_vice_suplente&#34;: df[&#34;NR_CPF_VICE_CANDIDATO&#34;].to_list(),
+                &#34;numero_partido&#34;: df[&#34;NR_PARTIDO&#34;].to_list(),
+                &#34;nome_partido&#34;: df[&#34;NM_PARTIDO&#34;].to_list(),
+                &#34;sigla_partido&#34;: df[&#34;SG_PARTIDO&#34;].to_list(),
+                &#34;cargo&#34;: df[&#34;DS_CARGO&#34;].to_list(),
+                &#34;sequencial_receita&#34;: df[&#34;SQ_RECEITA&#34;].to_list(),
+                &#34;data_receita&#34;: df[&#34;DT_RECEITA&#34;].to_list(),
+                &#34;fonte_receita&#34;: df[&#34;DS_FONTE_RECEITA&#34;].to_list(),
+                &#34;origem_receita&#34;: df[&#34;DS_ORIGEM_RECEITA&#34;].to_list(),
+                &#34;natureza_receita&#34;: df[&#34;DS_NATUREZA_RECEITA&#34;].to_list(),
+                &#34;especie_receita&#34;: df[&#34;DS_ESPECIE_RECEITA&#34;].to_list(),
+                &#34;situacao_receita&#34;: n * [np.nan],
+                &#34;descricao_receita&#34;: df[&#34;DS_RECEITA&#34;].to_list(),
+                &#34;valor_receita&#34;: df[&#34;VR_RECEITA&#34;].to_list(),
+                &#34;sequencial_candidato_doador&#34;: df[&#34;SQ_CANDIDATO_DOADOR&#34;].to_list(),
+                &#34;cpf_cnpj_doador&#34;: df[&#34;NR_CPF_CNPJ_DOADOR&#34;].to_list(),
+                &#34;id_municipio_tse_doador&#34;: df[&#34;CD_MUNICIPIO_DOADOR&#34;].to_list(),
+                &#34;nome_doador&#34;: df[&#34;NM_DOADOR&#34;].to_list(),
+                &#34;nome_doador_rf&#34;: df[&#34;NM_DOADOR_RFB&#34;].to_list(),
+                &#34;cargo_candidato_doador&#34;: df[&#34;DS_CARGO_CANDIDATO_DOADOR&#34;].to_list(),
+                &#34;numero_partido_doador&#34;: df[&#34;NR_PARTIDO_DOADOR&#34;].to_list(),
+                &#34;sigla_partido_doador&#34;: df[&#34;SG_PARTIDO_DOADOR&#34;].to_list(),
+                &#34;nome_partido_doador&#34;: df[&#34;SG_PARTIDO_DOADOR&#34;].to_list(),
+                &#34;esfera_partidaria_doador&#34;: df[&#34;DS_ESFERA_PARTIDARIA_DOADOR&#34;].to_list(),
+                &#34;numero_candidato_doador&#34;: df[&#34;NR_CANDIDATO_DOADOR&#34;].to_list(),
+                &#34;cnae_2_doador&#34;: df[&#34;CD_CNAE_DOADOR&#34;].to_list(),
+                &#34;descricao_cnae_2_doador&#34;: df[&#34;DS_CNAE_DOADOR&#34;].to_list(),
+                &#34;cpf_cnpj_doador_orig&#34;: n * [np.nan],
+                &#34;nome_doador_orig&#34;: n * [np.nan],
+                &#34;nome_doador_orig_rf&#34;: n * [np.nan],
+                &#34;tipo_doador_orig&#34;: n * [np.nan],
+                &#34;descricao_cnae_2_doador_orig&#34;: n * [np.nan],
+                &#34;nome_administrador&#34;: n * [np.nan],
+                &#34;cpf_administrador&#34;: n * [np.nan],
+                &#34;numero_recibo_eleitoral&#34;: n * [np.nan],
+                &#34;numero_documento&#34;: n * [np.nan],
+                &#34;numero_recibo_doacao&#34;: df[&#34;NR_RECIBO_DOACAO&#34;].to_list(),
+                &#34;numero_documento_doacao&#34;: df[&#34;NR_DOCUMENTO_DOACAO&#34;].to_list(),
+                &#34;tipo_prestacao_contas&#34;: df[&#34;TP_PRESTACAO_CONTAS&#34;].to_list(),
+                &#34;data_prestacao_contas&#34;: df[&#34;DT_PRESTACAO_CONTAS&#34;].to_list(),
+                &#34;sequencial_prestador_contas&#34;: df[&#34;SQ_PRESTADOR_CONTAS&#34;].to_list(),
+                &#34;cnpj_prestador_contas&#34;: df[&#34;NR_CNPJ_PRESTADOR_CONTA&#34;].to_list(),
+                &#34;entrega_conjunto&#34;: n * [np.nan],
+            }
+        )
+
+        table[&#34;tipo_eleicao&#34;] = table[&#34;tipo_eleicao&#34;].replace(
+            {&#34;ordinaria&#34;: &#34;eleicao ordinaria&#34;}
+        )
+        table.replace(&#34;#NULO#&#34;, np.nan, inplace=True)
+        table.replace(&#34;#Nulo#&#34;, np.nan, inplace=True)
+        table.replace(&#34;#nulo#&#34;, np.nan, inplace=True)
+        table.replace(-1, np.nan, inplace=True)
+
+        if table.shape[0] == 0:
+            continue
+        os.system(f&#34;mkdir -p /tmp/data/output/ano=2018/sigla_uf={uf}/&#34;)
+        table.drop_duplicates(inplace=True)
+        table.drop(&#34;ano&#34;, axis=1, inplace=True)
+        table.drop(&#34;sigla_uf&#34;, axis=1, inplace=True)
+        table.to_csv(
+            f&#34;/tmp/data/output/ano=2018/sigla_uf={uf}/receitas_candidato.csv&#34;,
+            index=False,
+        )
+
+        return &#34;/tmp/data/output/&#34;</code></pre>
 </details>
 </section>
 <section>
@@ -993,7 +1103,7 @@ def clean_despesa22(folder):
     &#34;&#34;&#34;
     Clean despesa_candidato.csv files for 2022
     &#34;&#34;&#34;
-    files = glob(f&#34;{folder}/*.csv&#34;)
+    files = glob(f&#34;{folder}/despesas_contratadas*.csv&#34;)
 
     for file in files:
         df = pd.read_csv(file, sep=&#34;;&#34;, encoding=&#34;latin-1&#34;)
@@ -1075,7 +1185,125 @@ def clean_despesa22(folder):
             index=False,
         )
 
-        return &#34;/tmp/data/output/ano=2018/&#34;</code></pre>
+        return &#34;/tmp/data/output/&#34;</code></pre>
+</details>
+</dd>
+<dt id="pipelines.datasets.br_tse_eleicoes.tasks.clean_receita22"><code class="name flex">
+<span>def <span class="ident">clean_receita22</span></span>(<span>folder)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Clean receita candidatos data</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@task(
+    max_retries=constants.TASK_MAX_RETRIES.value,
+    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
+)
+def clean_receita22(folder):
+    &#34;&#34;&#34;
+    Clean receita candidatos data
+    &#34;&#34;&#34;
+
+    files = glob(f&#34;{folder}/*.csv&#34;)
+    files = list(
+        filter(
+            lambda x: bool(
+                re.match(r&#34;receitas_candidatos_\d{4}_[A-Z]{2}.csv&#34;, x.split(&#34;/&#34;)[-1])
+            ),
+            files,
+        )
+    )
+
+    for file in files:
+        df = pd.read_csv(file, sep=&#34;;&#34;, encoding=&#34;latin-1&#34;)
+        n = df.shape[0]
+        uf = &#34;&#34;.join([k for k in file if k.isupper()])
+
+        table = pd.DataFrame(
+            {
+                &#34;ano&#34;: int(&#34;&#34;.join([k for k in file if k.isdigit()])),
+                &#34;turno&#34;: df[&#34;ST_TURNO&#34;].to_list(),
+                &#34;tipo_eleicao&#34;: [
+                    unidecode(k.lower()) for k in df[&#34;NM_TIPO_ELEICAO&#34;].to_list()
+                ],
+                &#34;sigla_uf&#34;: uf,
+                &#34;id_municipio&#34;: n * [np.nan],
+                &#34;id_municipio_tse&#34;: n * [np.nan],
+                &#34;numero_candidato&#34;: df[&#34;NR_CANDIDATO&#34;].to_list(),
+                &#34;cpf_candidato&#34;: df[&#34;NR_CPF_CANDIDATO&#34;].to_list(),
+                &#34;cnpj_candidato&#34;: n * [np.nan],
+                &#34;titulo_eleitor_candidato&#34;: n * [np.nan],
+                &#34;sequencial_candidato&#34;: df[&#34;SQ_CANDIDATO&#34;].to_list(),
+                &#34;id_candidato_bd&#34;: n * [np.nan],
+                &#34;nome_candidato&#34;: df[&#34;NM_CANDIDATO&#34;].to_list(),
+                &#34;cpf_vice_suplente&#34;: df[&#34;NR_CPF_VICE_CANDIDATO&#34;].to_list(),
+                &#34;numero_partido&#34;: df[&#34;NR_PARTIDO&#34;].to_list(),
+                &#34;nome_partido&#34;: df[&#34;NM_PARTIDO&#34;].to_list(),
+                &#34;sigla_partido&#34;: df[&#34;SG_PARTIDO&#34;].to_list(),
+                &#34;cargo&#34;: df[&#34;DS_CARGO&#34;].to_list(),
+                &#34;sequencial_receita&#34;: df[&#34;SQ_RECEITA&#34;].to_list(),
+                &#34;data_receita&#34;: df[&#34;DT_RECEITA&#34;].to_list(),
+                &#34;fonte_receita&#34;: df[&#34;DS_FONTE_RECEITA&#34;].to_list(),
+                &#34;origem_receita&#34;: df[&#34;DS_ORIGEM_RECEITA&#34;].to_list(),
+                &#34;natureza_receita&#34;: df[&#34;DS_NATUREZA_RECEITA&#34;].to_list(),
+                &#34;especie_receita&#34;: df[&#34;DS_ESPECIE_RECEITA&#34;].to_list(),
+                &#34;situacao_receita&#34;: n * [np.nan],
+                &#34;descricao_receita&#34;: df[&#34;DS_RECEITA&#34;].to_list(),
+                &#34;valor_receita&#34;: df[&#34;VR_RECEITA&#34;].to_list(),
+                &#34;sequencial_candidato_doador&#34;: df[&#34;SQ_CANDIDATO_DOADOR&#34;].to_list(),
+                &#34;cpf_cnpj_doador&#34;: df[&#34;NR_CPF_CNPJ_DOADOR&#34;].to_list(),
+                &#34;id_municipio_tse_doador&#34;: df[&#34;CD_MUNICIPIO_DOADOR&#34;].to_list(),
+                &#34;nome_doador&#34;: df[&#34;NM_DOADOR&#34;].to_list(),
+                &#34;nome_doador_rf&#34;: df[&#34;NM_DOADOR_RFB&#34;].to_list(),
+                &#34;cargo_candidato_doador&#34;: df[&#34;DS_CARGO_CANDIDATO_DOADOR&#34;].to_list(),
+                &#34;numero_partido_doador&#34;: df[&#34;NR_PARTIDO_DOADOR&#34;].to_list(),
+                &#34;sigla_partido_doador&#34;: df[&#34;SG_PARTIDO_DOADOR&#34;].to_list(),
+                &#34;nome_partido_doador&#34;: df[&#34;SG_PARTIDO_DOADOR&#34;].to_list(),
+                &#34;esfera_partidaria_doador&#34;: df[&#34;DS_ESFERA_PARTIDARIA_DOADOR&#34;].to_list(),
+                &#34;numero_candidato_doador&#34;: df[&#34;NR_CANDIDATO_DOADOR&#34;].to_list(),
+                &#34;cnae_2_doador&#34;: df[&#34;CD_CNAE_DOADOR&#34;].to_list(),
+                &#34;descricao_cnae_2_doador&#34;: df[&#34;DS_CNAE_DOADOR&#34;].to_list(),
+                &#34;cpf_cnpj_doador_orig&#34;: n * [np.nan],
+                &#34;nome_doador_orig&#34;: n * [np.nan],
+                &#34;nome_doador_orig_rf&#34;: n * [np.nan],
+                &#34;tipo_doador_orig&#34;: n * [np.nan],
+                &#34;descricao_cnae_2_doador_orig&#34;: n * [np.nan],
+                &#34;nome_administrador&#34;: n * [np.nan],
+                &#34;cpf_administrador&#34;: n * [np.nan],
+                &#34;numero_recibo_eleitoral&#34;: n * [np.nan],
+                &#34;numero_documento&#34;: n * [np.nan],
+                &#34;numero_recibo_doacao&#34;: df[&#34;NR_RECIBO_DOACAO&#34;].to_list(),
+                &#34;numero_documento_doacao&#34;: df[&#34;NR_DOCUMENTO_DOACAO&#34;].to_list(),
+                &#34;tipo_prestacao_contas&#34;: df[&#34;TP_PRESTACAO_CONTAS&#34;].to_list(),
+                &#34;data_prestacao_contas&#34;: df[&#34;DT_PRESTACAO_CONTAS&#34;].to_list(),
+                &#34;sequencial_prestador_contas&#34;: df[&#34;SQ_PRESTADOR_CONTAS&#34;].to_list(),
+                &#34;cnpj_prestador_contas&#34;: df[&#34;NR_CNPJ_PRESTADOR_CONTA&#34;].to_list(),
+                &#34;entrega_conjunto&#34;: n * [np.nan],
+            }
+        )
+
+        table[&#34;tipo_eleicao&#34;] = table[&#34;tipo_eleicao&#34;].replace(
+            {&#34;ordinaria&#34;: &#34;eleicao ordinaria&#34;}
+        )
+        table.replace(&#34;#NULO#&#34;, np.nan, inplace=True)
+        table.replace(&#34;#Nulo#&#34;, np.nan, inplace=True)
+        table.replace(&#34;#nulo#&#34;, np.nan, inplace=True)
+        table.replace(-1, np.nan, inplace=True)
+
+        if table.shape[0] == 0:
+            continue
+        os.system(f&#34;mkdir -p /tmp/data/output/ano=2018/sigla_uf={uf}/&#34;)
+        table.drop_duplicates(inplace=True)
+        table.drop(&#34;ano&#34;, axis=1, inplace=True)
+        table.drop(&#34;sigla_uf&#34;, axis=1, inplace=True)
+        table.to_csv(
+            f&#34;/tmp/data/output/ano=2018/sigla_uf={uf}/receitas_candidato.csv&#34;,
+            index=False,
+        )
+
+        return &#34;/tmp/data/output/&#34;</code></pre>
 </details>
 </dd>
 <dt id="pipelines.datasets.br_tse_eleicoes.tasks.download_before22"><code class="name flex">
@@ -1165,6 +1393,7 @@ def get_csv_files(url, save_path, chunk_size=128, mkdir=False) -&gt; None:
 <li><code><a title="pipelines.datasets.br_tse_eleicoes.tasks.clean_bens22" href="#pipelines.datasets.br_tse_eleicoes.tasks.clean_bens22">clean_bens22</a></code></li>
 <li><code><a title="pipelines.datasets.br_tse_eleicoes.tasks.clean_candidatos22" href="#pipelines.datasets.br_tse_eleicoes.tasks.clean_candidatos22">clean_candidatos22</a></code></li>
 <li><code><a title="pipelines.datasets.br_tse_eleicoes.tasks.clean_despesa22" href="#pipelines.datasets.br_tse_eleicoes.tasks.clean_despesa22">clean_despesa22</a></code></li>
+<li><code><a title="pipelines.datasets.br_tse_eleicoes.tasks.clean_receita22" href="#pipelines.datasets.br_tse_eleicoes.tasks.clean_receita22">clean_receita22</a></code></li>
 <li><code><a title="pipelines.datasets.br_tse_eleicoes.tasks.download_before22" href="#pipelines.datasets.br_tse_eleicoes.tasks.download_before22">download_before22</a></code></li>
 <li><code><a title="pipelines.datasets.br_tse_eleicoes.tasks.get_csv_files" href="#pipelines.datasets.br_tse_eleicoes.tasks.get_csv_files">get_csv_files</a></code></li>
 </ul>
