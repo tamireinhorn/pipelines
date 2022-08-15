@@ -277,13 +277,14 @@ def build_candidatos(folder: str, start: int, end: int, id_candidato_bd: bool = 
             table.drop(&#34;ano&#34;, axis=1, inplace=True)
             table.to_csv(f&#34;/tmp/data/output/ano={ano}/candidatos.csv&#34;, index=False)
     else:
-        df = pd.read_csv(
-            &#34;/tmp/data/raw/br_tse_eleicoes/candidatos/ano=2022/candidatos.csv&#34;,
-            sep=&#34;;&#34;,
-            encoding=&#34;utf-8&#34;,
-        )
-        os.system(&#34;mkdir -p /tmp/data/output/ano=2022/&#34;)
-        df.to_csv(&#34;/tmp/data/output/ano=2022/candidatos.csv&#34;, index=False)
+        for ano in range(end, start, -2):
+            df = pd.read_csv(
+                f&#34;/tmp/data/raw/br_tse_eleicoes/candidatos/ano={ano}/candidatos.csv&#34;,
+                sep=&#34;;&#34;,
+                encoding=&#34;utf-8&#34;,
+            )
+            os.system(f&#34;mkdir -p /tmp/data/output/ano={ano}/&#34;)
+            df.to_csv(f&#34;/tmp/data/output/ano={ano}/candidatos.csv&#34;, index=False)
 
     return &#34;/tmp/data/output/&#34;
 
@@ -942,13 +943,14 @@ def build_candidatos(folder: str, start: int, end: int, id_candidato_bd: bool = 
             table.drop(&#34;ano&#34;, axis=1, inplace=True)
             table.to_csv(f&#34;/tmp/data/output/ano={ano}/candidatos.csv&#34;, index=False)
     else:
-        df = pd.read_csv(
-            &#34;/tmp/data/raw/br_tse_eleicoes/candidatos/ano=2022/candidatos.csv&#34;,
-            sep=&#34;;&#34;,
-            encoding=&#34;utf-8&#34;,
-        )
-        os.system(&#34;mkdir -p /tmp/data/output/ano=2022/&#34;)
-        df.to_csv(&#34;/tmp/data/output/ano=2022/candidatos.csv&#34;, index=False)
+        for ano in range(end, start, -2):
+            df = pd.read_csv(
+                f&#34;/tmp/data/raw/br_tse_eleicoes/candidatos/ano={ano}/candidatos.csv&#34;,
+                sep=&#34;;&#34;,
+                encoding=&#34;utf-8&#34;,
+            )
+            os.system(f&#34;mkdir -p /tmp/data/output/ano={ano}/&#34;)
+            df.to_csv(f&#34;/tmp/data/output/ano={ano}/candidatos.csv&#34;, index=False)
 
     return &#34;/tmp/data/output/&#34;</code></pre>
 </details>
