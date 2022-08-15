@@ -259,6 +259,7 @@ def build_candidatos(folder: str, start: int, end: int, id_candidato_bd: bool = 
                     &#34;titulo_eleitoral&#34;: str,
                     &#34;sequencial&#34;: str,
                     &#34;numero&#34;: str,
+                    &#39;idade&#39;: int,
                 },
             )
             df[&#34;ano&#34;] = int(file.split(&#34;/&#34;)[-2].split(&#34;=&#34;)[-1])
@@ -925,6 +926,7 @@ def build_candidatos(folder: str, start: int, end: int, id_candidato_bd: bool = 
                     &#34;titulo_eleitoral&#34;: str,
                     &#34;sequencial&#34;: str,
                     &#34;numero&#34;: str,
+                    &#39;idade&#39;: int,
                 },
             )
             df[&#34;ano&#34;] = int(file.split(&#34;/&#34;)[-2].split(&#34;=&#34;)[-1])
