@@ -52,7 +52,7 @@ from pipelines.datasets.br_tse_eleicoes.utils import (
     get_blobs_from_raw,
     normalize_dahis,
     get_data_from_prod,
-    clean_digit_id
+    clean_digit_id,
 )
 
 
@@ -141,8 +141,10 @@ def clean_candidatos22(folder: str) -&gt; str:
                 clean_digit_id(number=k, n_digits=12) if isinstance(k, int) else k
                 for k in df[&#34;NR_TITULO_ELEITORAL_CANDIDATO&#34;].to_list()
             ],
-            &#34;sequencial&#34;: [clean_digit_id(number=k, n_digits=11) if isinstance(k, int) else k
-                for k in df[&#34;SQ_CANDIDATO&#34;].to_list()],
+            &#34;sequencial&#34;: [
+                clean_digit_id(number=k, n_digits=12) if isinstance(k, int) else k
+                for k in df[&#34;SQ_CANDIDATO&#34;].to_list()
+            ],
             &#34;numero&#34;: df[&#34;NR_CANDIDATO&#34;].to_list(),
             &#34;nome&#34;: [
                 unidecode(k.title()) if isinstance(k, str) else k
@@ -166,10 +168,7 @@ def clean_candidatos22(folder: str) -&gt; str:
                 unidecode(k.lower()) if isinstance(k, str) else k
                 for k in df[&#34;DS_OCUPACAO&#34;].to_list()
             ],
-            &#34;data_nascimento&#34;: [
-                k.replace(&#34;/&#34;, &#34;-&#34;) if isinstance(k, str) else k
-                for k in df[&#34;DT_NASCIMENTO&#34;].to_list()
-            ],
+            &#34;data_nascimento&#34;: pd.to_datetime(df[&#34;DT_NASCIMENTO&#34;]).to_list(),
             &#34;idade&#34;: df[&#34;NR_IDADE_DATA_POSSE&#34;].to_list(),
             &#34;genero&#34;: [
                 unidecode(k.lower()) if isinstance(k, str) else k
@@ -260,8 +259,6 @@ def build_candidatos(folder: str, start: int, end: int, id_candidato_bd: bool = 
                     &#34;cpf&#34;: str,
                     &#34;titulo_eleitoral&#34;: str,
                     &#34;sequencial&#34;: str,
-                    &#34;numero&#34;: str,
-                    &#39;idade&#39;: int,
                 },
             )
             df[&#34;ano&#34;] = int(file.split(&#34;/&#34;)[-2].split(&#34;=&#34;)[-1])
@@ -276,6 +273,18 @@ def build_candidatos(folder: str, start: int, end: int, id_candidato_bd: bool = 
         for ano in range(end, start, -2):
             os.system(f&#34;mkdir -p /tmp/data/output/ano={ano}/&#34;)
             table = df[df[&#34;ano&#34;] == ano]
+            table[&#34;cpf&#34;] = [
+                clean_digit_id(number=k, n_digits=11) if isinstance(k, int) else k
+                for k in table[&#34;cpf&#34;].to_list()
+            ]
+            table[&#34;titulo_eleitoral&#34;] = [
+                clean_digit_id(number=k, n_digits=12) if isinstance(k, int) else k
+                for k in table[&#34;titulo_eleitoral&#34;].to_list()
+            ]
+            table[&#34;sequencial&#34;] = [
+                clean_digit_id(number=k, n_digits=12) if isinstance(k, int) else k
+                for k in table[&#34;sequencial&#34;].to_list()
+            ]
             table.drop_duplicates(inplace=True)
             table.drop(&#34;ano&#34;, axis=1, inplace=True)
             table.to_csv(f&#34;/tmp/data/output/ano={ano}/candidatos.csv&#34;, index=False)
@@ -289,7 +298,7 @@ def build_candidatos(folder: str, start: int, end: int, id_candidato_bd: bool = 
                     &#34;cpf&#34;: str,
                     &#34;titulo_eleitoral&#34;: str,
                     &#34;sequencial&#34;: str,
-                }
+                },
             )
             df.drop_duplicates(inplace=True)
             os.system(f&#34;mkdir -p /tmp/data/output/ano={ano}/&#34;)
@@ -548,7 +557,7 @@ def clean_despesa22(folder):
                 &#34;nome_partido&#34;: df[&#34;NM_PARTIDO&#34;].to_list(),
                 &#34;cargo&#34;: df[&#34;DS_CARGO&#34;].to_list(),
                 &#34;sequencial_despesa&#34;: df[&#34;SQ_DESPESA&#34;].to_list(),
-                &#34;data_despesa&#34;: df[&#34;DT_DESPESA&#34;].to_list(),
+                &#34;data_despesa&#34;: pd.to_datetime(df[&#34;DT_DESPESA&#34;]).to_list(),
                 &#34;tipo_despesa&#34;: n * [np.nan],
                 &#34;descricao_despesa&#34;: df[&#34;DS_DESPESA&#34;].to_list(),
                 &#34;origem_despesa&#34;: df[&#34;DS_ORIGEM_DESPESA&#34;].to_list(),
@@ -557,7 +566,9 @@ def clean_despesa22(folder):
                     for k in df[&#34;VR_DESPESA_CONTRATADA&#34;].to_list()
                 ],
                 &#34;tipo_prestacao_contas&#34;: df[&#34;TP_PRESTACAO_CONTAS&#34;].to_list(),
-                &#34;data_prestacao_contas&#34;: df[&#34;DT_PRESTACAO_CONTAS&#34;].to_list(),
+                &#34;data_prestacao_contas&#34;: pd.to_datetime(
+                    df[&#34;DT_PRESTACAO_CONTAS&#34;]
+                ).to_list(),
                 &#34;sequencial_prestador_contas&#34;: df[&#34;SQ_PRESTADOR_CONTAS&#34;].to_list(),
                 &#34;cnpj_prestador_contas&#34;: df[&#34;NR_CNPJ_PRESTADOR_CONTA&#34;].to_list(),
                 &#34;cnpj_candidato&#34;: n * [np.nan],
@@ -658,10 +669,7 @@ def clean_receita22(folder):
                 &#34;sigla_partido&#34;: df[&#34;SG_PARTIDO&#34;].to_list(),
                 &#34;cargo&#34;: df[&#34;DS_CARGO&#34;].to_list(),
                 &#34;sequencial_receita&#34;: df[&#34;SQ_RECEITA&#34;].to_list(),
-                &#34;data_receita&#34;: [
-                    k.replace(&#34;/&#34;, &#34;-&#34;) if isinstance(k, str) else k
-                    for k in df[&#34;DT_RECEITA&#34;].to_list()
-                ],
+                &#34;data_receita&#34;: pd.to_datetime(df[&#34;DT_RECEITA&#34;]).to_list(),
                 &#34;fonte_receita&#34;: [
                     unidecode(k.lower()) if isinstance(k, str) else k
                     for k in df[&#34;DS_FONTE_RECEITA&#34;].to_list()
@@ -710,7 +718,9 @@ def clean_receita22(folder):
                 &#34;numero_recibo_doacao&#34;: df[&#34;NR_RECIBO_DOACAO&#34;].to_list(),
                 &#34;numero_documento_doacao&#34;: df[&#34;NR_DOCUMENTO_DOACAO&#34;].to_list(),
                 &#34;tipo_prestacao_contas&#34;: df[&#34;TP_PRESTACAO_CONTAS&#34;].to_list(),
-                &#34;data_prestacao_contas&#34;: df[&#34;DT_PRESTACAO_CONTAS&#34;].to_list(),
+                &#34;data_prestacao_contas&#34;: pd.to_datetime(
+                    df[&#34;DT_PRESTACAO_CONTAS&#34;]
+                ).to_list(),
                 &#34;sequencial_prestador_contas&#34;: df[&#34;SQ_PRESTADOR_CONTAS&#34;].to_list(),
                 &#34;cnpj_prestador_contas&#34;: df[&#34;NR_CNPJ_PRESTADOR_CONTA&#34;].to_list(),
                 &#34;entrega_conjunto&#34;: n * [np.nan],
@@ -933,8 +943,6 @@ def build_candidatos(folder: str, start: int, end: int, id_candidato_bd: bool = 
                     &#34;cpf&#34;: str,
                     &#34;titulo_eleitoral&#34;: str,
                     &#34;sequencial&#34;: str,
-                    &#34;numero&#34;: str,
-                    &#39;idade&#39;: int,
                 },
             )
             df[&#34;ano&#34;] = int(file.split(&#34;/&#34;)[-2].split(&#34;=&#34;)[-1])
@@ -949,6 +957,18 @@ def build_candidatos(folder: str, start: int, end: int, id_candidato_bd: bool = 
         for ano in range(end, start, -2):
             os.system(f&#34;mkdir -p /tmp/data/output/ano={ano}/&#34;)
             table = df[df[&#34;ano&#34;] == ano]
+            table[&#34;cpf&#34;] = [
+                clean_digit_id(number=k, n_digits=11) if isinstance(k, int) else k
+                for k in table[&#34;cpf&#34;].to_list()
+            ]
+            table[&#34;titulo_eleitoral&#34;] = [
+                clean_digit_id(number=k, n_digits=12) if isinstance(k, int) else k
+                for k in table[&#34;titulo_eleitoral&#34;].to_list()
+            ]
+            table[&#34;sequencial&#34;] = [
+                clean_digit_id(number=k, n_digits=12) if isinstance(k, int) else k
+                for k in table[&#34;sequencial&#34;].to_list()
+            ]
             table.drop_duplicates(inplace=True)
             table.drop(&#34;ano&#34;, axis=1, inplace=True)
             table.to_csv(f&#34;/tmp/data/output/ano={ano}/candidatos.csv&#34;, index=False)
@@ -962,7 +982,7 @@ def build_candidatos(folder: str, start: int, end: int, id_candidato_bd: bool = 
                     &#34;cpf&#34;: str,
                     &#34;titulo_eleitoral&#34;: str,
                     &#34;sequencial&#34;: str,
-                }
+                },
             )
             df.drop_duplicates(inplace=True)
             os.system(f&#34;mkdir -p /tmp/data/output/ano={ano}/&#34;)
@@ -1096,8 +1116,10 @@ def clean_candidatos22(folder: str) -&gt; str:
                 clean_digit_id(number=k, n_digits=12) if isinstance(k, int) else k
                 for k in df[&#34;NR_TITULO_ELEITORAL_CANDIDATO&#34;].to_list()
             ],
-            &#34;sequencial&#34;: [clean_digit_id(number=k, n_digits=11) if isinstance(k, int) else k
-                for k in df[&#34;SQ_CANDIDATO&#34;].to_list()],
+            &#34;sequencial&#34;: [
+                clean_digit_id(number=k, n_digits=12) if isinstance(k, int) else k
+                for k in df[&#34;SQ_CANDIDATO&#34;].to_list()
+            ],
             &#34;numero&#34;: df[&#34;NR_CANDIDATO&#34;].to_list(),
             &#34;nome&#34;: [
                 unidecode(k.title()) if isinstance(k, str) else k
@@ -1121,10 +1143,7 @@ def clean_candidatos22(folder: str) -&gt; str:
                 unidecode(k.lower()) if isinstance(k, str) else k
                 for k in df[&#34;DS_OCUPACAO&#34;].to_list()
             ],
-            &#34;data_nascimento&#34;: [
-                k.replace(&#34;/&#34;, &#34;-&#34;) if isinstance(k, str) else k
-                for k in df[&#34;DT_NASCIMENTO&#34;].to_list()
-            ],
+            &#34;data_nascimento&#34;: pd.to_datetime(df[&#34;DT_NASCIMENTO&#34;]).to_list(),
             &#34;idade&#34;: df[&#34;NR_IDADE_DATA_POSSE&#34;].to_list(),
             &#34;genero&#34;: [
                 unidecode(k.lower()) if isinstance(k, str) else k
@@ -1237,7 +1256,7 @@ def clean_despesa22(folder):
                 &#34;nome_partido&#34;: df[&#34;NM_PARTIDO&#34;].to_list(),
                 &#34;cargo&#34;: df[&#34;DS_CARGO&#34;].to_list(),
                 &#34;sequencial_despesa&#34;: df[&#34;SQ_DESPESA&#34;].to_list(),
-                &#34;data_despesa&#34;: df[&#34;DT_DESPESA&#34;].to_list(),
+                &#34;data_despesa&#34;: pd.to_datetime(df[&#34;DT_DESPESA&#34;]).to_list(),
                 &#34;tipo_despesa&#34;: n * [np.nan],
                 &#34;descricao_despesa&#34;: df[&#34;DS_DESPESA&#34;].to_list(),
                 &#34;origem_despesa&#34;: df[&#34;DS_ORIGEM_DESPESA&#34;].to_list(),
@@ -1246,7 +1265,9 @@ def clean_despesa22(folder):
                     for k in df[&#34;VR_DESPESA_CONTRATADA&#34;].to_list()
                 ],
                 &#34;tipo_prestacao_contas&#34;: df[&#34;TP_PRESTACAO_CONTAS&#34;].to_list(),
-                &#34;data_prestacao_contas&#34;: df[&#34;DT_PRESTACAO_CONTAS&#34;].to_list(),
+                &#34;data_prestacao_contas&#34;: pd.to_datetime(
+                    df[&#34;DT_PRESTACAO_CONTAS&#34;]
+                ).to_list(),
                 &#34;sequencial_prestador_contas&#34;: df[&#34;SQ_PRESTADOR_CONTAS&#34;].to_list(),
                 &#34;cnpj_prestador_contas&#34;: df[&#34;NR_CNPJ_PRESTADOR_CONTA&#34;].to_list(),
                 &#34;cnpj_candidato&#34;: n * [np.nan],
@@ -1356,10 +1377,7 @@ def clean_receita22(folder):
                 &#34;sigla_partido&#34;: df[&#34;SG_PARTIDO&#34;].to_list(),
                 &#34;cargo&#34;: df[&#34;DS_CARGO&#34;].to_list(),
                 &#34;sequencial_receita&#34;: df[&#34;SQ_RECEITA&#34;].to_list(),
-                &#34;data_receita&#34;: [
-                    k.replace(&#34;/&#34;, &#34;-&#34;) if isinstance(k, str) else k
-                    for k in df[&#34;DT_RECEITA&#34;].to_list()
-                ],
+                &#34;data_receita&#34;: pd.to_datetime(df[&#34;DT_RECEITA&#34;]).to_list(),
                 &#34;fonte_receita&#34;: [
                     unidecode(k.lower()) if isinstance(k, str) else k
                     for k in df[&#34;DS_FONTE_RECEITA&#34;].to_list()
@@ -1408,7 +1426,9 @@ def clean_receita22(folder):
                 &#34;numero_recibo_doacao&#34;: df[&#34;NR_RECIBO_DOACAO&#34;].to_list(),
                 &#34;numero_documento_doacao&#34;: df[&#34;NR_DOCUMENTO_DOACAO&#34;].to_list(),
                 &#34;tipo_prestacao_contas&#34;: df[&#34;TP_PRESTACAO_CONTAS&#34;].to_list(),
-                &#34;data_prestacao_contas&#34;: df[&#34;DT_PRESTACAO_CONTAS&#34;].to_list(),
+                &#34;data_prestacao_contas&#34;: pd.to_datetime(
+                    df[&#34;DT_PRESTACAO_CONTAS&#34;]
+                ).to_list(),
                 &#34;sequencial_prestador_contas&#34;: df[&#34;SQ_PRESTADOR_CONTAS&#34;].to_list(),
                 &#34;cnpj_prestador_contas&#34;: df[&#34;NR_CNPJ_PRESTADOR_CONTA&#34;].to_list(),
                 &#34;entrega_conjunto&#34;: n * [np.nan],
