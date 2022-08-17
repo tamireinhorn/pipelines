@@ -292,7 +292,18 @@ def normalize_dahis(df: pd.DataFrame) -&gt; pd.DataFrame:
         inplace=True,
     )
 
-    return df</code></pre>
+    return df
+
+
+def clean_digit_id(number: int, n_digits: int) -&gt; str:
+    &#34;&#34;&#34;
+    Clean digit id.
+    &#34;&#34;&#34;
+    number = str(number)
+    number = number.zfill(n_digits)
+    number = &#34;&#34;.join([i for i in number if i.isdigit()])
+
+    return number</code></pre>
 </details>
 </section>
 <section>
@@ -302,6 +313,26 @@ def normalize_dahis(df: pd.DataFrame) -&gt; pd.DataFrame:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="pipelines.datasets.br_tse_eleicoes.utils.clean_digit_id"><code class="name flex">
+<span>def <span class="ident">clean_digit_id</span></span>(<span>number: int, n_digits: int) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Clean digit id.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def clean_digit_id(number: int, n_digits: int) -&gt; str:
+    &#34;&#34;&#34;
+    Clean digit id.
+    &#34;&#34;&#34;
+    number = str(number)
+    number = number.zfill(n_digits)
+    number = &#34;&#34;.join([i for i in number if i.isdigit()])
+
+    return number</code></pre>
+</details>
+</dd>
 <dt id="pipelines.datasets.br_tse_eleicoes.utils.get_blobs_from_raw"><code class="name flex">
 <span>def <span class="ident">get_blobs_from_raw</span></span>(<span>dataset_id: str, table_id: str) ‑> list</span>
 </code></dt>
@@ -612,6 +643,7 @@ def normalize_dahis(df: pd.DataFrame) -&gt; pd.DataFrame:
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="pipelines.datasets.br_tse_eleicoes.utils.clean_digit_id" href="#pipelines.datasets.br_tse_eleicoes.utils.clean_digit_id">clean_digit_id</a></code></li>
 <li><code><a title="pipelines.datasets.br_tse_eleicoes.utils.get_blobs_from_raw" href="#pipelines.datasets.br_tse_eleicoes.utils.get_blobs_from_raw">get_blobs_from_raw</a></code></li>
 <li><code><a title="pipelines.datasets.br_tse_eleicoes.utils.get_data_from_prod" href="#pipelines.datasets.br_tse_eleicoes.utils.get_data_from_prod">get_data_from_prod</a></code></li>
 <li><code><a title="pipelines.datasets.br_tse_eleicoes.utils.get_id_candidato_bd" href="#pipelines.datasets.br_tse_eleicoes.utils.get_id_candidato_bd">get_id_candidato_bd</a></code></li>
