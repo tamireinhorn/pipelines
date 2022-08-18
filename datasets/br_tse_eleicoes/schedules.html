@@ -43,7 +43,7 @@ schedule_candidatos = Schedule(
             interval=timedelta(days=1),
             start_date=datetime(2021, 1, 1, 9, 45),
             labels=[
-                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+                constants.BASEDOSDADOS_PROD_AGENT_LABEL.value,
             ],
             parameter_defaults={
                 &#34;dataset_id&#34;: &#34;br_tse_eleicoes&#34;,
@@ -65,14 +65,14 @@ schedule_bens = Schedule(
             interval=timedelta(days=1),
             start_date=datetime(2021, 1, 1, 10, 0),
             labels=[
-                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+                constants.BASEDOSDADOS_PROD_AGENT_LABEL.value,
             ],
             parameter_defaults={
                 &#34;dataset_id&#34;: &#34;br_tse_eleicoes&#34;,
                 &#34;table_id&#34;: &#34;bens_candidato&#34;,
                 &#34;start&#34;: 2006,
                 &#34;id_candidato_bd&#34;: False,
-                &#34;materialization_mode&#34;: &#34;dev&#34;,
+                &#34;materialization_mode&#34;: &#34;prod&#34;,
                 &#34;materialize after dump&#34;: True,
                 &#34;dbt_alias&#34;: False,
             },
@@ -87,13 +87,13 @@ schedule_despesa = Schedule(
             interval=timedelta(days=1),
             start_date=datetime(2021, 1, 1, 10, 15),
             labels=[
-                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+                constants.BASEDOSDADOS_PROD_AGENT_LABEL.value,
             ],
             parameter_defaults={
                 &#34;dataset_id&#34;: &#34;br_tse_eleicoes&#34;,
                 &#34;table_id&#34;: &#34;despesas_candidato&#34;,
                 &#34;id_candidato_bd&#34;: False,
-                &#34;materialization_mode&#34;: &#34;dev&#34;,
+                &#34;materialization_mode&#34;: &#34;prod&#34;,
                 &#34;materialize after dump&#34;: True,
                 &#34;dbt_alias&#34;: False,
             },
@@ -109,13 +109,13 @@ schedule_receita = Schedule(
             interval=timedelta(days=1),
             start_date=datetime(2021, 1, 1, 10, 30),
             labels=[
-                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+                constants.BASEDOSDADOS_PROD_AGENT_LABEL.value,
             ],
             parameter_defaults={
                 &#34;dataset_id&#34;: &#34;br_tse_eleicoes&#34;,
                 &#34;table_id&#34;: &#34;receitas_candidato&#34;,
                 &#34;id_candidato_bd&#34;: False,
-                &#34;materialization_mode&#34;: &#34;dev&#34;,
+                &#34;materialization_mode&#34;: &#34;prod&#34;,
                 &#34;materialize after dump&#34;: True,
                 &#34;dbt_alias&#34;: False,
             },
