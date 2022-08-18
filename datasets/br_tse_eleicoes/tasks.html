@@ -357,10 +357,6 @@ def build_bens_candidato(
             for ano, uf in product(range(end, start, -2), ufs)
         ]
 
-        check = glob.glob(f&#34;{folder}/&#34;)
-        llog(&#34;Check files&#34;)
-        log(check)
-
         for file in files:
             try:
                 df = pd.read_csv(file, sep=&#34;;&#34;, encoding=&#34;utf-8&#34;)
@@ -449,10 +445,6 @@ def build_bens_candidato(
                 log(f&#34;File {file} not found&#34;)
                 continue
 
-    log(&#34;Check folders:&#34;)
-
-    log(os.system(&#34;tree /tmp/data/raw/br_tse_eleicoes/bens_candidato/&#34;))
-
     return &#34;/tmp/data/output/&#34;
 
 
@@ -468,7 +460,7 @@ def clean_bens22(folder) -&gt; None:
 
     files = glob(f&#34;{folder}/bem_candidato*.csv&#34;)
 
-    for file in files[:2]:
+    for file in files:
         df = pd.read_csv(file, sep=&#34;;&#34;, encoding=&#34;latin-1&#34;)
         dfs.append(df)
 
@@ -819,10 +811,6 @@ def build_bens_candidato(
             for ano, uf in product(range(end, start, -2), ufs)
         ]
 
-        check = glob.glob(f&#34;{folder}/&#34;)
-        llog(&#34;Check files&#34;)
-        log(check)
-
         for file in files:
             try:
                 df = pd.read_csv(file, sep=&#34;;&#34;, encoding=&#34;utf-8&#34;)
@@ -910,10 +898,6 @@ def build_bens_candidato(
             except FileNotFoundError:
                 log(f&#34;File {file} not found&#34;)
                 continue
-
-    log(&#34;Check folders:&#34;)
-
-    log(os.system(&#34;tree /tmp/data/raw/br_tse_eleicoes/bens_candidato/&#34;))
 
     return &#34;/tmp/data/output/&#34;</code></pre>
 </details>
@@ -1020,7 +1004,7 @@ def clean_bens22(folder) -&gt; None:
 
     files = glob(f&#34;{folder}/bem_candidato*.csv&#34;)
 
-    for file in files[:2]:
+    for file in files:
         df = pd.read_csv(file, sep=&#34;;&#34;, encoding=&#34;latin-1&#34;)
         dfs.append(df)
 
