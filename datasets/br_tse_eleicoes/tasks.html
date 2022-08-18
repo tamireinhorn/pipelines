@@ -357,6 +357,10 @@ def build_bens_candidato(
             for ano, uf in product(range(end, start, -2), ufs)
         ]
 
+        check = glob.glob(f&#34;{folder}/&#34;)
+        llog(&#34;Check files&#34;)
+        log(check)
+
         for file in files:
             try:
                 df = pd.read_csv(file, sep=&#34;;&#34;, encoding=&#34;utf-8&#34;)
@@ -814,6 +818,10 @@ def build_bens_candidato(
             f&#34;{folder}/ano={ano}/sigla_uf={uf}/bens_candidato.csv&#34;
             for ano, uf in product(range(end, start, -2), ufs)
         ]
+
+        check = glob.glob(f&#34;{folder}/&#34;)
+        llog(&#34;Check files&#34;)
+        log(check)
 
         for file in files:
             try:
