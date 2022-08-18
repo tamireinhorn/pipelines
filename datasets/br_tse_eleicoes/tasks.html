@@ -293,13 +293,24 @@ def build_candidatos(folder: str, start: int, end: int, id_candidato_bd: bool = 
             df = pd.read_csv(
                 f&#34;/tmp/data/raw/br_tse_eleicoes/candidatos/ano={ano}/candidatos.csv&#34;,
                 sep=&#34;;&#34;,
-                encoding=&#34;utf-8&#34;,
-                dtype={
-                    &#34;cpf&#34;: str,
-                    &#34;titulo_eleitoral&#34;: str,
-                    &#34;sequencial&#34;: str,
-                },
+                encoding=&#34;utf-8&#34;
             )
+            df[&#34;cpf&#34;] = [
+                clean_digit_id(number=k, n_digits=11) if pd.notna(k) else k
+                for k in df[&#34;cpf&#34;].to_list()
+            ]
+            df[&#34;titulo_eleitoral&#34;] = [
+                clean_digit_id(number=k, n_digits=12) if pd.notna(k) else k
+                for k in df[&#34;titulo_eleitoral&#34;].to_list()
+            ]
+            df[&#34;sequencial&#34;] = [
+                clean_digit_id(number=k, n_digits=12) if pd.notna(k) else k
+                for k in df[&#34;sequencial&#34;].to_list()
+            ]
+            df.replace(&#34;#NULO#&#34;, np.nan, inplace=True)
+            df.replace(&#34;#Nulo#&#34;, np.nan, inplace=True)
+            df.replace(&#34;#NI#&#34;, np.nan, inplace=True)
+            df.replace(-1, np.nan, inplace=True)
             df.drop_duplicates(inplace=True)
             os.system(f&#34;mkdir -p /tmp/data/output/ano={ano}/&#34;)
             df.to_csv(f&#34;/tmp/data/output/ano={ano}/candidatos.csv&#34;, index=False)
@@ -969,13 +980,24 @@ def build_candidatos(folder: str, start: int, end: int, id_candidato_bd: bool = 
             df = pd.read_csv(
                 f&#34;/tmp/data/raw/br_tse_eleicoes/candidatos/ano={ano}/candidatos.csv&#34;,
                 sep=&#34;;&#34;,
-                encoding=&#34;utf-8&#34;,
-                dtype={
-                    &#34;cpf&#34;: str,
-                    &#34;titulo_eleitoral&#34;: str,
-                    &#34;sequencial&#34;: str,
-                },
+                encoding=&#34;utf-8&#34;
             )
+            df[&#34;cpf&#34;] = [
+                clean_digit_id(number=k, n_digits=11) if pd.notna(k) else k
+                for k in df[&#34;cpf&#34;].to_list()
+            ]
+            df[&#34;titulo_eleitoral&#34;] = [
+                clean_digit_id(number=k, n_digits=12) if pd.notna(k) else k
+                for k in df[&#34;titulo_eleitoral&#34;].to_list()
+            ]
+            df[&#34;sequencial&#34;] = [
+                clean_digit_id(number=k, n_digits=12) if pd.notna(k) else k
+                for k in df[&#34;sequencial&#34;].to_list()
+            ]
+            df.replace(&#34;#NULO#&#34;, np.nan, inplace=True)
+            df.replace(&#34;#Nulo#&#34;, np.nan, inplace=True)
+            df.replace(&#34;#NI#&#34;, np.nan, inplace=True)
+            df.replace(-1, np.nan, inplace=True)
             df.drop_duplicates(inplace=True)
             os.system(f&#34;mkdir -p /tmp/data/output/ano={ano}/&#34;)
             df.to_csv(f&#34;/tmp/data/output/ano={ano}/candidatos.csv&#34;, index=False)
