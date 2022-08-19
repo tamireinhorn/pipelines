@@ -293,7 +293,7 @@ def build_candidatos(folder: str, start: int, end: int, id_candidato_bd: bool = 
             df = pd.read_csv(
                 f&#34;/tmp/data/raw/br_tse_eleicoes/candidatos/ano={ano}/candidatos.csv&#34;,
                 sep=&#34;;&#34;,
-                encoding=&#34;utf-8&#34;
+                encoding=&#34;utf-8&#34;,
             )
             df[&#34;cpf&#34;] = [
                 clean_digit_id(number=k, n_digits=11) if pd.notna(k) else k
@@ -980,7 +980,7 @@ def build_candidatos(folder: str, start: int, end: int, id_candidato_bd: bool = 
             df = pd.read_csv(
                 f&#34;/tmp/data/raw/br_tse_eleicoes/candidatos/ano={ano}/candidatos.csv&#34;,
                 sep=&#34;;&#34;,
-                encoding=&#34;utf-8&#34;
+                encoding=&#34;utf-8&#34;,
             )
             df[&#34;cpf&#34;] = [
                 clean_digit_id(number=k, n_digits=11) if pd.notna(k) else k

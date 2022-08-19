@@ -49,6 +49,7 @@ from pipelines.datasets.br_bd_indicadores.utils import (
     create_url,
     connect_to_endpoint,
     flatten,
+    GA4RealTimeReport,
 )
 from pipelines.constants import constants
 
@@ -67,7 +68,9 @@ def echo(message: str) -&gt; None:
 
 # pylint: disable=W0613
 @task(checkpoint=False, nout=5)
-def get_credentials(secret_path: str, wait=None) -&gt; Tuple[str, str, str, str, str]:
+def get_twitter_credentials(
+    secret_path: str, wait=None
+) -&gt; Tuple[str, str, str, str, str]:
     &#34;&#34;&#34;
     Returns the user and password for the given secret path.
     &#34;&#34;&#34;
@@ -232,7 +235,43 @@ def crawler_metricas(
     os.system(f&#34;mkdir -p {folder}&#34;)
     df.to_csv(full_filepath, index=False)
 
-    return f&#34;/tmp/data/{table_id}/&#34;</code></pre>
+    return f&#34;/tmp/data/{table_id}/&#34;
+
+
+@task(
+    max_retries=constants.TASK_MAX_RETRIES.value,
+    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
+)
+def crawler_real_time(lst_dimension: list, lst_metric: list, property_id: str) -&gt; None:
+    &#34;&#34;&#34;
+    Crawler real time data from Google Anallytics API
+    &#34;&#34;&#34;
+
+    ga4 = GA4RealTimeReport(property_id)
+    response = ga4.query_report(lst_dimension, lst_metric, 100, True)
+
+    df = pd.DataFrame(response[&#34;rows&#34;], columns=response[&#34;headers&#34;])
+
+    now = datetime.now().strftime(&#34;%Y-%m-%d&#34;)
+
+    df[&#34;date&#34;] = now
+
+    filepath = f&#34;/tmp/data/date={now}/pageviews.csv&#34;
+
+    df.to_csv(filepath, index=False)
+
+
+# pylint: disable=W0613
+@task(checkpoint=False)
+def get_ga_credentials(secret_path: str, wait=None) -&gt; str:
+    &#34;&#34;&#34;
+    Returns the user and password for the given secret path.
+    &#34;&#34;&#34;
+    log(f&#34;Getting user and password for secret path: {secret_path}&#34;)
+    tokens_dict = get_credentials_from_secret(secret_path)
+    property_id = tokens_dict[&#34;property_id&#34;]
+
+    return property_id</code></pre>
 </details>
 </section>
 <section>
@@ -359,6 +398,38 @@ def crawler_metricas(
     return f&#34;/tmp/data/{table_id}/&#34;</code></pre>
 </details>
 </dd>
+<dt id="pipelines.datasets.br_bd_indicadores.tasks.crawler_real_time"><code class="name flex">
+<span>def <span class="ident">crawler_real_time</span></span>(<span>lst_dimension: list, lst_metric: list, property_id: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Crawler real time data from Google Anallytics API</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@task(
+    max_retries=constants.TASK_MAX_RETRIES.value,
+    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
+)
+def crawler_real_time(lst_dimension: list, lst_metric: list, property_id: str) -&gt; None:
+    &#34;&#34;&#34;
+    Crawler real time data from Google Anallytics API
+    &#34;&#34;&#34;
+
+    ga4 = GA4RealTimeReport(property_id)
+    response = ga4.query_report(lst_dimension, lst_metric, 100, True)
+
+    df = pd.DataFrame(response[&#34;rows&#34;], columns=response[&#34;headers&#34;])
+
+    now = datetime.now().strftime(&#34;%Y-%m-%d&#34;)
+
+    df[&#34;date&#34;] = now
+
+    filepath = f&#34;/tmp/data/date={now}/pageviews.csv&#34;
+
+    df.to_csv(filepath, index=False)</code></pre>
+</details>
+</dd>
 <dt id="pipelines.datasets.br_bd_indicadores.tasks.echo"><code class="name flex">
 <span>def <span class="ident">echo</span></span>(<span>message: str) ‑> None</span>
 </code></dt>
@@ -379,8 +450,29 @@ def echo(message: str) -&gt; None:
     log(message)</code></pre>
 </details>
 </dd>
-<dt id="pipelines.datasets.br_bd_indicadores.tasks.get_credentials"><code class="name flex">
-<span>def <span class="ident">get_credentials</span></span>(<span>secret_path: str, wait=None) ‑> Tuple[str, str, str, str, str]</span>
+<dt id="pipelines.datasets.br_bd_indicadores.tasks.get_ga_credentials"><code class="name flex">
+<span>def <span class="ident">get_ga_credentials</span></span>(<span>secret_path: str, wait=None) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Returns the user and password for the given secret path.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@task(checkpoint=False)
+def get_ga_credentials(secret_path: str, wait=None) -&gt; str:
+    &#34;&#34;&#34;
+    Returns the user and password for the given secret path.
+    &#34;&#34;&#34;
+    log(f&#34;Getting user and password for secret path: {secret_path}&#34;)
+    tokens_dict = get_credentials_from_secret(secret_path)
+    property_id = tokens_dict[&#34;property_id&#34;]
+
+    return property_id</code></pre>
+</details>
+</dd>
+<dt id="pipelines.datasets.br_bd_indicadores.tasks.get_twitter_credentials"><code class="name flex">
+<span>def <span class="ident">get_twitter_credentials</span></span>(<span>secret_path: str, wait=None) ‑> Tuple[str, str, str, str, str]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Returns the user and password for the given secret path.</p></div>
@@ -389,7 +481,9 @@ def echo(message: str) -&gt; None:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@task(checkpoint=False, nout=5)
-def get_credentials(secret_path: str, wait=None) -&gt; Tuple[str, str, str, str, str]:
+def get_twitter_credentials(
+    secret_path: str, wait=None
+) -&gt; Tuple[str, str, str, str, str]:
     &#34;&#34;&#34;
     Returns the user and password for the given secret path.
     &#34;&#34;&#34;
@@ -476,8 +570,10 @@ def has_new_tweets(bearer_token: str, table_id: str) -&gt; bool:
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.crawler_metricas" href="#pipelines.datasets.br_bd_indicadores.tasks.crawler_metricas">crawler_metricas</a></code></li>
+<li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.crawler_real_time" href="#pipelines.datasets.br_bd_indicadores.tasks.crawler_real_time">crawler_real_time</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.echo" href="#pipelines.datasets.br_bd_indicadores.tasks.echo">echo</a></code></li>
-<li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.get_credentials" href="#pipelines.datasets.br_bd_indicadores.tasks.get_credentials">get_credentials</a></code></li>
+<li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.get_ga_credentials" href="#pipelines.datasets.br_bd_indicadores.tasks.get_ga_credentials">get_ga_credentials</a></code></li>
+<li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.get_twitter_credentials" href="#pipelines.datasets.br_bd_indicadores.tasks.get_twitter_credentials">get_twitter_credentials</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.has_new_tweets" href="#pipelines.datasets.br_bd_indicadores.tasks.has_new_tweets">has_new_tweets</a></code></li>
 </ul>
 </li>

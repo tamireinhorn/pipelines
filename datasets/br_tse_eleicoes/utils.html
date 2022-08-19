@@ -299,7 +299,7 @@ def clean_digit_id(number: int, n_digits: int) -&gt; str:
     &#34;&#34;&#34;
     Clean digit id.
     &#34;&#34;&#34;
-    number = str(number).split(&#39;.&#39;)[0]
+    number = str(number).split(&#34;.&#34;)[0]
     number = number.zfill(n_digits)
     number = &#34;&#34;.join([i for i in number if i.isdigit()])
 
@@ -326,7 +326,7 @@ def clean_digit_id(number: int, n_digits: int) -&gt; str:
     &#34;&#34;&#34;
     Clean digit id.
     &#34;&#34;&#34;
-    number = str(number).split(&#39;.&#39;)[0]
+    number = str(number).split(&#34;.&#34;)[0]
     number = number.zfill(n_digits)
     number = &#34;&#34;.join([i for i in number if i.isdigit()])
 
