@@ -37,6 +37,23 @@ from prefect.schedules import Schedule, filters, adjustments
 from prefect.schedules.clocks import IntervalClock
 from pipelines.constants import constants
 
+schedule_pageviews = Schedule(
+    clocks=[
+        IntervalClock(
+            interval=timedelta(days=1),
+            start_date=datetime(2022, 5, 18, 16, 27),
+            labels=[
+                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+            ],
+            parameter_defaults={
+                &#34;dataset_id&#34;: &#34;br_bd_indicadores&#34;,
+                &#34;table_id&#34;: &#34;pageviews&#34;,
+            },
+        ),
+    ],
+    filters=[filters.is_weekday],
+)
+
 every_day = Schedule(
     clocks=[
         IntervalClock(
