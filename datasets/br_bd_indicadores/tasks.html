@@ -258,7 +258,11 @@ def crawler_real_time(lst_dimension: list, lst_metric: list, property_id: str) -
 
     filepath = f&#34;/tmp/data/date={now}/pageviews.csv&#34;
 
+    os.system(f&#34;mkdir -p {filepath.replace(&#39;pageviews.csv&#39;, &#39;&#39;)}&#34;)
+
     df.to_csv(filepath, index=False)
+
+    return filepath
 
 
 # pylint: disable=W0613
@@ -427,7 +431,11 @@ def crawler_real_time(lst_dimension: list, lst_metric: list, property_id: str) -
 
     filepath = f&#34;/tmp/data/date={now}/pageviews.csv&#34;
 
-    df.to_csv(filepath, index=False)</code></pre>
+    os.system(f&#34;mkdir -p {filepath.replace(&#39;pageviews.csv&#39;, &#39;&#39;)}&#34;)
+
+    df.to_csv(filepath, index=False)
+
+    return filepath</code></pre>
 </details>
 </dd>
 <dt id="pipelines.datasets.br_bd_indicadores.tasks.echo"><code class="name flex">
