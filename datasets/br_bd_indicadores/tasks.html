@@ -254,15 +254,13 @@ def crawler_real_time(lst_dimension: list, lst_metric: list, property_id: str) -
 
     now = datetime.now().strftime(&#34;%Y-%m-%d&#34;)
 
-    df[&#34;date&#34;] = now
-
     filepath = f&#34;/tmp/data/date={now}/pageviews.csv&#34;
-
-    os.system(f&#34;mkdir -p {filepath.replace(&#39;pageviews.csv&#39;, &#39;&#39;)}&#34;)
+    partition_path = filepath.replace(&#39;pageviews.csv&#39;, &#39;&#39;)
+    os.system(f&#34;mkdir -p {partition_path}&#34;)
 
     df.to_csv(filepath, index=False)
 
-    return filepath
+    return &#39;/tmp/data/&#39;
 
 
 # pylint: disable=W0613
@@ -427,15 +425,13 @@ def crawler_real_time(lst_dimension: list, lst_metric: list, property_id: str) -
 
     now = datetime.now().strftime(&#34;%Y-%m-%d&#34;)
 
-    df[&#34;date&#34;] = now
-
     filepath = f&#34;/tmp/data/date={now}/pageviews.csv&#34;
-
-    os.system(f&#34;mkdir -p {filepath.replace(&#39;pageviews.csv&#39;, &#39;&#39;)}&#34;)
+    partition_path = filepath.replace(&#39;pageviews.csv&#39;, &#39;&#39;)
+    os.system(f&#34;mkdir -p {partition_path}&#34;)
 
     df.to_csv(filepath, index=False)
 
-    return filepath</code></pre>
+    return &#39;/tmp/data/&#39;</code></pre>
 </details>
 </dd>
 <dt id="pipelines.datasets.br_bd_indicadores.tasks.echo"><code class="name flex">
