@@ -35,7 +35,11 @@ utils for br_bd_inndicadores
 import collections
 from typing import Tuple
 from typing import List
+import os
 
+from googleapiclient.discovery import build
+from oauth2client.service_account import ServiceAccountCredentials
+import pandas as pd
 from google.analytics.data_v1beta import BetaAnalyticsDataClient
 from google.analytics.data_v1beta.types import (
     Dimension,
@@ -163,7 +167,88 @@ class GA4RealTimeReport:
             output[&#34;rows&#34;] = rows
             return output
         except Exception as e:
-            raise GA4Exception(e) from e</code></pre>
+            raise GA4Exception(e) from e
+
+
+def initialize_analyticsreporting():
+    &#34;&#34;&#34;Initializes an Analytics Reporting API V4 service object.
+    Returns:
+      An authorized Analytics Reporting API V4 service object.
+    &#34;&#34;&#34;
+    KEY_FILE_LOCATION = os.environ[&#34;GOOGLE_APPLICATION_CREDENTIALS&#34;]
+    SCOPES = [&#34;https://www.googleapis.com/auth/analytics.readonly&#34;]
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(
+        KEY_FILE_LOCATION, SCOPES
+    )
+
+    # Build the service object.
+    analytics = build(&#34;analyticsreporting&#34;, &#34;v4&#34;, credentials=credentials)
+
+    return analytics
+
+
+def get_report(analytics, dimension: str, metric: str, VIEW_ID: str):
+    &#34;&#34;&#34;Queries the Analytics Reporting API V4.
+    Args:
+        analytics: An authorized Analytics Reporting API V4 service object.
+        dimension: The name of the dimension to query.
+        metric: The name of the metric to query.
+        VIEW_ID: The ID of the view to retrieve data for.
+    Returns:
+        The Analytics Reporting API V4 response.
+    &#34;&#34;&#34;
+    return (
+        analytics.reports()
+        .batchGet(
+            body={
+                &#34;reportRequests&#34;: [
+                    {
+                        &#34;viewId&#34;: VIEW_ID,
+                        &#34;dateRanges&#34;: [{&#34;startDate&#34;: &#34;today&#34;, &#34;endDate&#34;: &#34;today&#34;}],
+                        &#34;metrics&#34;: [{&#34;expression&#34;: metric}],
+                        &#34;dimensions&#34;: [{&#34;name&#34;: dimension}],
+                    }
+                ]
+            }
+        )
+        .execute()
+    )
+
+
+def parse_data(response) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Parses the Analytics Reporting API V4 response.
+
+    Args:
+        response: An Analytics Reporting API V4 response.
+
+    Returns:
+        Dataframe with the response data.
+    &#34;&#34;&#34;
+    reports = response[&#34;reports&#34;][0]
+    columnHeader = reports[&#34;columnHeader&#34;][&#34;dimensions&#34;]
+    metricHeader = reports[&#34;columnHeader&#34;][&#34;metricHeader&#34;][&#34;metricHeaderEntries&#34;]
+    # Get dimenssion names
+    dim_names = [columnHeader[n].split(&#34;:&#34;)[1] for n in range(len(columnHeader))]
+    # Get metric names
+    metric_names = [
+        metricHeader[n][&#34;name&#34;].split(&#34;:&#34;)[1] for n in range(len(metricHeader))
+    ]
+    column_names = dim_names + metric_names
+
+    columns = columnHeader
+    for metric in metricHeader:
+        columns.append(metric[&#34;name&#34;])
+
+    data = pd.json_normalize(reports[&#34;data&#34;][&#34;rows&#34;])
+    data_dimensions = pd.DataFrame(data[&#34;dimensions&#34;].tolist())
+    data_metrics = pd.DataFrame(data[&#34;metrics&#34;].tolist())
+    data_metrics = data_metrics.applymap(lambda x: x[&#34;values&#34;])
+    data_metrics = pd.DataFrame(data_metrics[0].tolist())
+    result = pd.concat([data_dimensions, data_metrics], axis=1, ignore_index=True)
+
+    # Assign columns names to DF
+    result.columns = column_names
+    return result</code></pre>
 </details>
 </section>
 <section>
@@ -261,6 +346,136 @@ class GA4RealTimeReport:
         else:
             items.append((new_key, v))
     return dict(items)</code></pre>
+</details>
+</dd>
+<dt id="pipelines.datasets.br_bd_indicadores.utils.get_report"><code class="name flex">
+<span>def <span class="ident">get_report</span></span>(<span>analytics, dimension: str, metric: str, VIEW_ID: str)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Queries the Analytics Reporting API V4.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>analytics</code></strong></dt>
+<dd>An authorized Analytics Reporting API V4 service object.</dd>
+<dt><strong><code>dimension</code></strong></dt>
+<dd>The name of the dimension to query.</dd>
+<dt><strong><code>metric</code></strong></dt>
+<dd>The name of the metric to query.</dd>
+<dt><strong><code>VIEW_ID</code></strong></dt>
+<dd>The ID of the view to retrieve data for.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>The Analytics Reporting API V4 response.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_report(analytics, dimension: str, metric: str, VIEW_ID: str):
+    &#34;&#34;&#34;Queries the Analytics Reporting API V4.
+    Args:
+        analytics: An authorized Analytics Reporting API V4 service object.
+        dimension: The name of the dimension to query.
+        metric: The name of the metric to query.
+        VIEW_ID: The ID of the view to retrieve data for.
+    Returns:
+        The Analytics Reporting API V4 response.
+    &#34;&#34;&#34;
+    return (
+        analytics.reports()
+        .batchGet(
+            body={
+                &#34;reportRequests&#34;: [
+                    {
+                        &#34;viewId&#34;: VIEW_ID,
+                        &#34;dateRanges&#34;: [{&#34;startDate&#34;: &#34;today&#34;, &#34;endDate&#34;: &#34;today&#34;}],
+                        &#34;metrics&#34;: [{&#34;expression&#34;: metric}],
+                        &#34;dimensions&#34;: [{&#34;name&#34;: dimension}],
+                    }
+                ]
+            }
+        )
+        .execute()
+    )</code></pre>
+</details>
+</dd>
+<dt id="pipelines.datasets.br_bd_indicadores.utils.initialize_analyticsreporting"><code class="name flex">
+<span>def <span class="ident">initialize_analyticsreporting</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Initializes an Analytics Reporting API V4 service object.</p>
+<h2 id="returns">Returns</h2>
+<p>An authorized Analytics Reporting API V4 service object.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def initialize_analyticsreporting():
+    &#34;&#34;&#34;Initializes an Analytics Reporting API V4 service object.
+    Returns:
+      An authorized Analytics Reporting API V4 service object.
+    &#34;&#34;&#34;
+    KEY_FILE_LOCATION = os.environ[&#34;GOOGLE_APPLICATION_CREDENTIALS&#34;]
+    SCOPES = [&#34;https://www.googleapis.com/auth/analytics.readonly&#34;]
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(
+        KEY_FILE_LOCATION, SCOPES
+    )
+
+    # Build the service object.
+    analytics = build(&#34;analyticsreporting&#34;, &#34;v4&#34;, credentials=credentials)
+
+    return analytics</code></pre>
+</details>
+</dd>
+<dt id="pipelines.datasets.br_bd_indicadores.utils.parse_data"><code class="name flex">
+<span>def <span class="ident">parse_data</span></span>(<span>response) ‑> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Parses the Analytics Reporting API V4 response.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>response</code></strong></dt>
+<dd>An Analytics Reporting API V4 response.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Dataframe with the response data.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def parse_data(response) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Parses the Analytics Reporting API V4 response.
+
+    Args:
+        response: An Analytics Reporting API V4 response.
+
+    Returns:
+        Dataframe with the response data.
+    &#34;&#34;&#34;
+    reports = response[&#34;reports&#34;][0]
+    columnHeader = reports[&#34;columnHeader&#34;][&#34;dimensions&#34;]
+    metricHeader = reports[&#34;columnHeader&#34;][&#34;metricHeader&#34;][&#34;metricHeaderEntries&#34;]
+    # Get dimenssion names
+    dim_names = [columnHeader[n].split(&#34;:&#34;)[1] for n in range(len(columnHeader))]
+    # Get metric names
+    metric_names = [
+        metricHeader[n][&#34;name&#34;].split(&#34;:&#34;)[1] for n in range(len(metricHeader))
+    ]
+    column_names = dim_names + metric_names
+
+    columns = columnHeader
+    for metric in metricHeader:
+        columns.append(metric[&#34;name&#34;])
+
+    data = pd.json_normalize(reports[&#34;data&#34;][&#34;rows&#34;])
+    data_dimensions = pd.DataFrame(data[&#34;dimensions&#34;].tolist())
+    data_metrics = pd.DataFrame(data[&#34;metrics&#34;].tolist())
+    data_metrics = data_metrics.applymap(lambda x: x[&#34;values&#34;])
+    data_metrics = pd.DataFrame(data_metrics[0].tolist())
+    result = pd.concat([data_dimensions, data_metrics], axis=1, ignore_index=True)
+
+    # Assign columns names to DF
+    result.columns = column_names
+    return result</code></pre>
 </details>
 </dd>
 </dl>
@@ -443,6 +658,9 @@ More information: <a href="https://support.google.com/analytics/answer/9271392?h
 <li><code><a title="pipelines.datasets.br_bd_indicadores.utils.create_headers" href="#pipelines.datasets.br_bd_indicadores.utils.create_headers">create_headers</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.utils.create_url" href="#pipelines.datasets.br_bd_indicadores.utils.create_url">create_url</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.utils.flatten" href="#pipelines.datasets.br_bd_indicadores.utils.flatten">flatten</a></code></li>
+<li><code><a title="pipelines.datasets.br_bd_indicadores.utils.get_report" href="#pipelines.datasets.br_bd_indicadores.utils.get_report">get_report</a></code></li>
+<li><code><a title="pipelines.datasets.br_bd_indicadores.utils.initialize_analyticsreporting" href="#pipelines.datasets.br_bd_indicadores.utils.initialize_analyticsreporting">initialize_analyticsreporting</a></code></li>
+<li><code><a title="pipelines.datasets.br_bd_indicadores.utils.parse_data" href="#pipelines.datasets.br_bd_indicadores.utils.parse_data">parse_data</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
