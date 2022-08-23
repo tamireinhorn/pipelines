@@ -44,7 +44,12 @@ from requests_oauthlib import OAuth1
 import pandas as pd
 import numpy as np
 
-from pipelines.utils.utils import get_storage_blobs, log, get_credentials_from_secret, add_underscore_to_column_name
+from pipelines.utils.utils import (
+    get_storage_blobs,
+    log,
+    get_credentials_from_secret,
+    add_underscore_to_column_name,
+)
 from pipelines.datasets.br_bd_indicadores.utils import (
     create_headers,
     create_url,
@@ -313,7 +318,9 @@ def crawler_report_ga(view_id: str, metrics: list = None) -&gt; str:
 
     df = reduce(lambda left, right: pd.merge(left, right, on=&#34;date&#34;, how=&#34;outer&#34;), dfs)
 
-    df=add_underscore_to_column_name(df)
+    df.drop(columns=[&#34;date&#34;], inplace=True)
+
+    df = add_underscore_to_column_name(df)
 
     now = datetime.now().strftime(&#34;%Y-%m-%d&#34;)
 
@@ -540,7 +547,9 @@ def crawler_report_ga(view_id: str, metrics: list = None) -&gt; str:
 
     df = reduce(lambda left, right: pd.merge(left, right, on=&#34;date&#34;, how=&#34;outer&#34;), dfs)
 
-    df=add_underscore_to_column_name(df)
+    df.drop(columns=[&#34;date&#34;], inplace=True)
+
+    df = add_underscore_to_column_name(df)
 
     now = datetime.now().strftime(&#34;%Y-%m-%d&#34;)
 
