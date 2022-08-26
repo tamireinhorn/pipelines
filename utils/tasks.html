@@ -250,7 +250,7 @@ def update_metadata(dataset_id: str, table_id: str, fields_to_update: list) -&gt
         yaml.dump(data, fp)
 
     if handle.validate():
-        handle.publish(if_exists=&#34;replace&#34;)
+        handle.publish(if_exists=&#34;replace&#34;, all=True)
         log(f&#34;Metadata for {table_id} updated&#34;)
     else:
         log(&#34;Fail to validate metadata.&#34;)
@@ -772,7 +772,7 @@ def update_metadata(dataset_id: str, table_id: str, fields_to_update: list) -&gt
         yaml.dump(data, fp)
 
     if handle.validate():
-        handle.publish(if_exists=&#34;replace&#34;)
+        handle.publish(if_exists=&#34;replace&#34;, all=True)
         log(f&#34;Metadata for {table_id} updated&#34;)
     else:
         log(&#34;Fail to validate metadata.&#34;)</code></pre>
