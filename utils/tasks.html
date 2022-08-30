@@ -220,23 +220,17 @@ def update_metadata(dataset_id: str, table_id: str, fields_to_update: list) -&gt
     fields_to_update: list of dictionaries with key and values to be updated
     &#34;&#34;&#34;
     # add credentials to config.toml
-    # dict_credentials = get_credentials_from_secret(secret_path=&#34;ckan_credentials&#34;)
-
     handle = bd.Metadata(dataset_id=dataset_id, table_id=table_id)
     handle.create(if_exists=&#34;replace&#34;)
-
-    log(&#39;Check config.toml for credentials&#39;)
-    log(handle.CKAN_API_KEY)
-    log(handle.CKAN_URL)
-
-    # handle.CKAN_API_KEY = dict_credentials[&#34;api_key&#34;]
-    # handle.CKAN_URL = dict_credentials[&#34;url&#34;]
 
     yaml = ryaml.YAML()
     yaml.preserve_quotes = True
     yaml.indent(mapping=4, sequence=6, offset=4)
 
     config_file = handle.filepath.as_posix()
+
+    log(&#39;get path config_file&#39;)
+    log(config_file)
 
     with open(config_file, encoding=&#34;utf-8&#34;) as fp:
         data = yaml.load(fp)
@@ -746,23 +740,17 @@ def update_metadata(dataset_id: str, table_id: str, fields_to_update: list) -&gt
     fields_to_update: list of dictionaries with key and values to be updated
     &#34;&#34;&#34;
     # add credentials to config.toml
-    # dict_credentials = get_credentials_from_secret(secret_path=&#34;ckan_credentials&#34;)
-
     handle = bd.Metadata(dataset_id=dataset_id, table_id=table_id)
     handle.create(if_exists=&#34;replace&#34;)
-
-    log(&#39;Check config.toml for credentials&#39;)
-    log(handle.CKAN_API_KEY)
-    log(handle.CKAN_URL)
-
-    # handle.CKAN_API_KEY = dict_credentials[&#34;api_key&#34;]
-    # handle.CKAN_URL = dict_credentials[&#34;url&#34;]
 
     yaml = ryaml.YAML()
     yaml.preserve_quotes = True
     yaml.indent(mapping=4, sequence=6, offset=4)
 
     config_file = handle.filepath.as_posix()
+
+    log(&#39;get path config_file&#39;)
+    log(config_file)
 
     with open(config_file, encoding=&#34;utf-8&#34;) as fp:
         data = yaml.load(fp)
