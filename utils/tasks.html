@@ -225,6 +225,10 @@ def update_metadata(dataset_id: str, table_id: str, fields_to_update: list) -&gt
     handle = bd.Metadata(dataset_id=dataset_id, table_id=table_id)
     handle.create(if_exists=&#34;replace&#34;)
 
+    log(&#39;Check config.toml for credentials&#39;)
+    log(handle.CKAN_API_KEY)
+    log(handle.CKAN_URL)
+
     # handle.CKAN_API_KEY = dict_credentials[&#34;api_key&#34;]
     # handle.CKAN_URL = dict_credentials[&#34;url&#34;]
 
@@ -746,6 +750,10 @@ def update_metadata(dataset_id: str, table_id: str, fields_to_update: list) -&gt
 
     handle = bd.Metadata(dataset_id=dataset_id, table_id=table_id)
     handle.create(if_exists=&#34;replace&#34;)
+
+    log(&#39;Check config.toml for credentials&#39;)
+    log(handle.CKAN_API_KEY)
+    log(handle.CKAN_URL)
 
     # handle.CKAN_API_KEY = dict_credentials[&#34;api_key&#34;]
     # handle.CKAN_URL = dict_credentials[&#34;url&#34;]
