@@ -46,7 +46,6 @@ from pipelines.utils.utils import (
     determine_whether_to_execute_or_not,
     get_redis_client,
     human_readable,
-    list_blobs_with_prefix,
     log,
 )
 
@@ -136,7 +135,7 @@ def download_data_to_gcs(  # pylint: disable=R0912,R0913,R0914,R0915
     # Checking if data exceeds the maximum allowed size
     log(&#34;Checking if data exceeds the maximum allowed size&#34;)
     # pylint: disable=E1124
-    client = google_client(project_id, billing_project_id, from_file=True, reauth=False)
+    client = google_client(billing_project_id, from_file=True, reauth=False)
     job_config = bigquery.QueryJobConfig()
     job_config.dry_run = True
     job = client[&#34;bigquery&#34;].query(query, job_config=job_config)
@@ -168,7 +167,7 @@ def download_data_to_gcs(  # pylint: disable=R0912,R0913,R0914,R0915
         f&#34;Query results were stored in {dest_project_id}.{dest_dataset_id}.{dest_table_id}&#34;
     )
 
-    blob_path = f&#34;gs://datario/share/{dataset_id}/{table_id}/data*.csv.gz&#34;
+    blob_path = f&#34;gs://basedosdados-public/one-click-download/{dataset_id}/{table_id}/data*.csv.gz&#34;
     log(f&#34;Loading data to {blob_path}&#34;)
     dataset_ref = bigquery.DatasetReference(dest_project_id, dest_dataset_id)
     table_ref = dataset_ref.table(dest_table_id)
@@ -181,15 +180,6 @@ def download_data_to_gcs(  # pylint: disable=R0912,R0913,R0914,R0915
     )
     extract_job.result()
     log(&#34;Data was loaded successfully&#34;)
-
-    # Get the BLOB we&#39;ve just created and make it public
-    blobs = list_blobs_with_prefix(&#34;datario&#34;, f&#34;share/{dataset_id}/{table_id}/&#34;)
-    if not blobs:
-        raise ValueError(f&#34;No blob found at {blob_path}&#34;)
-    for blob in blobs:
-        log(f&#34;Blob found at {blob.name}&#34;)
-        blob.make_public()
-        log(&#34;Blob was made public&#34;)
 
 
 @task
@@ -358,7 +348,7 @@ def download_data_to_gcs(  # pylint: disable=R0912,R0913,R0914,R0915
     # Checking if data exceeds the maximum allowed size
     log(&#34;Checking if data exceeds the maximum allowed size&#34;)
     # pylint: disable=E1124
-    client = google_client(project_id, billing_project_id, from_file=True, reauth=False)
+    client = google_client(billing_project_id, from_file=True, reauth=False)
     job_config = bigquery.QueryJobConfig()
     job_config.dry_run = True
     job = client[&#34;bigquery&#34;].query(query, job_config=job_config)
@@ -390,7 +380,7 @@ def download_data_to_gcs(  # pylint: disable=R0912,R0913,R0914,R0915
         f&#34;Query results were stored in {dest_project_id}.{dest_dataset_id}.{dest_table_id}&#34;
     )
 
-    blob_path = f&#34;gs://datario/share/{dataset_id}/{table_id}/data*.csv.gz&#34;
+    blob_path = f&#34;gs://basedosdados-public/one-click-download/{dataset_id}/{table_id}/data*.csv.gz&#34;
     log(f&#34;Loading data to {blob_path}&#34;)
     dataset_ref = bigquery.DatasetReference(dest_project_id, dest_dataset_id)
     table_ref = dataset_ref.table(dest_table_id)
@@ -402,16 +392,7 @@ def download_data_to_gcs(  # pylint: disable=R0912,R0913,R0914,R0915
         job_config=job_config,
     )
     extract_job.result()
-    log(&#34;Data was loaded successfully&#34;)
-
-    # Get the BLOB we&#39;ve just created and make it public
-    blobs = list_blobs_with_prefix(&#34;datario&#34;, f&#34;share/{dataset_id}/{table_id}/&#34;)
-    if not blobs:
-        raise ValueError(f&#34;No blob found at {blob_path}&#34;)
-    for blob in blobs:
-        log(f&#34;Blob found at {blob.name}&#34;)
-        blob.make_public()
-        log(&#34;Blob was made public&#34;)</code></pre>
+    log(&#34;Data was loaded successfully&#34;)</code></pre>
 </details>
 </dd>
 <dt id="pipelines.utils.dump_to_gcs.tasks.get_project_id"><code class="name flex">
