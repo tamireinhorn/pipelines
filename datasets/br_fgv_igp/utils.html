@@ -32,32 +32,6 @@
 General purpose functions for the br_fgv_igp project
 &#34;&#34;&#34;
 
-###############################################################################
-#
-# Esse é um arquivo onde podem ser declaratas funções que serão usadas
-# pelo projeto br_fgv_igp.
-#
-# Por ser um arquivo opcional, pode ser removido sem prejuízo ao funcionamento
-# do projeto, caos não esteja em uso.
-#
-# Para declarar funções, basta fazer em código Python comum, como abaixo:
-#
-# ```
-# def foo():
-#     &#34;&#34;&#34;
-#     Function foo
-#     &#34;&#34;&#34;
-#     print(&#34;foo&#34;)
-# ```
-#
-# Para usá-las, basta fazer conforme o exemplo abaixo:
-#
-# ```py
-# from pipelines.datasets.br_fgv_igp.utils import foo
-# foo()
-# ```
-#
-###############################################################################
 import ipeadatapy as idpy
 import numpy as np
 import pandas as pd
@@ -86,7 +60,7 @@ class IGPData:
         Returns:
             str: full path of csv file
         &#34;&#34;&#34;
-        return f&#34;{ROOT}/{self.index_name}_{self.period}.csv&#34;
+        return f&#34;{ROOT}/{self.index_name.lower()}_{self.period.lower()}/{self.index_name.lower()}_{self.period.lower()}.csv&#34;
 
     def _get_ipea_data(self) -&gt; pd.DataFrame:
         &#34;&#34;&#34;
@@ -178,13 +152,11 @@ class IGPData:
             pd.DataFrame: DataFrame with 1st and 2nd tenths
         &#34;&#34;&#34;
         dec1 = idpy.timeseries(self.decendios[0])
-        dec1.rename(
-            {dec1.columns[-1]: &#34;indice_primeiro_decendio&#34;}, axis=1, inplace=True
-        )
-        dec1 = dec1[[&#34;indice_primeiro_decendio&#34;]]
+        dec1.rename({dec1.columns[-1]: &#34;var_primeiro_decendio&#34;}, axis=1, inplace=True)
+        dec1 = dec1[[&#34;var_primeiro_decendio&#34;]]
         dec2 = idpy.timeseries(self.decendios[1])
-        dec2.rename({dec2.columns[-1]: &#34;indice_segundo_decendio&#34;}, axis=1, inplace=True)
-        dec2 = dec2[[&#34;indice_segundo_decendio&#34;]]
+        dec2.rename({dec2.columns[-1]: &#34;var_segundo_decendio&#34;}, axis=1, inplace=True)
+        dec2 = dec2[[&#34;var_segundo_decendio&#34;]]
         return pd.merge(dec1, dec2, how=&#34;outer&#34;, on=&#34;DATE&#34;)
 
     @staticmethod
@@ -235,7 +207,7 @@ class IGPData:
         Returns:
             str: full path of csv file
         &#34;&#34;&#34;
-        return f&#34;{ROOT}/{self.index_name}_{self.period}.csv&#34;
+        return f&#34;{ROOT}/{self.index_name.lower()}_{self.period.lower()}/{self.index_name.lower()}_{self.period.lower()}.csv&#34;
 
     def _get_ipea_data(self) -&gt; pd.DataFrame:
         &#34;&#34;&#34;
@@ -327,13 +299,11 @@ class IGPData:
             pd.DataFrame: DataFrame with 1st and 2nd tenths
         &#34;&#34;&#34;
         dec1 = idpy.timeseries(self.decendios[0])
-        dec1.rename(
-            {dec1.columns[-1]: &#34;indice_primeiro_decendio&#34;}, axis=1, inplace=True
-        )
-        dec1 = dec1[[&#34;indice_primeiro_decendio&#34;]]
+        dec1.rename({dec1.columns[-1]: &#34;var_primeiro_decendio&#34;}, axis=1, inplace=True)
+        dec1 = dec1[[&#34;var_primeiro_decendio&#34;]]
         dec2 = idpy.timeseries(self.decendios[1])
-        dec2.rename({dec2.columns[-1]: &#34;indice_segundo_decendio&#34;}, axis=1, inplace=True)
-        dec2 = dec2[[&#34;indice_segundo_decendio&#34;]]
+        dec2.rename({dec2.columns[-1]: &#34;var_segundo_decendio&#34;}, axis=1, inplace=True)
+        dec2 = dec2[[&#34;var_segundo_decendio&#34;]]
         return pd.merge(dec1, dec2, how=&#34;outer&#34;, on=&#34;DATE&#34;)
 
     @staticmethod
@@ -367,7 +337,7 @@ def filepath(self) -&gt; str:
     Returns:
         str: full path of csv file
     &#34;&#34;&#34;
-    return f&#34;{ROOT}/{self.index_name}_{self.period}.csv&#34;</code></pre>
+    return f&#34;{ROOT}/{self.index_name.lower()}_{self.period.lower()}/{self.index_name.lower()}_{self.period.lower()}.csv&#34;</code></pre>
 </details>
 </dd>
 </dl>
