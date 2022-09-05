@@ -38,12 +38,12 @@ from pathlib import Path
 from typing import Union, List
 
 import basedosdados as bd
-import prefect
-from prefect import task
-from prefect.client import Client
-from prefect.backend import FlowRunView
-import ruamel.yaml as ryaml
 import pandas as pd
+import prefect
+import ruamel.yaml as ryaml
+from prefect import task
+from prefect.backend import FlowRunView
+from prefect.client import Client
 
 from pipelines.constants import constants
 from pipelines.utils.utils import (
@@ -51,6 +51,7 @@ from pipelines.utils.utils import (
     log,
     dump_header_to_csv,
 )
+
 
 ##################
 #
@@ -227,7 +228,7 @@ def update_metadata(dataset_id: str, table_id: str, fields_to_update: list) -&gt
     yaml.preserve_quotes = True
     yaml.indent(mapping=4, sequence=6, offset=4)
 
-    config_file = handle.filepath.as_posix()
+    config_file = handle.filepath.as_posix()  # noqa
 
     log(&#34;get path config_file&#34;)
     log(config_file)
@@ -336,8 +337,8 @@ def get_temporal_coverage(
 
 
 # pylint: disable=W0613
-@task
-def rename_current_flow_run(msg: str, wait=None) -&gt; None:
+@task  # noqa
+def rename_current_flow_run(msg: str, wait=None) -&gt; bool:
     &#34;&#34;&#34;
     Rename the current flow run.
     &#34;&#34;&#34;
@@ -346,10 +347,10 @@ def rename_current_flow_run(msg: str, wait=None) -&gt; None:
     return client.set_flow_run_name(flow_run_id, msg)
 
 
-@task
+@task  # noqa
 def rename_current_flow_run_dataset_table(
     prefix: str, dataset_id, table_id, wait=None
-) -&gt; None:
+) -&gt; bool:
     &#34;&#34;&#34;
     Rename the current flow run.
     &#34;&#34;&#34;
@@ -358,7 +359,7 @@ def rename_current_flow_run_dataset_table(
     return client.set_flow_run_name(flow_run_id, f&#34;{prefix}{dataset_id}.{table_id}&#34;)
 
 
-@task
+@task  # noqa
 def get_current_flow_labels() -&gt; List[str]:
     &#34;&#34;&#34;
     Get the labels of the current flow.
@@ -368,7 +369,7 @@ def get_current_flow_labels() -&gt; List[str]:
     return flow_run_view.labels
 
 
-@task
+@task  # noqa
 def get_date_time_str(wait=None) -&gt; str:
     &#34;&#34;&#34;
     Get current time as string
@@ -550,7 +551,7 @@ def get_credentials(secret_path: str):
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@task
+<pre><code class="python">@task  # noqa
 def get_current_flow_labels() -&gt; List[str]:
     &#34;&#34;&#34;
     Get the labels of the current flow.
@@ -569,7 +570,7 @@ def get_current_flow_labels() -&gt; List[str]:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@task
+<pre><code class="python">@task  # noqa
 def get_date_time_str(wait=None) -&gt; str:
     &#34;&#34;&#34;
     Get current time as string
@@ -675,7 +676,7 @@ def get_temporal_coverage(
 </details>
 </dd>
 <dt id="pipelines.utils.tasks.rename_current_flow_run"><code class="name flex">
-<span>def <span class="ident">rename_current_flow_run</span></span>(<span>msg: str, wait=None) ‑> None</span>
+<span>def <span class="ident">rename_current_flow_run</span></span>(<span>msg: str, wait=None) ‑> bool</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Rename the current flow run.</p></div>
@@ -683,8 +684,8 @@ def get_temporal_coverage(
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@task
-def rename_current_flow_run(msg: str, wait=None) -&gt; None:
+<pre><code class="python">@task  # noqa
+def rename_current_flow_run(msg: str, wait=None) -&gt; bool:
     &#34;&#34;&#34;
     Rename the current flow run.
     &#34;&#34;&#34;
@@ -694,7 +695,7 @@ def rename_current_flow_run(msg: str, wait=None) -&gt; None:
 </details>
 </dd>
 <dt id="pipelines.utils.tasks.rename_current_flow_run_dataset_table"><code class="name flex">
-<span>def <span class="ident">rename_current_flow_run_dataset_table</span></span>(<span>prefix: str, dataset_id, table_id, wait=None) ‑> None</span>
+<span>def <span class="ident">rename_current_flow_run_dataset_table</span></span>(<span>prefix: str, dataset_id, table_id, wait=None) ‑> bool</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Rename the current flow run.</p></div>
@@ -702,10 +703,10 @@ def rename_current_flow_run(msg: str, wait=None) -&gt; None:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">@task
+<pre><code class="python">@task  # noqa
 def rename_current_flow_run_dataset_table(
     prefix: str, dataset_id, table_id, wait=None
-) -&gt; None:
+) -&gt; bool:
     &#34;&#34;&#34;
     Rename the current flow run.
     &#34;&#34;&#34;
@@ -747,7 +748,7 @@ def update_metadata(dataset_id: str, table_id: str, fields_to_update: list) -&gt
     yaml.preserve_quotes = True
     yaml.indent(mapping=4, sequence=6, offset=4)
 
-    config_file = handle.filepath.as_posix()
+    config_file = handle.filepath.as_posix()  # noqa
 
     log(&#34;get path config_file&#34;)
     log(config_file)
