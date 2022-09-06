@@ -394,8 +394,8 @@ def get_nrows(dataset_id: str, table_id: str, staging_mode: str) -&gt; int:
         database = &#34;basedosdados-dev.{dataset_id}_staging.{table_id}&#34;
     elif staging_mode == &#34;prod&#34;:
         database = &#34;basedosdados-staging.{dataset_id}_staging.{table_id}&#34;
-    # ideally, we would consume the API to get the number of rows, 
-    # but it is not available yet. 
+    # ideally, we would consume the API to get the number of rows,
+    # but it is not available yet.
     # See: https://stackoverflow.com/questions/69313542/num-rows-issue-for-views-in-big-query-python-library
     query = f&#34;SELECT COUNT(*) AS n_rows FROM `{database}`&#34;
     n_rows = bd.read_sql(
@@ -646,8 +646,8 @@ def get_nrows(dataset_id: str, table_id: str, staging_mode: str) -&gt; int:
         database = &#34;basedosdados-dev.{dataset_id}_staging.{table_id}&#34;
     elif staging_mode == &#34;prod&#34;:
         database = &#34;basedosdados-staging.{dataset_id}_staging.{table_id}&#34;
-    # ideally, we would consume the API to get the number of rows, 
-    # but it is not available yet. 
+    # ideally, we would consume the API to get the number of rows,
+    # but it is not available yet.
     # See: https://stackoverflow.com/questions/69313542/num-rows-issue-for-views-in-big-query-python-library
     query = f&#34;SELECT COUNT(*) AS n_rows FROM `{database}`&#34;
     n_rows = bd.read_sql(
