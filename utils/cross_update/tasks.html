@@ -209,6 +209,8 @@ def update_nrows(table_dict: Dict[str, str], mode: str) -&gt; Dict[str, str]:
     with open(config_file, encoding=&#34;utf-8&#34;) as fp:
         data = yaml.load(fp)
 
+    log(data)
+
     for field in fields_to_update:
         for k, v in field.items():
             if isinstance(v, dict):
@@ -219,6 +221,8 @@ def update_nrows(table_dict: Dict[str, str], mode: str) -&gt; Dict[str, str]:
 
     with open(config_file, &#34;w&#34;, encoding=&#34;utf-8&#34;) as fp:
         yaml.dump(data, fp)
+
+    log(data)
 
     if handle.validate():
         handle.publish(if_exists=&#34;replace&#34;)
@@ -456,6 +460,8 @@ def update_nrows(table_dict: Dict[str, str], mode: str) -&gt; Dict[str, str]:
     with open(config_file, encoding=&#34;utf-8&#34;) as fp:
         data = yaml.load(fp)
 
+    log(data)
+
     for field in fields_to_update:
         for k, v in field.items():
             if isinstance(v, dict):
@@ -466,6 +472,8 @@ def update_nrows(table_dict: Dict[str, str], mode: str) -&gt; Dict[str, str]:
 
     with open(config_file, &#34;w&#34;, encoding=&#34;utf-8&#34;) as fp:
         yaml.dump(data, fp)
+
+    log(data)
 
     if handle.validate():
         handle.publish(if_exists=&#34;replace&#34;)
