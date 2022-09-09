@@ -46,7 +46,7 @@ from pipelines.utils.utils import log
 
 
 @task
-def crawler_datasets() -&gt; Dict:
+def crawler_datasets(page_size:int, mode:str) -&gt; Dict:
     &#34;&#34;&#34;
     This task uses `bd_dataset_search` website API
     enpoint to retrieve a list of tables updated in last 7 days.
@@ -55,9 +55,13 @@ def crawler_datasets() -&gt; Dict:
     Returns:
         list of lists with dataset_id and table_id
     &#34;&#34;&#34;
-    # first request is made separately since we need to know the number of pages before the iteration
-    page_size = 100
-    url = f&#34;https://basedosdados.org/api/3/action/bd_dataset_search?q=&amp;resource_type=bdm_table&amp;page=1&amp;page_size={page_size}&#34;  # pylint: disable=C0301
+    if mode==&#39;prod&#39;:
+        url = &#39;https://basedosdados.org/api/3/action/bd_dataset_search&#39;
+    elif mode==&#39;dev&#39;:
+        url = &#39;https://staging.basedosdados.org/api/3/action/bd_dataset_search&#39;
+    else:
+        raise ValueError(&#39;mode must be prod or dev&#39;)
+    url = f&#34;{url}?q=&amp;resource_type=bdm_table&amp;page=1&amp;page_size={page_size}&#34;  # pylint: disable=C0301
     response = _safe_fetch(url)
     json_response = response.json()
 
@@ -161,7 +165,7 @@ def tables_to_zip(json_response:dict, days:int=7) -&gt; List[Dict[str, str]]:
 
 
 @task
-def update_nrows(table_dict: Dict[str, str]) -&gt; Dict[str, str]:
+def update_nrows(table_dict: Dict[str, str], mode: str) -&gt; Dict[str, str]:
     &#34;&#34;&#34;Get number of rows in a table
 
     Args:
@@ -173,8 +177,14 @@ def update_nrows(table_dict: Dict[str, str]) -&gt; Dict[str, str]:
     dataset_id = table_dict[&#34;dataset_id&#34;]
     table_id = table_dict[&#34;table_id&#34;]
     config_map = {}
-    config_map.update({&#34;database&#34;: f&#34;basedosdados.{dataset_id}.{table_id}&#34;})
-    config_map.update({&#34;project_id&#34;: &#34;basedosdados&#34;})
+    if mode == &#34;prod&#34;:
+        config_map.update({&#34;database&#34;: f&#34;basedosdados.{dataset_id}.{table_id}&#34;})
+        config_map.update({&#34;project_id&#34;: &#34;basedosdados&#34;})
+    elif mode == &#34;dev&#34;:
+        config_map.update({&#34;database&#34;: f&#34;basedosdados-dev.{dataset_id}_staging.{table_id}&#34;})
+        config_map.update({&#34;project_id&#34;: &#34;basedosdados-dev&#34;})
+    else:
+        raise ValueError(&#34;mode must be prod or dev&#34;)
 
     # ideally, we would consume the API to get the number of rows,
     # but it is not available yet.
@@ -225,7 +235,7 @@ def update_nrows(table_dict: Dict[str, str]) -&gt; Dict[str, str]:
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="pipelines.utils.cross_update.tasks.crawler_datasets"><code class="name flex">
-<span>def <span class="ident">crawler_datasets</span></span>(<span>) ‑> Dict</span>
+<span>def <span class="ident">crawler_datasets</span></span>(<span>page_size: int, mode: str) ‑> Dict</span>
 </code></dt>
 <dd>
 <div class="desc"><p>This task uses <code>bd_dataset_search</code> website API
@@ -242,7 +252,7 @@ enpoint to retrieve a list of tables updated in last 7 days.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@task
-def crawler_datasets() -&gt; Dict:
+def crawler_datasets(page_size:int, mode:str) -&gt; Dict:
     &#34;&#34;&#34;
     This task uses `bd_dataset_search` website API
     enpoint to retrieve a list of tables updated in last 7 days.
@@ -251,9 +261,13 @@ def crawler_datasets() -&gt; Dict:
     Returns:
         list of lists with dataset_id and table_id
     &#34;&#34;&#34;
-    # first request is made separately since we need to know the number of pages before the iteration
-    page_size = 100
-    url = f&#34;https://basedosdados.org/api/3/action/bd_dataset_search?q=&amp;resource_type=bdm_table&amp;page=1&amp;page_size={page_size}&#34;  # pylint: disable=C0301
+    if mode==&#39;prod&#39;:
+        url = &#39;https://basedosdados.org/api/3/action/bd_dataset_search&#39;
+    elif mode==&#39;dev&#39;:
+        url = &#39;https://staging.basedosdados.org/api/3/action/bd_dataset_search&#39;
+    else:
+        raise ValueError(&#39;mode must be prod or dev&#39;)
+    url = f&#34;{url}?q=&amp;resource_type=bdm_table&amp;page=1&amp;page_size={page_size}&#34;  # pylint: disable=C0301
     response = _safe_fetch(url)
     json_response = response.json()
 
@@ -377,7 +391,7 @@ def tables_to_zip(json_response:dict, days:int=7) -&gt; List[Dict[str, str]]:
 </details>
 </dd>
 <dt id="pipelines.utils.cross_update.tasks.update_nrows"><code class="name flex">
-<span>def <span class="ident">update_nrows</span></span>(<span>table_dict: Dict[str, str]) ‑> Dict[str, str]</span>
+<span>def <span class="ident">update_nrows</span></span>(<span>table_dict: Dict[str, str], mode: str) ‑> Dict[str, str]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get number of rows in a table</p>
@@ -398,7 +412,7 @@ def tables_to_zip(json_response:dict, days:int=7) -&gt; List[Dict[str, str]]:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@task
-def update_nrows(table_dict: Dict[str, str]) -&gt; Dict[str, str]:
+def update_nrows(table_dict: Dict[str, str], mode: str) -&gt; Dict[str, str]:
     &#34;&#34;&#34;Get number of rows in a table
 
     Args:
@@ -410,8 +424,14 @@ def update_nrows(table_dict: Dict[str, str]) -&gt; Dict[str, str]:
     dataset_id = table_dict[&#34;dataset_id&#34;]
     table_id = table_dict[&#34;table_id&#34;]
     config_map = {}
-    config_map.update({&#34;database&#34;: f&#34;basedosdados.{dataset_id}.{table_id}&#34;})
-    config_map.update({&#34;project_id&#34;: &#34;basedosdados&#34;})
+    if mode == &#34;prod&#34;:
+        config_map.update({&#34;database&#34;: f&#34;basedosdados.{dataset_id}.{table_id}&#34;})
+        config_map.update({&#34;project_id&#34;: &#34;basedosdados&#34;})
+    elif mode == &#34;dev&#34;:
+        config_map.update({&#34;database&#34;: f&#34;basedosdados-dev.{dataset_id}_staging.{table_id}&#34;})
+        config_map.update({&#34;project_id&#34;: &#34;basedosdados-dev&#34;})
+    else:
+        raise ValueError(&#34;mode must be prod or dev&#34;)
 
     # ideally, we would consume the API to get the number of rows,
     # but it is not available yet.
