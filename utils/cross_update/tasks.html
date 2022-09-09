@@ -43,10 +43,11 @@ import ruamel.yaml as ryaml
 
 from pipelines.utils.cross_update.utils import _safe_fetch
 from pipelines.utils.utils import log
+from pipelines.utils.dump_to_gcs.constants import constants as dump_to_gcs_constants
 
 
 @task
-def crawler_datasets(page_size:int, mode:str) -&gt; Dict:
+def crawler_datasets(page_size: int, mode: str) -&gt; Dict:
     &#34;&#34;&#34;
     This task uses `bd_dataset_search` website API
     enpoint to retrieve a list of tables updated in last 7 days.
@@ -55,12 +56,12 @@ def crawler_datasets(page_size:int, mode:str) -&gt; Dict:
     Returns:
         list of lists with dataset_id and table_id
     &#34;&#34;&#34;
-    if mode==&#39;prod&#39;:
-        url = &#39;https://basedosdados.org/api/3/action/bd_dataset_search&#39;
-    elif mode==&#39;dev&#39;:
-        url = &#39;https://staging.basedosdados.org/api/3/action/bd_dataset_search&#39;
+    if mode == &#34;prod&#34;:
+        url = &#34;https://basedosdados.org/api/3/action/bd_dataset_search&#34;
+    elif mode == &#34;dev&#34;:
+        url = &#34;https://staging.basedosdados.org/api/3/action/bd_dataset_search&#34;
     else:
-        raise ValueError(&#39;mode must be prod or dev&#39;)
+        raise ValueError(&#34;mode must be prod or dev&#34;)
     url = f&#34;{url}?q=&amp;resource_type=bdm_table&amp;page=1&amp;page_size={page_size}&#34;  # pylint: disable=C0301
     response = _safe_fetch(url)
     json_response = response.json()
@@ -69,7 +70,7 @@ def crawler_datasets(page_size:int, mode:str) -&gt; Dict:
 
 
 @task
-def last_updated_tables(json_response:dict, days:int=7) -&gt; List[Dict[str, str]]:
+def last_updated_tables(json_response: dict, days: int = 7) -&gt; List[Dict[str, str]]:
     &#34;&#34;&#34;Generate a list of dicts like {&#34;dataset_id&#34;: &#34;dataset_id&#34;, &#34;table_id&#34;: &#34;table_id&#34;}
     where all tables was update in the last 7 days
     &#34;&#34;&#34;
@@ -117,7 +118,7 @@ def last_updated_tables(json_response:dict, days:int=7) -&gt; List[Dict[str, str
 
 
 @task
-def tables_to_zip(json_response:dict, days:int=7) -&gt; List[Dict[str, str]]:
+def tables_to_zip(json_response: dict, days: int = 7) -&gt; List[Dict[str, str]]:
     &#34;&#34;&#34;Generate a list of dicts like {&#34;dataset_id&#34;: &#34;dataset_id&#34;, &#34;table_id&#34;: &#34;table_id&#34;}
     where all tables was update in the last 7 days and has less than 200k rows
     &#34;&#34;&#34;
@@ -134,12 +135,22 @@ def tables_to_zip(json_response:dict, days:int=7) -&gt; List[Dict[str, str]]:
             if datasets[i][&#34;resources&#34;][j][&#34;resource_type&#34;] == &#34;bdm_table&#34;:
                 bdm_tables.append(datasets[i][&#34;resources&#34;][j])
     result = []
+
     for bdm_table in bdm_tables:
+        # skip if dataset_id, table_id, metadata_modified, and number of rows are not in the bdm_table keys
+        if not all(
+            key in bdm_table.keys()
+            for key in [&#34;dataset_id&#34;, &#34;table_id&#34;, &#34;metadata_modified&#34;, &#34;number_of_rows&#34;]
+        ):
+            continue
+        log(f&#34;Table: {bdm_table[&#39;dataset_id&#39;]}.{bdm_table[&#39;table_id&#39;]}&#34;)
         tmp_dict = {
             &#34;dataset_id&#34;: bdm_table[&#34;dataset_id&#34;],
             &#34;table_id&#34;: bdm_table[&#34;table_id&#34;],
             &#34;last_updated&#34;: bdm_table[&#34;metadata_modified&#34;],
             &#34;number_rows&#34;: bdm_table[&#34;number_rows&#34;],
+            &#34;project_id&#34;: &#34;basedosdados&#34;,
+            &#34;maximum_bytes_processed&#34;: dump_to_gcs_constants.MAX_BYTES_PROCESSED_PER_TABLE.value,
         }
         result.append(tmp_dict)
 
@@ -155,6 +166,12 @@ def tables_to_zip(json_response:dict, days:int=7) -&gt; List[Dict[str, str]]:
 
     # filter list of dictionaries by number_rows and remove tables with more than 200k rows
     result = [x for x in result if x[&#34;number_rows&#34;] &lt;= 200000]
+
+    log(
+        f&#34;Found {len(result)} tables updated in last 7 days and has less than 200k rows&#34;
+    )
+    for table in result:
+        log(f&#34;Table: {table[&#39;dataset_id&#39;]}.{table[&#39;table_id&#39;]} will be ziped&#34;)
 
     # remove last_updated key and number_rows key
     for x in result:
@@ -181,7 +198,9 @@ def update_nrows(table_dict: Dict[str, str], mode: str) -&gt; Dict[str, str]:
         config_map.update({&#34;database&#34;: f&#34;basedosdados.{dataset_id}.{table_id}&#34;})
         config_map.update({&#34;project_id&#34;: &#34;basedosdados&#34;})
     elif mode == &#34;dev&#34;:
-        config_map.update({&#34;database&#34;: f&#34;basedosdados-dev.{dataset_id}_staging.{table_id}&#34;})
+        config_map.update(
+            {&#34;database&#34;: f&#34;basedosdados-dev.{dataset_id}_staging.{table_id}&#34;}
+        )
         config_map.update({&#34;project_id&#34;: &#34;basedosdados-dev&#34;})
     else:
         raise ValueError(&#34;mode must be prod or dev&#34;)
@@ -256,7 +275,7 @@ enpoint to retrieve a list of tables updated in last 7 days.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@task
-def crawler_datasets(page_size:int, mode:str) -&gt; Dict:
+def crawler_datasets(page_size: int, mode: str) -&gt; Dict:
     &#34;&#34;&#34;
     This task uses `bd_dataset_search` website API
     enpoint to retrieve a list of tables updated in last 7 days.
@@ -265,12 +284,12 @@ def crawler_datasets(page_size:int, mode:str) -&gt; Dict:
     Returns:
         list of lists with dataset_id and table_id
     &#34;&#34;&#34;
-    if mode==&#39;prod&#39;:
-        url = &#39;https://basedosdados.org/api/3/action/bd_dataset_search&#39;
-    elif mode==&#39;dev&#39;:
-        url = &#39;https://staging.basedosdados.org/api/3/action/bd_dataset_search&#39;
+    if mode == &#34;prod&#34;:
+        url = &#34;https://basedosdados.org/api/3/action/bd_dataset_search&#34;
+    elif mode == &#34;dev&#34;:
+        url = &#34;https://staging.basedosdados.org/api/3/action/bd_dataset_search&#34;
     else:
-        raise ValueError(&#39;mode must be prod or dev&#39;)
+        raise ValueError(&#34;mode must be prod or dev&#34;)
     url = f&#34;{url}?q=&amp;resource_type=bdm_table&amp;page=1&amp;page_size={page_size}&#34;  # pylint: disable=C0301
     response = _safe_fetch(url)
     json_response = response.json()
@@ -289,7 +308,7 @@ where all tables was update in the last 7 days</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@task
-def last_updated_tables(json_response:dict, days:int=7) -&gt; List[Dict[str, str]]:
+def last_updated_tables(json_response: dict, days: int = 7) -&gt; List[Dict[str, str]]:
     &#34;&#34;&#34;Generate a list of dicts like {&#34;dataset_id&#34;: &#34;dataset_id&#34;, &#34;table_id&#34;: &#34;table_id&#34;}
     where all tables was update in the last 7 days
     &#34;&#34;&#34;
@@ -347,7 +366,7 @@ where all tables was update in the last 7 days and has less than 200k rows</p></
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@task
-def tables_to_zip(json_response:dict, days:int=7) -&gt; List[Dict[str, str]]:
+def tables_to_zip(json_response: dict, days: int = 7) -&gt; List[Dict[str, str]]:
     &#34;&#34;&#34;Generate a list of dicts like {&#34;dataset_id&#34;: &#34;dataset_id&#34;, &#34;table_id&#34;: &#34;table_id&#34;}
     where all tables was update in the last 7 days and has less than 200k rows
     &#34;&#34;&#34;
@@ -364,12 +383,22 @@ def tables_to_zip(json_response:dict, days:int=7) -&gt; List[Dict[str, str]]:
             if datasets[i][&#34;resources&#34;][j][&#34;resource_type&#34;] == &#34;bdm_table&#34;:
                 bdm_tables.append(datasets[i][&#34;resources&#34;][j])
     result = []
+
     for bdm_table in bdm_tables:
+        # skip if dataset_id, table_id, metadata_modified, and number of rows are not in the bdm_table keys
+        if not all(
+            key in bdm_table.keys()
+            for key in [&#34;dataset_id&#34;, &#34;table_id&#34;, &#34;metadata_modified&#34;, &#34;number_of_rows&#34;]
+        ):
+            continue
+        log(f&#34;Table: {bdm_table[&#39;dataset_id&#39;]}.{bdm_table[&#39;table_id&#39;]}&#34;)
         tmp_dict = {
             &#34;dataset_id&#34;: bdm_table[&#34;dataset_id&#34;],
             &#34;table_id&#34;: bdm_table[&#34;table_id&#34;],
             &#34;last_updated&#34;: bdm_table[&#34;metadata_modified&#34;],
             &#34;number_rows&#34;: bdm_table[&#34;number_rows&#34;],
+            &#34;project_id&#34;: &#34;basedosdados&#34;,
+            &#34;maximum_bytes_processed&#34;: dump_to_gcs_constants.MAX_BYTES_PROCESSED_PER_TABLE.value,
         }
         result.append(tmp_dict)
 
@@ -385,6 +414,12 @@ def tables_to_zip(json_response:dict, days:int=7) -&gt; List[Dict[str, str]]:
 
     # filter list of dictionaries by number_rows and remove tables with more than 200k rows
     result = [x for x in result if x[&#34;number_rows&#34;] &lt;= 200000]
+
+    log(
+        f&#34;Found {len(result)} tables updated in last 7 days and has less than 200k rows&#34;
+    )
+    for table in result:
+        log(f&#34;Table: {table[&#39;dataset_id&#39;]}.{table[&#39;table_id&#39;]} will be ziped&#34;)
 
     # remove last_updated key and number_rows key
     for x in result:
@@ -432,7 +467,9 @@ def update_nrows(table_dict: Dict[str, str], mode: str) -&gt; Dict[str, str]:
         config_map.update({&#34;database&#34;: f&#34;basedosdados.{dataset_id}.{table_id}&#34;})
         config_map.update({&#34;project_id&#34;: &#34;basedosdados&#34;})
     elif mode == &#34;dev&#34;:
-        config_map.update({&#34;database&#34;: f&#34;basedosdados-dev.{dataset_id}_staging.{table_id}&#34;})
+        config_map.update(
+            {&#34;database&#34;: f&#34;basedosdados-dev.{dataset_id}_staging.{table_id}&#34;}
+        )
         config_map.update({&#34;project_id&#34;: &#34;basedosdados-dev&#34;})
     else:
         raise ValueError(&#34;mode must be prod or dev&#34;)
