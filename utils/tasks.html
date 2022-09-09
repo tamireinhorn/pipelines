@@ -230,9 +230,6 @@ def update_metadata(dataset_id: str, table_id: str, fields_to_update: list) -&gt
 
     config_file = handle.filepath.as_posix()  # noqa
 
-    log(&#34;get path config_file&#34;)
-    log(config_file)
-
     with open(config_file, encoding=&#34;utf-8&#34;) as fp:
         data = yaml.load(fp)
 
@@ -374,35 +371,7 @@ def get_date_time_str(wait=None) -&gt; str:
     &#34;&#34;&#34;
     Get current time as string
     &#34;&#34;&#34;
-    return datetime.now().strftime(&#34;%Y-%m-%d %HH:%MM&#34;)
-
-
-@task
-def get_nrows(dataset_id: str, table_id: str, staging_mode: str) -&gt; int:
-    &#34;&#34;&#34;Get number of rows in a table
-
-    Args:
-        dataset_id (str): dataset id
-        table_id (str): table id
-        staging_mode (str): staging mode
-
-    Returns:
-        int: number of rows
-    &#34;&#34;&#34;
-
-    if staging_mode == &#34;dev&#34;:
-        database = &#34;basedosdados-dev.{dataset_id}_staging.{table_id}&#34;
-    elif staging_mode == &#34;prod&#34;:
-        database = &#34;basedosdados-staging.{dataset_id}_staging.{table_id}&#34;
-    # ideally, we would consume the API to get the number of rows,
-    # but it is not available yet.
-    # See: https://stackoverflow.com/questions/69313542/num-rows-issue-for-views-in-big-query-python-library
-    query = f&#34;SELECT COUNT(*) AS n_rows FROM `{database}`&#34;
-    n_rows = bd.read_sql(
-        query=query, billing_project_id=&#34;basedosdados-dev&#34;, from_file=True
-    )[&#34;n_rows&#34;].to_list()[0]
-
-    return n_rows</code></pre>
+    return datetime.now().strftime(&#34;%Y-%m-%d %HH:%MM&#34;)</code></pre>
 </details>
 </section>
 <section>
@@ -606,57 +575,6 @@ def get_date_time_str(wait=None) -&gt; str:
     return datetime.now().strftime(&#34;%Y-%m-%d %HH:%MM&#34;)</code></pre>
 </details>
 </dd>
-<dt id="pipelines.utils.tasks.get_nrows"><code class="name flex">
-<span>def <span class="ident">get_nrows</span></span>(<span>dataset_id: str, table_id: str, staging_mode: str) ‑> int</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Get number of rows in a table</p>
-<h2 id="args">Args</h2>
-<dl>
-<dt><strong><code>dataset_id</code></strong> :&ensp;<code>str</code></dt>
-<dd>dataset id</dd>
-<dt><strong><code>table_id</code></strong> :&ensp;<code>str</code></dt>
-<dd>table id</dd>
-<dt><strong><code>staging_mode</code></strong> :&ensp;<code>str</code></dt>
-<dd>staging mode</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>int</code></dt>
-<dd>number of rows</dd>
-</dl></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@task
-def get_nrows(dataset_id: str, table_id: str, staging_mode: str) -&gt; int:
-    &#34;&#34;&#34;Get number of rows in a table
-
-    Args:
-        dataset_id (str): dataset id
-        table_id (str): table id
-        staging_mode (str): staging mode
-
-    Returns:
-        int: number of rows
-    &#34;&#34;&#34;
-
-    if staging_mode == &#34;dev&#34;:
-        database = &#34;basedosdados-dev.{dataset_id}_staging.{table_id}&#34;
-    elif staging_mode == &#34;prod&#34;:
-        database = &#34;basedosdados-staging.{dataset_id}_staging.{table_id}&#34;
-    # ideally, we would consume the API to get the number of rows,
-    # but it is not available yet.
-    # See: https://stackoverflow.com/questions/69313542/num-rows-issue-for-views-in-big-query-python-library
-    query = f&#34;SELECT COUNT(*) AS n_rows FROM `{database}`&#34;
-    n_rows = bd.read_sql(
-        query=query, billing_project_id=&#34;basedosdados-dev&#34;, from_file=True
-    )[&#34;n_rows&#34;].to_list()[0]
-
-    return n_rows</code></pre>
-</details>
-</dd>
 <dt id="pipelines.utils.tasks.get_temporal_coverage"><code class="name flex">
 <span>def <span class="ident">get_temporal_coverage</span></span>(<span>filepath: str, date_cols: list, time_unit: str, interval: str) ‑> str</span>
 </code></dt>
@@ -829,9 +747,6 @@ def update_metadata(dataset_id: str, table_id: str, fields_to_update: list) -&gt
 
     config_file = handle.filepath.as_posix()  # noqa
 
-    log(&#34;get path config_file&#34;)
-    log(config_file)
-
     with open(config_file, encoding=&#34;utf-8&#34;) as fp:
         data = yaml.load(fp)
 
@@ -876,7 +791,6 @@ def update_metadata(dataset_id: str, table_id: str, fields_to_update: list) -&gt
 <li><code><a title="pipelines.utils.tasks.get_credentials" href="#pipelines.utils.tasks.get_credentials">get_credentials</a></code></li>
 <li><code><a title="pipelines.utils.tasks.get_current_flow_labels" href="#pipelines.utils.tasks.get_current_flow_labels">get_current_flow_labels</a></code></li>
 <li><code><a title="pipelines.utils.tasks.get_date_time_str" href="#pipelines.utils.tasks.get_date_time_str">get_date_time_str</a></code></li>
-<li><code><a title="pipelines.utils.tasks.get_nrows" href="#pipelines.utils.tasks.get_nrows">get_nrows</a></code></li>
 <li><code><a title="pipelines.utils.tasks.get_temporal_coverage" href="#pipelines.utils.tasks.get_temporal_coverage">get_temporal_coverage</a></code></li>
 <li><code><a title="pipelines.utils.tasks.rename_current_flow_run" href="#pipelines.utils.tasks.rename_current_flow_run">rename_current_flow_run</a></code></li>
 <li><code><a title="pipelines.utils.tasks.rename_current_flow_run_dataset_table" href="#pipelines.utils.tasks.rename_current_flow_run_dataset_table">rename_current_flow_run_dataset_table</a></code></li>

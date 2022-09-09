@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>pipelines.utils.dump_to_gcs.flows API documentation</title>
-<meta name="description" content="Flows for dumping data directly from BigQuery to GCS." />
+<title>pipelines.utils.cross_update.schedules API documentation</title>
+<meta name="description" content="Schedules for br_tse_eleicoes" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,95 +19,35 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>pipelines.utils.dump_to_gcs.flows</code></h1>
+<h1 class="title">Module <code>pipelines.utils.cross_update.schedules</code></h1>
 </header>
 <section id="section-intro">
-<p>Flows for dumping data directly from BigQuery to GCS.</p>
+<p>Schedules for br_tse_eleicoes</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python"># -*- coding: utf-8 -*-
 &#34;&#34;&#34;
-Flows for dumping data directly from BigQuery to GCS.
+Schedules for br_tse_eleicoes
 &#34;&#34;&#34;
-from prefect import Parameter, case
-from prefect.run_configs import KubernetesRun
-from prefect.storage import GCS
 
+from datetime import timedelta, datetime
+from prefect.schedules import Schedule
+from prefect.schedules.clocks import IntervalClock
 from pipelines.constants import constants
-from pipelines.utils.constants import constants as utils_constants
-from pipelines.utils.decorators import Flow
-from pipelines.utils.dump_to_gcs.constants import constants as dump_to_gcs_constants
-from pipelines.utils.dump_to_gcs.tasks import (
-    download_data_to_gcs,
-    get_project_id,
-    trigger_cron_job,
-    update_last_trigger,
-)
-from pipelines.utils.tasks import rename_current_flow_run_dataset_table
 
-with Flow(
-    name=utils_constants.FLOW_DUMP_TO_GCS_NAME.value,
-    code_owners=[&#34;lucas_cr&#34;],
-) as dump_to_gcs_flow:
-
-    project_id = Parameter(&#34;project_id&#34;, required=False)
-    dataset_id = Parameter(&#34;dataset_id&#34;)  # dataset_id or dataset_id_staging
-    table_id = Parameter(&#34;table_id&#34;)
-    query = Parameter(&#34;query&#34;, required=False)
-    jinja_query_params = Parameter(&#34;jinja_query_params&#34;, required=False)
-    bd_project_mode = Parameter(
-        &#34;bd_project_mode&#34;, required=False, default=&#34;prod&#34;
-    )  # prod or staging
-    billing_project_id = Parameter(&#34;billing_project_id&#34;, required=False)
-    maximum_bytes_processed = Parameter(
-        &#34;maximum_bytes_processed&#34;,
-        required=False,
-        default=dump_to_gcs_constants.MAX_BYTES_PROCESSED_PER_TABLE.value,
-    )
-    desired_crontab = Parameter(
-        &#34;desired_crontab&#34;,
-        required=False,
-        default=&#34;0 0 * * *&#34;,
-    )
-
-    rename_flow_run = rename_current_flow_run_dataset_table(
-        prefix=&#34;Dump to GCS: &#34;, dataset_id=dataset_id, table_id=table_id
-    )
-
-    project_id = get_project_id(project_id=project_id, bd_project_mode=bd_project_mode)
-
-    trigger_download, execution_time = trigger_cron_job(
-        project_id=project_id,
-        dataset_id=dataset_id,
-        table_id=table_id,
-        cron_expression=desired_crontab,
-    )
-
-    with case(trigger_download, True):
-        download_task = download_data_to_gcs(  # pylint: disable=C0103
-            project_id=project_id,
-            dataset_id=dataset_id,
-            table_id=table_id,
-            query=query,
-            jinja_query_params=jinja_query_params,
-            bd_project_mode=bd_project_mode,
-            billing_project_id=billing_project_id,
-            maximum_bytes_processed=maximum_bytes_processed,
-        )
-
-        update_task = update_last_trigger(  # pylint: disable=C0103
-            project_id=project_id,
-            dataset_id=dataset_id,
-            table_id=table_id,
-            execution_time=execution_time,
-        )
-        update_task.set_upstream(download_task)
-
-
-dump_to_gcs_flow.storage = GCS(constants.GCS_FLOWS_BUCKET.value)
-dump_to_gcs_flow.run_config = KubernetesRun(image=constants.DOCKER_IMAGE.value)</code></pre>
+schedule_nrows = Schedule(
+    clocks=[
+        IntervalClock(
+            interval=timedelta(days=7),
+            start_date=datetime(2021, 1, 1, 9, 45),
+            labels=[
+                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+            ],
+        ),
+    ],
+)</code></pre>
 </details>
 </section>
 <section>
@@ -127,7 +67,7 @@ dump_to_gcs_flow.run_config = KubernetesRun(image=constants.DOCKER_IMAGE.value)<
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="pipelines.utils.dump_to_gcs" href="index.html">pipelines.utils.dump_to_gcs</a></code></li>
+<li><code><a title="pipelines.utils.cross_update" href="index.html">pipelines.utils.cross_update</a></code></li>
 </ul>
 </li>
 </ul>
