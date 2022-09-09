@@ -65,9 +65,9 @@ def crawler_datasets() -&gt; Dict:
 
 
 @task
-def last_updated_tables(json_response) -&gt; List[Dict[str, str]]:
-    &#34;&#34;&#34;
-    Generate a dict from BD&#39;s API response with dataset_id and description as keys
+def last_updated_tables(json_response:dict, days:int=7) -&gt; List[Dict[str, str]]:
+    &#34;&#34;&#34;Generate a list of dicts like {&#34;dataset_id&#34;: &#34;dataset_id&#34;, &#34;table_id&#34;: &#34;table_id&#34;}
+    where all tables was update in the last 7 days
     &#34;&#34;&#34;
     n_datasets = json_response[&#34;result&#34;][&#34;count&#34;]
     n_resources = [
@@ -90,9 +90,9 @@ def last_updated_tables(json_response) -&gt; List[Dict[str, str]]:
         }
         result.append(tmp_dict)
 
-    # filter list of dictionaries by last_updated and remove older than 7 days
+    # filter list of dictionaries by last_updated and remove older than X days
     today = datetime.datetime.today()
-    seven_days_ago = today - timedelta(days=1)
+    seven_days_ago = today - timedelta(days=days)
     result = [
         x
         for x in result
@@ -108,6 +108,54 @@ def last_updated_tables(json_response) -&gt; List[Dict[str, str]]:
     # remove last_updated key
     for x in result:
         del x[&#34;last_updated&#34;]
+
+    return result
+
+
+@task
+def tables_to_zip(json_response:dict, days:int=7) -&gt; List[Dict[str, str]]:
+    &#34;&#34;&#34;Generate a list of dicts like {&#34;dataset_id&#34;: &#34;dataset_id&#34;, &#34;table_id&#34;: &#34;table_id&#34;}
+    where all tables was update in the last 7 days and has less than 200k rows
+    &#34;&#34;&#34;
+    n_datasets = json_response[&#34;result&#34;][&#34;count&#34;]
+    n_resources = [
+        json_response[&#34;result&#34;][&#34;datasets&#34;][k][&#34;num_resources&#34;]
+        for k in range(n_datasets)
+    ]
+    datasets = json_response[&#34;result&#34;][&#34;datasets&#34;]
+    bdm_tables = []
+
+    for i in range(n_datasets):
+        for j in range(n_resources[i]):
+            if datasets[i][&#34;resources&#34;][j][&#34;resource_type&#34;] == &#34;bdm_table&#34;:
+                bdm_tables.append(datasets[i][&#34;resources&#34;][j])
+    result = []
+    for bdm_table in bdm_tables:
+        tmp_dict = {
+            &#34;dataset_id&#34;: bdm_table[&#34;dataset_id&#34;],
+            &#34;table_id&#34;: bdm_table[&#34;table_id&#34;],
+            &#34;last_updated&#34;: bdm_table[&#34;metadata_modified&#34;],
+            &#34;number_rows&#34;: bdm_table[&#34;number_rows&#34;],
+        }
+        result.append(tmp_dict)
+
+    # filter list of dictionaries by last_updated and remove older than X days
+    today = datetime.datetime.today()
+    seven_days_ago = today - timedelta(days=days)
+    result = [
+        x
+        for x in result
+        if datetime.datetime.strptime(x[&#34;last_updated&#34;], &#34;%Y-%m-%dT%H:%M:%S.%f&#34;)
+        &gt; seven_days_ago
+    ]
+
+    # filter list of dictionaries by number_rows and remove tables with more than 200k rows
+    result = [x for x in result if x[&#34;number_rows&#34;] &lt;= 200000]
+
+    # remove last_updated key and number_rows key
+    for x in result:
+        del x[&#34;last_updated&#34;]
+        del x[&#34;number_rows&#34;]
 
     return result
 
@@ -213,18 +261,19 @@ def crawler_datasets() -&gt; Dict:
 </details>
 </dd>
 <dt id="pipelines.utils.cross_update.tasks.last_updated_tables"><code class="name flex">
-<span>def <span class="ident">last_updated_tables</span></span>(<span>json_response) ‑> List[Dict[str, str]]</span>
+<span>def <span class="ident">last_updated_tables</span></span>(<span>json_response: dict, days: int = 7) ‑> List[Dict[str, str]]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Generate a dict from BD's API response with dataset_id and description as keys</p></div>
+<div class="desc"><p>Generate a list of dicts like {"dataset_id": "dataset_id", "table_id": "table_id"}
+where all tables was update in the last 7 days</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@task
-def last_updated_tables(json_response) -&gt; List[Dict[str, str]]:
-    &#34;&#34;&#34;
-    Generate a dict from BD&#39;s API response with dataset_id and description as keys
+def last_updated_tables(json_response:dict, days:int=7) -&gt; List[Dict[str, str]]:
+    &#34;&#34;&#34;Generate a list of dicts like {&#34;dataset_id&#34;: &#34;dataset_id&#34;, &#34;table_id&#34;: &#34;table_id&#34;}
+    where all tables was update in the last 7 days
     &#34;&#34;&#34;
     n_datasets = json_response[&#34;result&#34;][&#34;count&#34;]
     n_resources = [
@@ -247,9 +296,9 @@ def last_updated_tables(json_response) -&gt; List[Dict[str, str]]:
         }
         result.append(tmp_dict)
 
-    # filter list of dictionaries by last_updated and remove older than 7 days
+    # filter list of dictionaries by last_updated and remove older than X days
     today = datetime.datetime.today()
-    seven_days_ago = today - timedelta(days=1)
+    seven_days_ago = today - timedelta(days=days)
     result = [
         x
         for x in result
@@ -265,6 +314,64 @@ def last_updated_tables(json_response) -&gt; List[Dict[str, str]]:
     # remove last_updated key
     for x in result:
         del x[&#34;last_updated&#34;]
+
+    return result</code></pre>
+</details>
+</dd>
+<dt id="pipelines.utils.cross_update.tasks.tables_to_zip"><code class="name flex">
+<span>def <span class="ident">tables_to_zip</span></span>(<span>json_response: dict, days: int = 7) ‑> List[Dict[str, str]]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generate a list of dicts like {"dataset_id": "dataset_id", "table_id": "table_id"}
+where all tables was update in the last 7 days and has less than 200k rows</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@task
+def tables_to_zip(json_response:dict, days:int=7) -&gt; List[Dict[str, str]]:
+    &#34;&#34;&#34;Generate a list of dicts like {&#34;dataset_id&#34;: &#34;dataset_id&#34;, &#34;table_id&#34;: &#34;table_id&#34;}
+    where all tables was update in the last 7 days and has less than 200k rows
+    &#34;&#34;&#34;
+    n_datasets = json_response[&#34;result&#34;][&#34;count&#34;]
+    n_resources = [
+        json_response[&#34;result&#34;][&#34;datasets&#34;][k][&#34;num_resources&#34;]
+        for k in range(n_datasets)
+    ]
+    datasets = json_response[&#34;result&#34;][&#34;datasets&#34;]
+    bdm_tables = []
+
+    for i in range(n_datasets):
+        for j in range(n_resources[i]):
+            if datasets[i][&#34;resources&#34;][j][&#34;resource_type&#34;] == &#34;bdm_table&#34;:
+                bdm_tables.append(datasets[i][&#34;resources&#34;][j])
+    result = []
+    for bdm_table in bdm_tables:
+        tmp_dict = {
+            &#34;dataset_id&#34;: bdm_table[&#34;dataset_id&#34;],
+            &#34;table_id&#34;: bdm_table[&#34;table_id&#34;],
+            &#34;last_updated&#34;: bdm_table[&#34;metadata_modified&#34;],
+            &#34;number_rows&#34;: bdm_table[&#34;number_rows&#34;],
+        }
+        result.append(tmp_dict)
+
+    # filter list of dictionaries by last_updated and remove older than X days
+    today = datetime.datetime.today()
+    seven_days_ago = today - timedelta(days=days)
+    result = [
+        x
+        for x in result
+        if datetime.datetime.strptime(x[&#34;last_updated&#34;], &#34;%Y-%m-%dT%H:%M:%S.%f&#34;)
+        &gt; seven_days_ago
+    ]
+
+    # filter list of dictionaries by number_rows and remove tables with more than 200k rows
+    result = [x for x in result if x[&#34;number_rows&#34;] &lt;= 200000]
+
+    # remove last_updated key and number_rows key
+    for x in result:
+        del x[&#34;last_updated&#34;]
+        del x[&#34;number_rows&#34;]
 
     return result</code></pre>
 </details>
@@ -367,6 +474,7 @@ def update_nrows(table_dict: Dict[str, str]) -&gt; Dict[str, str]:
 <ul class="">
 <li><code><a title="pipelines.utils.cross_update.tasks.crawler_datasets" href="#pipelines.utils.cross_update.tasks.crawler_datasets">crawler_datasets</a></code></li>
 <li><code><a title="pipelines.utils.cross_update.tasks.last_updated_tables" href="#pipelines.utils.cross_update.tasks.last_updated_tables">last_updated_tables</a></code></li>
+<li><code><a title="pipelines.utils.cross_update.tasks.tables_to_zip" href="#pipelines.utils.cross_update.tasks.tables_to_zip">tables_to_zip</a></code></li>
 <li><code><a title="pipelines.utils.cross_update.tasks.update_nrows" href="#pipelines.utils.cross_update.tasks.update_nrows">update_nrows</a></code></li>
 </ul>
 </li>
