@@ -54,7 +54,7 @@ def get_random_expression() -&gt; pd.DataFrame:
     Get random data
     &#34;&#34;&#34;
     URL = &#34;https://x-math.herokuapp.com/api/random&#34;
-    response = requests.get(URL)
+    response = requests.get(URL, timeout=5)
 
     cols = [&#34;date&#34;, &#34;first&#34;, &#34;second&#34;, &#34;operation&#34;, &#34;expression&#34;, &#34;answer&#34;]
     time_stamp = datetime.datetime.now().strftime(&#34;%Y-%m-%d %H:%M&#34;)
@@ -170,7 +170,7 @@ def get_random_expression() -&gt; pd.DataFrame:
     Get random data
     &#34;&#34;&#34;
     URL = &#34;https://x-math.herokuapp.com/api/random&#34;
-    response = requests.get(URL)
+    response = requests.get(URL, timeout=5)
 
     cols = [&#34;date&#34;, &#34;first&#34;, &#34;second&#34;, &#34;operation&#34;, &#34;expression&#34;, &#34;answer&#34;]
     time_stamp = datetime.datetime.now().strftime(&#34;%Y-%m-%d %H:%M&#34;)

@@ -195,6 +195,7 @@ def send_discord_message(
     requests.post(
         webhook_url,
         data={&#34;content&#34;: message},
+        timeout=5,
     )
 
 
@@ -1221,6 +1222,7 @@ def log_task(
     requests.post(
         webhook_url,
         data={&#34;content&#34;: message},
+        timeout=5,
     )</code></pre>
 </details>
 </dd>

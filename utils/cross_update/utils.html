@@ -40,7 +40,7 @@ def _safe_fetch(url: str):
     &#34;&#34;&#34;
     response = None
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=300)
         response.raise_for_status()
     except requests.exceptions.HTTPError as errh:
         print(&#34;Http Error:&#34;, errh)

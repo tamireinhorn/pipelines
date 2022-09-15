@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>pipelines.datasets.br_bd_indicadores.schedules API documentation</title>
-<meta name="description" content="Schedules for bd_tweet_data" />
+<title>pipelines.datasets.br_me_comex_stat.constants API documentation</title>
+<meta name="description" content="Constants for br_me_comex_stat" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,99 +19,63 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>pipelines.datasets.br_bd_indicadores.schedules</code></h1>
+<h1 class="title">Module <code>pipelines.datasets.br_me_comex_stat.constants</code></h1>
 </header>
 <section id="section-intro">
-<p>Schedules for bd_tweet_data</p>
+<p>Constants for br_me_comex_stat</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python"># -*- coding: utf-8 -*-
 &#34;&#34;&#34;
-Schedules for bd_tweet_data
+Constants for br_me_comex_stat
 &#34;&#34;&#34;
 
-from datetime import timedelta, datetime
-from prefect.schedules import Schedule, filters, adjustments
-from prefect.schedules.clocks import IntervalClock
-from pipelines.constants import constants
+from enum import Enum
 
-schedule_users = Schedule(
-    clocks=[
-        IntervalClock(
-            interval=timedelta(days=1),
-            start_date=datetime(2022, 5, 15, 0, 0),
-            labels=[
-                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
-            ],
-            parameter_defaults={
-                &#34;dataset_id&#34;: &#34;br_bd_indicadores&#34;,
-                &#34;table_id&#34;: &#34;website_users&#34;,
-            },
-        ),
-    ],
-    filters=[filters.is_weekday],
-)
 
-every_day = Schedule(
-    clocks=[
-        IntervalClock(
-            interval=timedelta(days=1),
-            start_date=datetime(2022, 5, 18, 16, 24),
-            labels=[
-                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
-            ],
-            parameter_defaults={
-                &#34;dataset_id&#34;: &#34;br_bd_indicadores&#34;,
-                &#34;materialization_mode&#34;: &#34;dev&#34;,
-                &#34;materialize after dump&#34;: True,
-                &#34;table_id&#34;: &#34;twitter_metrics&#34;,
-                &#34;dbt_alias&#34;: False,
-            },
-        ),
-    ],
-    filters=[filters.is_weekday],
-)
+class constants(Enum):  # pylint: disable=c0103
+    &#34;&#34;&#34;
+    Constants for br_me_comex_stat
+    &#34;&#34;&#34;
 
-every_day_data_quality = Schedule(
-    clocks=[
-        IntervalClock(
-            interval=timedelta(days=1),
-            start_date=datetime(2022, 9, 15, 10, 00),
-            labels=[
-                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
-            ],
-            parameter_defaults={
-                &#34;dataset_id&#34;: &#34;br_bd_indicadores&#34;,
-                &#34;table_id&#34;: &#34;data_quality&#34;,
-                &#34;materialization_mode&#34;: &#34;dev&#34;,
-                &#34;materialize after dump&#34;: True,
-                &#34;dbt_alias&#34;: False,
-            },
-        ),
-    ],
-)
-
-every_week = Schedule(
-    clocks=[
-        IntervalClock(
-            interval=timedelta(weeks=1),
-            start_date=datetime(2021, 1, 1, 17, 35),
-            labels=[
-                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
-            ],
-            parameter_defaults={
-                &#34;dataset_id&#34;: &#34;br_bd_indicadores&#34;,
-                &#34;materialization_mode&#34;: &#34;dev&#34;,
-                &#34;materialize after dump&#34;: True,
-                &#34;table_id&#34;: &#34;twitter_metrics_agg&#34;,
-            },
-        ),
-    ],
-    filters=[filters.is_weekday],
-    adjustments=[adjustments.next_weekday],
-)</code></pre>
+    UF = [
+        &#34;AC&#34;,
+        &#34;AL&#34;,
+        &#34;AM&#34;,
+        &#34;AP&#34;,
+        &#34;BA&#34;,
+        &#34;CE&#34;,
+        &#34;DF&#34;,
+        &#34;ES&#34;,
+        &#34;GO&#34;,
+        &#34;MA&#34;,
+        &#34;MG&#34;,
+        &#34;MS&#34;,
+        &#34;MT&#34;,
+        &#34;PA&#34;,
+        &#34;PB&#34;,
+        &#34;PE&#34;,
+        &#34;PI&#34;,
+        &#34;PR&#34;,
+        &#34;RJ&#34;,
+        &#34;RN&#34;,
+        &#34;RO&#34;,
+        &#34;RR&#34;,
+        &#34;SC&#34;,
+        &#34;SE&#34;,
+        &#34;RS&#34;,
+        &#34;SP&#34;,
+        &#34;TO&#34;,
+    ]
+    PATH = &#34;/tmp/br_me_comex_stat/&#34;
+    TABLE = [
+        &#34;ncm_exportacao&#34;,
+        &#34;ncm_importacao&#34;,
+        &#34;municipio_exportacao&#34;,
+        &#34;municipio_importacao&#34;,
+    ]</code></pre>
 </details>
 </section>
 <section>
@@ -121,6 +85,81 @@ every_week = Schedule(
 <section>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="pipelines.datasets.br_me_comex_stat.constants.constants"><code class="flex name class">
+<span>class <span class="ident">constants</span></span>
+<span>(</span><span>value, names=None, *, module=None, qualname=None, type=None, start=1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Constants for br_me_comex_stat</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class constants(Enum):  # pylint: disable=c0103
+    &#34;&#34;&#34;
+    Constants for br_me_comex_stat
+    &#34;&#34;&#34;
+
+    UF = [
+        &#34;AC&#34;,
+        &#34;AL&#34;,
+        &#34;AM&#34;,
+        &#34;AP&#34;,
+        &#34;BA&#34;,
+        &#34;CE&#34;,
+        &#34;DF&#34;,
+        &#34;ES&#34;,
+        &#34;GO&#34;,
+        &#34;MA&#34;,
+        &#34;MG&#34;,
+        &#34;MS&#34;,
+        &#34;MT&#34;,
+        &#34;PA&#34;,
+        &#34;PB&#34;,
+        &#34;PE&#34;,
+        &#34;PI&#34;,
+        &#34;PR&#34;,
+        &#34;RJ&#34;,
+        &#34;RN&#34;,
+        &#34;RO&#34;,
+        &#34;RR&#34;,
+        &#34;SC&#34;,
+        &#34;SE&#34;,
+        &#34;RS&#34;,
+        &#34;SP&#34;,
+        &#34;TO&#34;,
+    ]
+    PATH = &#34;/tmp/br_me_comex_stat/&#34;
+    TABLE = [
+        &#34;ncm_exportacao&#34;,
+        &#34;ncm_importacao&#34;,
+        &#34;municipio_exportacao&#34;,
+        &#34;municipio_importacao&#34;,
+    ]</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="pipelines.datasets.br_me_comex_stat.constants.constants.PATH"><code class="name">var <span class="ident">PATH</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="pipelines.datasets.br_me_comex_stat.constants.constants.TABLE"><code class="name">var <span class="ident">TABLE</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="pipelines.datasets.br_me_comex_stat.constants.constants.UF"><code class="name">var <span class="ident">UF</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -131,7 +170,19 @@ every_week = Schedule(
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="pipelines.datasets.br_bd_indicadores" href="index.html">pipelines.datasets.br_bd_indicadores</a></code></li>
+<li><code><a title="pipelines.datasets.br_me_comex_stat" href="index.html">pipelines.datasets.br_me_comex_stat</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="pipelines.datasets.br_me_comex_stat.constants.constants" href="#pipelines.datasets.br_me_comex_stat.constants.constants">constants</a></code></h4>
+<ul class="">
+<li><code><a title="pipelines.datasets.br_me_comex_stat.constants.constants.PATH" href="#pipelines.datasets.br_me_comex_stat.constants.constants.PATH">PATH</a></code></li>
+<li><code><a title="pipelines.datasets.br_me_comex_stat.constants.constants.TABLE" href="#pipelines.datasets.br_me_comex_stat.constants.constants.TABLE">TABLE</a></code></li>
+<li><code><a title="pipelines.datasets.br_me_comex_stat.constants.constants.UF" href="#pipelines.datasets.br_me_comex_stat.constants.constants.UF">UF</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

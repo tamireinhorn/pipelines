@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>pipelines.datasets.br_bd_indicadores.schedules API documentation</title>
-<meta name="description" content="Schedules for bd_tweet_data" />
+<title>pipelines.datasets.br_me_caged.flows API documentation</title>
+<meta name="description" content="Flows for br_me_novo_caged" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,99 +19,49 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>pipelines.datasets.br_bd_indicadores.schedules</code></h1>
+<h1 class="title">Module <code>pipelines.datasets.br_me_caged.flows</code></h1>
 </header>
 <section id="section-intro">
-<p>Schedules for bd_tweet_data</p>
+<p>Flows for br_me_novo_caged</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python"># -*- coding: utf-8 -*-
 &#34;&#34;&#34;
-Schedules for bd_tweet_data
+Flows for br_me_novo_caged
 &#34;&#34;&#34;
+# pylint: disable=invalid-name
+from prefect.storage import GCS
+from prefect import Parameter
+from prefect.run_configs import KubernetesRun
 
-from datetime import timedelta, datetime
-from prefect.schedules import Schedule, filters, adjustments
-from prefect.schedules.clocks import IntervalClock
+from pipelines.utils.decorators import Flow
 from pipelines.constants import constants
+from pipelines.datasets.br_me_caged.tasks import build_partitions, get_caged_data
+from pipelines.utils.tasks import create_table_and_upload_to_gcs
+from pipelines.datasets.br_me_caged.schedules import every_month
 
-schedule_users = Schedule(
-    clocks=[
-        IntervalClock(
-            interval=timedelta(days=1),
-            start_date=datetime(2022, 5, 15, 0, 0),
-            labels=[
-                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
-            ],
-            parameter_defaults={
-                &#34;dataset_id&#34;: &#34;br_bd_indicadores&#34;,
-                &#34;table_id&#34;: &#34;website_users&#34;,
-            },
-        ),
-    ],
-    filters=[filters.is_weekday],
-)
+with Flow(&#34;br_me_caged.microdados_mov&#34;, code_owners=[&#34;lucas_cr&#34;]) as cagedmov:
+    dataset_id = Parameter(&#34;dataset_id&#34;, default=&#34;br_me_caged&#34;, required=True)
+    table_id = Parameter(&#34;table_id&#34;, default=&#34;microdados_movimentacao&#34;, required=True)
+    year = Parameter(&#34;year&#34;, default=2022, required=True)
 
-every_day = Schedule(
-    clocks=[
-        IntervalClock(
-            interval=timedelta(days=1),
-            start_date=datetime(2022, 5, 18, 16, 24),
-            labels=[
-                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
-            ],
-            parameter_defaults={
-                &#34;dataset_id&#34;: &#34;br_bd_indicadores&#34;,
-                &#34;materialization_mode&#34;: &#34;dev&#34;,
-                &#34;materialize after dump&#34;: True,
-                &#34;table_id&#34;: &#34;twitter_metrics&#34;,
-                &#34;dbt_alias&#34;: False,
-            },
-        ),
-    ],
-    filters=[filters.is_weekday],
-)
+    get_data = get_caged_data(table_id=table_id, year=year)
 
-every_day_data_quality = Schedule(
-    clocks=[
-        IntervalClock(
-            interval=timedelta(days=1),
-            start_date=datetime(2022, 9, 15, 10, 00),
-            labels=[
-                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
-            ],
-            parameter_defaults={
-                &#34;dataset_id&#34;: &#34;br_bd_indicadores&#34;,
-                &#34;table_id&#34;: &#34;data_quality&#34;,
-                &#34;materialization_mode&#34;: &#34;dev&#34;,
-                &#34;materialize after dump&#34;: True,
-                &#34;dbt_alias&#34;: False,
-            },
-        ),
-    ],
-)
+    filepath = build_partitions(table_id=table_id, upstream_tasks=[get_data])
 
-every_week = Schedule(
-    clocks=[
-        IntervalClock(
-            interval=timedelta(weeks=1),
-            start_date=datetime(2021, 1, 1, 17, 35),
-            labels=[
-                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
-            ],
-            parameter_defaults={
-                &#34;dataset_id&#34;: &#34;br_bd_indicadores&#34;,
-                &#34;materialization_mode&#34;: &#34;dev&#34;,
-                &#34;materialize after dump&#34;: True,
-                &#34;table_id&#34;: &#34;twitter_metrics_agg&#34;,
-            },
-        ),
-    ],
-    filters=[filters.is_weekday],
-    adjustments=[adjustments.next_weekday],
-)</code></pre>
+    wait_upload_table = create_table_and_upload_to_gcs(
+        data_path=filepath,
+        dataset_id=dataset_id,
+        table_id=table_id,
+        dump_mode=&#34;append&#34;,
+        wait=filepath,
+    )
+
+cagedmov.storage = GCS(constants.GCS_FLOWS_BUCKET.value)
+cagedmov.run_config = KubernetesRun(image=constants.DOCKER_IMAGE.value)
+cagedmov.schedule = every_month</code></pre>
 </details>
 </section>
 <section>
@@ -131,7 +81,7 @@ every_week = Schedule(
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="pipelines.datasets.br_bd_indicadores" href="index.html">pipelines.datasets.br_bd_indicadores</a></code></li>
+<li><code><a title="pipelines.datasets.br_me_caged" href="index.html">pipelines.datasets.br_me_caged</a></code></li>
 </ul>
 </li>
 </ul>

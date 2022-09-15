@@ -36,6 +36,7 @@ import collections
 from typing import Tuple
 from typing import List
 import os
+from datetime import datetime
 
 from googleapiclient.discovery import build
 from oauth2client.service_account import ServiceAccountCredentials
@@ -84,7 +85,7 @@ def connect_to_endpoint(url: str, headers: dict, params: dict, next_token=None) 
     Connect to endpoint using params
     &#34;&#34;&#34;
     params[&#34;next_token&#34;] = next_token  # params object received from create_url function
-    response = requests.request(&#34;GET&#34;, url, headers=headers, params=params)
+    response = requests.request(&#34;GET&#34;, url, headers=headers, params=params, timeout=30)
     print(&#34;Endpoint Response Code: &#34; + str(response.status_code))
     if response.status_code != 200:
         raise Exception(response.status_code, response.text)
@@ -247,7 +248,99 @@ def parse_data(response) -&gt; pd.DataFrame:
 
     # Assign columns names to DF
     result.columns = column_names
-    return result</code></pre>
+    return result
+
+
+def flatten_list(ll):
+    &#34;&#34;&#34;Flatten a list of lists&#34;&#34;&#34;
+    return [str(item) for sublist in ll for item in sublist]
+
+
+def classify_frequency(interval):
+    &#34;&#34;&#34;
+    Classify a temporal coverage interval&#39;s frequency as: year, month, day, other
+    &#34;&#34;&#34;
+
+    if &#34;(&#34; in interval and &#34;)&#34; in interval:
+        initial = interval.split(&#34;(&#34;)[0]
+        final = interval.split(&#34;)&#34;)[1]
+    else:
+        initial = interval
+        final = interval
+
+    initial_dashes = initial.count(&#34;-&#34;)
+    final_dashes = final.count(&#34;-&#34;)
+
+    if max(initial_dashes, final_dashes) == 2:
+        frequency = &#34;day&#34;
+    elif max(initial_dashes, final_dashes) == 1:
+        frequency = &#34;month&#34;
+    elif max(initial_dashes, final_dashes) == 0:
+        frequency = &#34;year&#34;
+    else:
+        frequency = &#34;other&#34;
+
+    return frequency
+
+
+def get_temporal_coverage_elements(interval):
+    &#34;&#34;&#34;
+    Return the three temporal coverage interval&#39;s elements: start, end, delta
+    &#34;&#34;&#34;
+
+    if &#34;(&#34; in interval and &#34;)&#34; in interval:
+        start = interval.split(&#34;(&#34;)[0]
+        end = interval.split(&#34;)&#34;)[1]
+        delta = int(interval[interval.find(&#34;(&#34;) + 1 : interval.find(&#34;)&#34;)])
+    else:
+        start = interval
+        end = interval
+        delta = 0
+
+    return start, end, delta
+
+
+def get_interval_range(start, end, delta, frequency):
+    &#34;&#34;&#34;
+    Return a range list based on an interval&#39;s elements
+    &#34;&#34;&#34;
+
+    if delta &gt; 0:
+        if frequency == &#34;year&#34;:
+            sub = [*range(int(start), int(end) + 1, delta)]
+        elif frequency == &#34;month&#34;:
+            start_date = datetime.strptime(start, &#34;%Y-%m&#34;)
+            end_date = datetime.strptime(end, &#34;%Y-%m&#34;)
+            date_range = pd.period_range(start_date, end_date, freq=&#34;M&#34;)
+            sub = [str(date) for date in date_range]
+        elif frequency == &#34;day&#34;:
+            start_date = datetime.strptime(start, &#34;%Y-%m-%d&#34;)
+            end_date = datetime.strptime(end, &#34;%Y-%m-%d&#34;)
+            date_range = pd.period_range(start_date, end_date, freq=&#34;D&#34;)
+            sub = [str(date) for date in date_range]
+        else:
+            pass
+    else:
+        sub = [start]
+
+    return sub
+
+
+def get_temporal_coverage_list(temporal_coverage_field: list) -&gt; list:
+    &#34;&#34;&#34;
+    Generates a list of dates covered by resource in format YYYY[-MM][-DD].
+    &#34;&#34;&#34;
+
+    temporal_coverage_list = []
+
+    for s in temporal_coverage_field:
+
+        frequency = classify_frequency(s)
+        start, end, delta = get_temporal_coverage_elements(s)
+        sub = get_interval_range(start, end, delta, frequency)
+        temporal_coverage_list.append(sub)
+
+    return flatten_list(temporal_coverage_list)</code></pre>
 </details>
 </section>
 <section>
@@ -257,6 +350,42 @@ def parse_data(response) -&gt; pd.DataFrame:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="pipelines.datasets.br_bd_indicadores.utils.classify_frequency"><code class="name flex">
+<span>def <span class="ident">classify_frequency</span></span>(<span>interval)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Classify a temporal coverage interval's frequency as: year, month, day, other</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def classify_frequency(interval):
+    &#34;&#34;&#34;
+    Classify a temporal coverage interval&#39;s frequency as: year, month, day, other
+    &#34;&#34;&#34;
+
+    if &#34;(&#34; in interval and &#34;)&#34; in interval:
+        initial = interval.split(&#34;(&#34;)[0]
+        final = interval.split(&#34;)&#34;)[1]
+    else:
+        initial = interval
+        final = interval
+
+    initial_dashes = initial.count(&#34;-&#34;)
+    final_dashes = final.count(&#34;-&#34;)
+
+    if max(initial_dashes, final_dashes) == 2:
+        frequency = &#34;day&#34;
+    elif max(initial_dashes, final_dashes) == 1:
+        frequency = &#34;month&#34;
+    elif max(initial_dashes, final_dashes) == 0:
+        frequency = &#34;year&#34;
+    else:
+        frequency = &#34;other&#34;
+
+    return frequency</code></pre>
+</details>
+</dd>
 <dt id="pipelines.datasets.br_bd_indicadores.utils.connect_to_endpoint"><code class="name flex">
 <span>def <span class="ident">connect_to_endpoint</span></span>(<span>url: str, headers: dict, params: dict, next_token=None) ‑> dict</span>
 </code></dt>
@@ -271,7 +400,7 @@ def parse_data(response) -&gt; pd.DataFrame:
     Connect to endpoint using params
     &#34;&#34;&#34;
     params[&#34;next_token&#34;] = next_token  # params object received from create_url function
-    response = requests.request(&#34;GET&#34;, url, headers=headers, params=params)
+    response = requests.request(&#34;GET&#34;, url, headers=headers, params=params, timeout=30)
     print(&#34;Endpoint Response Code: &#34; + str(response.status_code))
     if response.status_code != 200:
         raise Exception(response.status_code, response.text)
@@ -347,6 +476,55 @@ def parse_data(response) -&gt; pd.DataFrame:
     return dict(items)</code></pre>
 </details>
 </dd>
+<dt id="pipelines.datasets.br_bd_indicadores.utils.flatten_list"><code class="name flex">
+<span>def <span class="ident">flatten_list</span></span>(<span>ll)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Flatten a list of lists</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def flatten_list(ll):
+    &#34;&#34;&#34;Flatten a list of lists&#34;&#34;&#34;
+    return [str(item) for sublist in ll for item in sublist]</code></pre>
+</details>
+</dd>
+<dt id="pipelines.datasets.br_bd_indicadores.utils.get_interval_range"><code class="name flex">
+<span>def <span class="ident">get_interval_range</span></span>(<span>start, end, delta, frequency)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return a range list based on an interval's elements</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_interval_range(start, end, delta, frequency):
+    &#34;&#34;&#34;
+    Return a range list based on an interval&#39;s elements
+    &#34;&#34;&#34;
+
+    if delta &gt; 0:
+        if frequency == &#34;year&#34;:
+            sub = [*range(int(start), int(end) + 1, delta)]
+        elif frequency == &#34;month&#34;:
+            start_date = datetime.strptime(start, &#34;%Y-%m&#34;)
+            end_date = datetime.strptime(end, &#34;%Y-%m&#34;)
+            date_range = pd.period_range(start_date, end_date, freq=&#34;M&#34;)
+            sub = [str(date) for date in date_range]
+        elif frequency == &#34;day&#34;:
+            start_date = datetime.strptime(start, &#34;%Y-%m-%d&#34;)
+            end_date = datetime.strptime(end, &#34;%Y-%m-%d&#34;)
+            date_range = pd.period_range(start_date, end_date, freq=&#34;D&#34;)
+            sub = [str(date) for date in date_range]
+        else:
+            pass
+    else:
+        sub = [start]
+
+    return sub</code></pre>
+</details>
+</dd>
 <dt id="pipelines.datasets.br_bd_indicadores.utils.get_report"><code class="name flex">
 <span>def <span class="ident">get_report</span></span>(<span>analytics, dimension: str, metric: str, VIEW_ID: str)</span>
 </code></dt>
@@ -395,6 +573,58 @@ def parse_data(response) -&gt; pd.DataFrame:
         )
         .execute()
     )</code></pre>
+</details>
+</dd>
+<dt id="pipelines.datasets.br_bd_indicadores.utils.get_temporal_coverage_elements"><code class="name flex">
+<span>def <span class="ident">get_temporal_coverage_elements</span></span>(<span>interval)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Return the three temporal coverage interval's elements: start, end, delta</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_temporal_coverage_elements(interval):
+    &#34;&#34;&#34;
+    Return the three temporal coverage interval&#39;s elements: start, end, delta
+    &#34;&#34;&#34;
+
+    if &#34;(&#34; in interval and &#34;)&#34; in interval:
+        start = interval.split(&#34;(&#34;)[0]
+        end = interval.split(&#34;)&#34;)[1]
+        delta = int(interval[interval.find(&#34;(&#34;) + 1 : interval.find(&#34;)&#34;)])
+    else:
+        start = interval
+        end = interval
+        delta = 0
+
+    return start, end, delta</code></pre>
+</details>
+</dd>
+<dt id="pipelines.datasets.br_bd_indicadores.utils.get_temporal_coverage_list"><code class="name flex">
+<span>def <span class="ident">get_temporal_coverage_list</span></span>(<span>temporal_coverage_field: list) ‑> list</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generates a list of dates covered by resource in format YYYY[-MM][-DD].</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_temporal_coverage_list(temporal_coverage_field: list) -&gt; list:
+    &#34;&#34;&#34;
+    Generates a list of dates covered by resource in format YYYY[-MM][-DD].
+    &#34;&#34;&#34;
+
+    temporal_coverage_list = []
+
+    for s in temporal_coverage_field:
+
+        frequency = classify_frequency(s)
+        start, end, delta = get_temporal_coverage_elements(s)
+        sub = get_interval_range(start, end, delta, frequency)
+        temporal_coverage_list.append(sub)
+
+    return flatten_list(temporal_coverage_list)</code></pre>
 </details>
 </dd>
 <dt id="pipelines.datasets.br_bd_indicadores.utils.initialize_analyticsreporting"><code class="name flex">
@@ -653,11 +883,16 @@ More information: <a href="https://support.google.com/analytics/answer/9271392?h
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="pipelines.datasets.br_bd_indicadores.utils.classify_frequency" href="#pipelines.datasets.br_bd_indicadores.utils.classify_frequency">classify_frequency</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.utils.connect_to_endpoint" href="#pipelines.datasets.br_bd_indicadores.utils.connect_to_endpoint">connect_to_endpoint</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.utils.create_headers" href="#pipelines.datasets.br_bd_indicadores.utils.create_headers">create_headers</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.utils.create_url" href="#pipelines.datasets.br_bd_indicadores.utils.create_url">create_url</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.utils.flatten" href="#pipelines.datasets.br_bd_indicadores.utils.flatten">flatten</a></code></li>
+<li><code><a title="pipelines.datasets.br_bd_indicadores.utils.flatten_list" href="#pipelines.datasets.br_bd_indicadores.utils.flatten_list">flatten_list</a></code></li>
+<li><code><a title="pipelines.datasets.br_bd_indicadores.utils.get_interval_range" href="#pipelines.datasets.br_bd_indicadores.utils.get_interval_range">get_interval_range</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.utils.get_report" href="#pipelines.datasets.br_bd_indicadores.utils.get_report">get_report</a></code></li>
+<li><code><a title="pipelines.datasets.br_bd_indicadores.utils.get_temporal_coverage_elements" href="#pipelines.datasets.br_bd_indicadores.utils.get_temporal_coverage_elements">get_temporal_coverage_elements</a></code></li>
+<li><code><a title="pipelines.datasets.br_bd_indicadores.utils.get_temporal_coverage_list" href="#pipelines.datasets.br_bd_indicadores.utils.get_temporal_coverage_list">get_temporal_coverage_list</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.utils.initialize_analyticsreporting" href="#pipelines.datasets.br_bd_indicadores.utils.initialize_analyticsreporting">initialize_analyticsreporting</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.utils.parse_data" href="#pipelines.datasets.br_bd_indicadores.utils.parse_data">parse_data</a></code></li>
 </ul>

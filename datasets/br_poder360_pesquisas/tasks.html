@@ -83,7 +83,7 @@ def crawler() -&gt; str:
 
     for year in tqdm(range(2000, 2023)):
         url = f&#34;https://pesquisas.poder360.com.br/web/consulta/fetch?data_pesquisa_de={year}-01-01&amp;data_pesquisa_ate={year}-12-31&amp;order_column=ano&amp;order_type=asc&#34;
-        response = requests.get(url, headers={&#34;User-Agent&#34;: &#34;Magic Browser&#34;})
+        response = requests.get(url, headers={&#34;User-Agent&#34;: &#34;Magic Browser&#34;}, timeout=5)
         try:
             data_json = response.json()
         except (JSONDecodeError, ValueError):
@@ -224,7 +224,7 @@ def crawler() -&gt; str:
 
     for year in tqdm(range(2000, 2023)):
         url = f&#34;https://pesquisas.poder360.com.br/web/consulta/fetch?data_pesquisa_de={year}-01-01&amp;data_pesquisa_ate={year}-12-31&amp;order_column=ano&amp;order_type=asc&#34;
-        response = requests.get(url, headers={&#34;User-Agent&#34;: &#34;Magic Browser&#34;})
+        response = requests.get(url, headers={&#34;User-Agent&#34;: &#34;Magic Browser&#34;}, timeout=5)
         try:
             data_json = response.json()
         except (JSONDecodeError, ValueError):
