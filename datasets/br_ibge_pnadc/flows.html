@@ -46,7 +46,6 @@ from pipelines.datasets.br_ibge_pnadc.tasks import (
     get_url_from_template,
     download_txt,
     build_partitions,
-    get_quarter_and_year,
 )
 from pipelines.utils.decorators import Flow
 from pipelines.utils.tasks import (
@@ -63,7 +62,6 @@ with Flow(name=&#34;br_ibge_pnadc.microdados&#34;, code_owners=[&#34;lucas_cr&#3
     table_id = Parameter(&#34;table_id&#34;, default=&#34;microdados&#34;, required=True)
     year = Parameter(&#34;year&#34;, default=2020, required=False)
     quarter = Parameter(&#34;quarter&#34;, default=1, required=False)
-    auto = Parameter(&#34;auto&#34;, default=False, required=False)
     materialization_mode = Parameter(
         &#34;materialization_mode&#34;, default=&#34;dev&#34;, required=False
     )
@@ -76,9 +74,6 @@ with Flow(name=&#34;br_ibge_pnadc.microdados&#34;, code_owners=[&#34;lucas_cr&#3
         prefix=&#34;Dump: &#34;, dataset_id=dataset_id, table_id=table_id, wait=table_id
     )
 
-    with case(auto, True):
-        quarter, year = get_quarter_and_year()
-
     url = get_url_from_template(year, quarter, upstream_tasks=[rename_flow_run])
     input_filepath = download_txt(url, upstream_tasks=[url])
     output_filepath = build_partitions(input_filepath, upstream_tasks=[input_filepath])
@@ -90,7 +85,6 @@ with Flow(name=&#34;br_ibge_pnadc.microdados&#34;, code_owners=[&#34;lucas_cr&#3
         dump_mode=&#34;append&#34;,
         wait=output_filepath,
     )
-
     with case(materialize_after_dump, True):
         # Trigger DBT flow run
         current_flow_labels = get_current_flow_labels()
