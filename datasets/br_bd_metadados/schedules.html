@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>pipelines.datasets.br_bd_indicadores API documentation</title>
-<meta name="description" content="" />
+<title>pipelines.datasets.br_bd_metadados.schedules API documentation</title>
+<meta name="description" content="Schedules for bd_tweet_data" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,30 +19,159 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>pipelines.datasets.br_bd_indicadores</code></h1>
+<h1 class="title">Module <code>pipelines.datasets.br_bd_metadados.schedules</code></h1>
 </header>
 <section id="section-intro">
+<p>Schedules for bd_tweet_data</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python"># -*- coding: utf-8 -*-
+&#34;&#34;&#34;
+Schedules for bd_tweet_data
+&#34;&#34;&#34;
+
+from datetime import timedelta, datetime
+from prefect.schedules import Schedule
+from prefect.schedules.clocks import IntervalClock
+from pipelines.constants import constants
+
+every_day_organizations = Schedule(
+    clocks=[
+        IntervalClock(
+            interval=timedelta(days=1),
+            start_date=datetime(2022, 9, 20, 10, 00),
+            labels=[
+                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+            ],
+            parameter_defaults={
+                &#34;dataset_id&#34;: &#34;br_bd_metadados&#34;,
+                &#34;table_id&#34;: &#34;organizations&#34;,
+                &#34;materialization_mode&#34;: &#34;dev&#34;,
+                &#34;materialize after dump&#34;: True,
+                &#34;dbt_alias&#34;: False,
+            },
+        ),
+    ],
+)
+
+every_day_datasets = Schedule(
+    clocks=[
+        IntervalClock(
+            interval=timedelta(days=1),
+            start_date=datetime(2022, 9, 20, 10, 5),
+            labels=[
+                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+            ],
+            parameter_defaults={
+                &#34;dataset_id&#34;: &#34;br_bd_metadados&#34;,
+                &#34;table_id&#34;: &#34;datasets&#34;,
+                &#34;materialization_mode&#34;: &#34;dev&#34;,
+                &#34;materialize after dump&#34;: True,
+                &#34;dbt_alias&#34;: False,
+            },
+        ),
+    ],
+)
+
+every_day_resources = Schedule(
+    clocks=[
+        IntervalClock(
+            interval=timedelta(days=1),
+            start_date=datetime(2022, 9, 20, 10, 10),
+            labels=[
+                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+            ],
+            parameter_defaults={
+                &#34;dataset_id&#34;: &#34;br_bd_metadados&#34;,
+                &#34;table_id&#34;: &#34;resources&#34;,
+                &#34;materialization_mode&#34;: &#34;dev&#34;,
+                &#34;materialize after dump&#34;: True,
+                &#34;dbt_alias&#34;: False,
+            },
+        ),
+    ],
+)
+
+every_day_external_links = Schedule(
+    clocks=[
+        IntervalClock(
+            interval=timedelta(days=1),
+            start_date=datetime(2022, 9, 20, 10, 15),
+            labels=[
+                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+            ],
+            parameter_defaults={
+                &#34;dataset_id&#34;: &#34;br_bd_metadados&#34;,
+                &#34;table_id&#34;: &#34;external_links&#34;,
+                &#34;materialization_mode&#34;: &#34;dev&#34;,
+                &#34;materialize after dump&#34;: True,
+                &#34;dbt_alias&#34;: False,
+            },
+        ),
+    ],
+)
+
+every_day_information_requests = Schedule(
+    clocks=[
+        IntervalClock(
+            interval=timedelta(days=1),
+            start_date=datetime(2022, 9, 20, 10, 20),
+            labels=[
+                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+            ],
+            parameter_defaults={
+                &#34;dataset_id&#34;: &#34;br_bd_metadados&#34;,
+                &#34;table_id&#34;: &#34;information_requests&#34;,
+                &#34;materialization_mode&#34;: &#34;dev&#34;,
+                &#34;materialize after dump&#34;: True,
+                &#34;dbt_alias&#34;: False,
+            },
+        ),
+    ],
+)
+
+every_day_tables = Schedule(
+    clocks=[
+        IntervalClock(
+            interval=timedelta(days=1),
+            start_date=datetime(2022, 9, 20, 10, 25),
+            labels=[
+                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+            ],
+            parameter_defaults={
+                &#34;dataset_id&#34;: &#34;br_bd_metadados&#34;,
+                &#34;table_id&#34;: &#34;tables&#34;,
+                &#34;materialization_mode&#34;: &#34;dev&#34;,
+                &#34;materialize after dump&#34;: True,
+                &#34;dbt_alias&#34;: False,
+            },
+        ),
+    ],
+)
+
+every_day_columns = Schedule(
+    clocks=[
+        IntervalClock(
+            interval=timedelta(days=1),
+            start_date=datetime(2022, 9, 20, 10, 30),
+            labels=[
+                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+            ],
+            parameter_defaults={
+                &#34;dataset_id&#34;: &#34;br_bd_metadados&#34;,
+                &#34;table_id&#34;: &#34;columns&#34;,
+                &#34;materialization_mode&#34;: &#34;dev&#34;,
+                &#34;materialize after dump&#34;: True,
+                &#34;dbt_alias&#34;: False,
+            },
+        ),
+    ],
+)</code></pre>
+</details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
-<dl>
-<dt><code class="name"><a title="pipelines.datasets.br_bd_indicadores.flows" href="flows.html">pipelines.datasets.br_bd_indicadores.flows</a></code></dt>
-<dd>
-<div class="desc"><p>Flows for br_bd_indicadores</p></div>
-</dd>
-<dt><code class="name"><a title="pipelines.datasets.br_bd_indicadores.schedules" href="schedules.html">pipelines.datasets.br_bd_indicadores.schedules</a></code></dt>
-<dd>
-<div class="desc"><p>Schedules for bd_tweet_data</p></div>
-</dd>
-<dt><code class="name"><a title="pipelines.datasets.br_bd_indicadores.tasks" href="tasks.html">pipelines.datasets.br_bd_indicadores.tasks</a></code></dt>
-<dd>
-<div class="desc"><p>Tasks for br_twitter</p></div>
-</dd>
-<dt><code class="name"><a title="pipelines.datasets.br_bd_indicadores.utils" href="utils.html">pipelines.datasets.br_bd_indicadores.utils</a></code></dt>
-<dd>
-<div class="desc"><p>utils for br_bd_indicadores</p></div>
-</dd>
-</dl>
 </section>
 <section>
 </section>
@@ -59,15 +188,7 @@
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="pipelines.datasets" href="../index.html">pipelines.datasets</a></code></li>
-</ul>
-</li>
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
-<ul>
-<li><code><a title="pipelines.datasets.br_bd_indicadores.flows" href="flows.html">pipelines.datasets.br_bd_indicadores.flows</a></code></li>
-<li><code><a title="pipelines.datasets.br_bd_indicadores.schedules" href="schedules.html">pipelines.datasets.br_bd_indicadores.schedules</a></code></li>
-<li><code><a title="pipelines.datasets.br_bd_indicadores.tasks" href="tasks.html">pipelines.datasets.br_bd_indicadores.tasks</a></code></li>
-<li><code><a title="pipelines.datasets.br_bd_indicadores.utils" href="utils.html">pipelines.datasets.br_bd_indicadores.utils</a></code></li>
+<li><code><a title="pipelines.datasets.br_bd_metadados" href="index.html">pipelines.datasets.br_bd_metadados</a></code></li>
 </ul>
 </li>
 </ul>

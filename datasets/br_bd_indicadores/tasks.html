@@ -37,7 +37,6 @@ from datetime import datetime, timedelta
 from typing import Tuple
 from functools import reduce
 
-from dateutil.relativedelta import relativedelta
 import pytz
 from prefect import task
 import requests
@@ -61,7 +60,6 @@ from pipelines.datasets.br_bd_indicadores.utils import (
     parse_data,
     initialize_analyticsreporting,
     get_report,
-    get_temporal_coverage_list,
 )
 from pipelines.constants import constants
 
@@ -333,109 +331,7 @@ def crawler_report_ga(view_id: str, metrics: list = None) -&gt; str:
 
     df.to_csv(filepath, index=False)
 
-    return &#34;/tmp/data/&#34;
-
-
-@task(
-    max_retries=constants.TASK_MAX_RETRIES.value,
-    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
-)
-def crawler_data_quality():
-    &#34;&#34;&#34;
-
-    Args:
-
-    Returns:
-    &#34;&#34;&#34;
-
-    url = &#34;https://basedosdados.org/api/3/action/bd_dataset_search?page_size=10000&#34;
-    r = requests.get(url, timeout=300)
-    json_response = r.json()
-
-    current_date = datetime.today()
-    datasets = json_response[&#34;result&#34;][&#34;datasets&#34;]
-    tables = []
-    for dataset in datasets:
-        for resource in dataset[&#34;resources&#34;]:
-            if resource[&#34;resource_type&#34;] == &#34;bdm_table&#34;:
-                if &#34;update_frequency&#34; in resource:
-
-                    # indicator for outdated
-                    outdated = None
-                    if resource[&#34;update_frequency&#34;] in [
-                        &#34;recurring&#34;,
-                        &#34;unique&#34;,
-                        &#34;uncertain&#34;,
-                        &#34;other&#34;,
-                        None,
-                    ]:
-                        pass
-                    else:
-                        if resource[&#34;temporal_coverage&#34;] in [None, []]:
-                            pass
-                        else:
-                            upper_temporal_coverage = get_temporal_coverage_list(
-                                resource[&#34;temporal_coverage&#34;]
-                            )[-1]
-                            if resource[&#34;update_frequency&#34;] in [
-                                &#34;one_year&#34;,
-                                &#34;semester&#34;,
-                                &#34;quarter&#34;,
-                                &#34;month&#34;,
-                                &#34;week&#34;,
-                                &#34;day&#34;,
-                                &#34;hour&#34;,
-                                &#34;minute&#34;,
-                                &#34;second&#34;,
-                            ]:
-                                delta = 1
-                            elif resource[&#34;update_frequency&#34;] == &#34;two_years&#34;:
-                                delta = 2
-                            elif resource[&#34;update_frequency&#34;] == &#34;four_years&#34;:
-                                delta = 4
-                            elif resource[&#34;update_frequency&#34;] == &#34;five_years&#34;:
-                                delta = 5
-                            elif resource[&#34;update_frequency&#34;] == &#34;ten_years&#34;:
-                                delta = 10
-                            else:
-                                delta = 1000
-
-                            number_dashes = upper_temporal_coverage.count(&#34;-&#34;)
-                            if number_dashes == 0:
-                                upper_temporal_coverage = datetime.strptime(
-                                    upper_temporal_coverage, &#34;%Y&#34;
-                                )
-                                diff = relativedelta(years=delta)
-                            elif number_dashes == 1:
-                                upper_temporal_coverage = datetime.strptime(
-                                    upper_temporal_coverage, &#34;%Y-%m&#34;
-                                )
-                                diff = relativedelta(month=delta)
-                            elif number_dashes == 2:
-                                upper_temporal_coverage = datetime.strptime(
-                                    upper_temporal_coverage, &#34;%Y-%m-%d&#34;
-                                )
-                                diff = relativedelta(days=delta)
-
-                            outdated = current_date &gt; upper_temporal_coverage + diff
-
-                    tables.append(
-                        {
-                            &#34;resource_id&#34;: resource[&#34;id&#34;],
-                            &#34;dataset_id&#34;: dataset[&#34;name&#34;],
-                            &#34;table_id&#34;: resource[&#34;name&#34;],
-                            &#34;temporal_coverage&#34;: resource[&#34;temporal_coverage&#34;],
-                            &#34;update_frequency&#34;: resource[&#34;update_frequency&#34;],
-                            &#34;outdated&#34;: outdated,
-                        }
-                    )
-
-    df = pd.DataFrame.from_dict(tables)
-
-    os.system(&#34;mkdir -p /tmp/data/&#34;)
-    df.to_csv(&#34;/tmp/data/data_quality.csv&#34;, index=False)
-
-    return &#34;/tmp/data/data_quality.csv&#34;</code></pre>
+    return &#34;/tmp/data/&#34;</code></pre>
 </details>
 </section>
 <section>
@@ -445,118 +341,6 @@ def crawler_data_quality():
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="pipelines.datasets.br_bd_indicadores.tasks.crawler_data_quality"><code class="name flex">
-<span>def <span class="ident">crawler_data_quality</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Args:</p>
-<p>Returns:</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@task(
-    max_retries=constants.TASK_MAX_RETRIES.value,
-    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
-)
-def crawler_data_quality():
-    &#34;&#34;&#34;
-
-    Args:
-
-    Returns:
-    &#34;&#34;&#34;
-
-    url = &#34;https://basedosdados.org/api/3/action/bd_dataset_search?page_size=10000&#34;
-    r = requests.get(url, timeout=300)
-    json_response = r.json()
-
-    current_date = datetime.today()
-    datasets = json_response[&#34;result&#34;][&#34;datasets&#34;]
-    tables = []
-    for dataset in datasets:
-        for resource in dataset[&#34;resources&#34;]:
-            if resource[&#34;resource_type&#34;] == &#34;bdm_table&#34;:
-                if &#34;update_frequency&#34; in resource:
-
-                    # indicator for outdated
-                    outdated = None
-                    if resource[&#34;update_frequency&#34;] in [
-                        &#34;recurring&#34;,
-                        &#34;unique&#34;,
-                        &#34;uncertain&#34;,
-                        &#34;other&#34;,
-                        None,
-                    ]:
-                        pass
-                    else:
-                        if resource[&#34;temporal_coverage&#34;] in [None, []]:
-                            pass
-                        else:
-                            upper_temporal_coverage = get_temporal_coverage_list(
-                                resource[&#34;temporal_coverage&#34;]
-                            )[-1]
-                            if resource[&#34;update_frequency&#34;] in [
-                                &#34;one_year&#34;,
-                                &#34;semester&#34;,
-                                &#34;quarter&#34;,
-                                &#34;month&#34;,
-                                &#34;week&#34;,
-                                &#34;day&#34;,
-                                &#34;hour&#34;,
-                                &#34;minute&#34;,
-                                &#34;second&#34;,
-                            ]:
-                                delta = 1
-                            elif resource[&#34;update_frequency&#34;] == &#34;two_years&#34;:
-                                delta = 2
-                            elif resource[&#34;update_frequency&#34;] == &#34;four_years&#34;:
-                                delta = 4
-                            elif resource[&#34;update_frequency&#34;] == &#34;five_years&#34;:
-                                delta = 5
-                            elif resource[&#34;update_frequency&#34;] == &#34;ten_years&#34;:
-                                delta = 10
-                            else:
-                                delta = 1000
-
-                            number_dashes = upper_temporal_coverage.count(&#34;-&#34;)
-                            if number_dashes == 0:
-                                upper_temporal_coverage = datetime.strptime(
-                                    upper_temporal_coverage, &#34;%Y&#34;
-                                )
-                                diff = relativedelta(years=delta)
-                            elif number_dashes == 1:
-                                upper_temporal_coverage = datetime.strptime(
-                                    upper_temporal_coverage, &#34;%Y-%m&#34;
-                                )
-                                diff = relativedelta(month=delta)
-                            elif number_dashes == 2:
-                                upper_temporal_coverage = datetime.strptime(
-                                    upper_temporal_coverage, &#34;%Y-%m-%d&#34;
-                                )
-                                diff = relativedelta(days=delta)
-
-                            outdated = current_date &gt; upper_temporal_coverage + diff
-
-                    tables.append(
-                        {
-                            &#34;resource_id&#34;: resource[&#34;id&#34;],
-                            &#34;dataset_id&#34;: dataset[&#34;name&#34;],
-                            &#34;table_id&#34;: resource[&#34;name&#34;],
-                            &#34;temporal_coverage&#34;: resource[&#34;temporal_coverage&#34;],
-                            &#34;update_frequency&#34;: resource[&#34;update_frequency&#34;],
-                            &#34;outdated&#34;: outdated,
-                        }
-                    )
-
-    df = pd.DataFrame.from_dict(tables)
-
-    os.system(&#34;mkdir -p /tmp/data/&#34;)
-    df.to_csv(&#34;/tmp/data/data_quality.csv&#34;, index=False)
-
-    return &#34;/tmp/data/data_quality.csv&#34;</code></pre>
-</details>
-</dd>
 <dt id="pipelines.datasets.br_bd_indicadores.tasks.crawler_metricas"><code class="name flex">
 <span>def <span class="ident">crawler_metricas</span></span>(<span>access_secret: str, access_token: str, consumer_key: str, consumer_secret: str, table_id: str) ‑> str</span>
 </code></dt>
@@ -918,7 +702,6 @@ def has_new_tweets(bearer_token: str, table_id: str) -&gt; bool:
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.crawler_data_quality" href="#pipelines.datasets.br_bd_indicadores.tasks.crawler_data_quality">crawler_data_quality</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.crawler_metricas" href="#pipelines.datasets.br_bd_indicadores.tasks.crawler_metricas">crawler_metricas</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.crawler_real_time" href="#pipelines.datasets.br_bd_indicadores.tasks.crawler_real_time">crawler_real_time</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.crawler_report_ga" href="#pipelines.datasets.br_bd_indicadores.tasks.crawler_report_ga">crawler_report_ga</a></code></li>
