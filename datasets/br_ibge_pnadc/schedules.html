@@ -38,6 +38,9 @@ from prefect.schedules.clocks import IntervalClock
 
 from pipelines.constants import constants
 
+current_year = datetime.now().year
+current_quarter = (datetime.now().month - 1) // 3 + 1
+last_quarter = current_quarter - 1
 
 every_quarter = Schedule(
     clocks=[
@@ -50,7 +53,8 @@ every_quarter = Schedule(
             parameter_defaults={
                 &#34;dataset_id&#34;: &#34;br_ibge_pnadc&#34;,
                 &#34;table_id&#34;: &#34;microdados&#34;,
-                &#34;auto&#34;: True,
+                &#34;year&#34;: current_year,
+                &#34;quarter&#34;: last_quarter,
                 &#34;materialization_mode&#34;: &#34;dev&#34;,
                 &#34;materialize after dump&#34;: False,
                 &#34;dbt_alias&#34;: False,
