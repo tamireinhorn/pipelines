@@ -100,14 +100,14 @@ class IGPData:
         Returns:
             pd.DataFrame: DataFrame with specific columns
         &#34;&#34;&#34;
-        dfm[&#34;var_mensal&#34;] = dfm[&#34;indice&#34;].pct_change(periods=1) * 100
-        dfm[&#34;var_12_meses&#34;] = dfm[&#34;indice&#34;].pct_change(periods=12) * 100
+        dfm[&#34;variacao_mensal&#34;] = dfm[&#34;indice&#34;].pct_change(periods=1) * 100
+        dfm[&#34;variacao_12_meses&#34;] = dfm[&#34;indice&#34;].pct_change(periods=12) * 100
         if self.first_dec and self.second_dec:
             decendios = self._get_decendios()
             dfm = pd.merge(dfm, decendios, how=&#34;outer&#34;, on=&#34;DATE&#34;)
         # noinspection PyUnresolvedReferences
-        dfm[&#34;acum_ano&#34;] = (
-            dfm[[&#34;var_mensal&#34;]]
+        dfm[&#34;variacao_acumulada_ano&#34;] = (
+            dfm[[&#34;variacao_mensal&#34;]]
             .groupby(dfm.index.year)
             .apply(self._calculate_year_accum)
         )
@@ -139,12 +139,13 @@ class IGPData:
         last_days.drop(columns=[&#34;mes&#34;], inplace=True)
         dfy = pd.merge(grouped_df, last_days, how=&#34;outer&#34;, on=&#34;YEAR&#34;)
         dfy.drop(dfy.tail(1).index, inplace=True)
-        dfy[&#34;var_anual&#34;] = dfy[&#34;indice&#34;].pct_change(periods=1) * 100
+        dfy[&#34;variacao_anual&#34;] = dfy[&#34;indice&#34;].pct_change(periods=1) * 100
         dfy[&#34;next_month&#34;] = dfy[&#34;indice&#34;].shift(-1)
         dfy[&#34;indice_fechamento_anual&#34;] = round(
             np.sqrt(dfy[&#34;indice&#34;] * dfy[&#34;next_month&#34;]), ndigits=6
         )
         dfy.drop(columns=[&#34;next_month&#34;], inplace=True)
+        dfy[&#34;ano&#34;] = pd.to_numeric(dfy[&#34;ano&#34;], downcast=&#34;integer&#34;)
         return dfy
 
     def _get_decendios(self) -&gt; pd.DataFrame:
@@ -154,11 +155,15 @@ class IGPData:
             pd.DataFrame: DataFrame with 1st and 2nd tenths
         &#34;&#34;&#34;
         dec1 = idpy.timeseries(self.decendios[0])
-        dec1.rename({dec1.columns[-1]: &#34;var_primeiro_decendio&#34;}, axis=1, inplace=True)
-        dec1 = dec1[[&#34;var_primeiro_decendio&#34;]]
+        dec1.rename(
+            {dec1.columns[-1]: &#34;variacao_primeiro_decendio&#34;}, axis=1, inplace=True
+        )
+        dec1 = dec1[[&#34;variacao_primeiro_decendio&#34;]]
         dec2 = idpy.timeseries(self.decendios[1])
-        dec2.rename({dec2.columns[-1]: &#34;var_segundo_decendio&#34;}, axis=1, inplace=True)
-        dec2 = dec2[[&#34;var_segundo_decendio&#34;]]
+        dec2.rename(
+            {dec2.columns[-1]: &#34;variacao_segundo_decendio&#34;}, axis=1, inplace=True
+        )
+        dec2 = dec2[[&#34;variacao_segundo_decendio&#34;]]
         return pd.merge(dec1, dec2, how=&#34;outer&#34;, on=&#34;DATE&#34;)
 
     @staticmethod
@@ -249,14 +254,14 @@ class IGPData:
         Returns:
             pd.DataFrame: DataFrame with specific columns
         &#34;&#34;&#34;
-        dfm[&#34;var_mensal&#34;] = dfm[&#34;indice&#34;].pct_change(periods=1) * 100
-        dfm[&#34;var_12_meses&#34;] = dfm[&#34;indice&#34;].pct_change(periods=12) * 100
+        dfm[&#34;variacao_mensal&#34;] = dfm[&#34;indice&#34;].pct_change(periods=1) * 100
+        dfm[&#34;variacao_12_meses&#34;] = dfm[&#34;indice&#34;].pct_change(periods=12) * 100
         if self.first_dec and self.second_dec:
             decendios = self._get_decendios()
             dfm = pd.merge(dfm, decendios, how=&#34;outer&#34;, on=&#34;DATE&#34;)
         # noinspection PyUnresolvedReferences
-        dfm[&#34;acum_ano&#34;] = (
-            dfm[[&#34;var_mensal&#34;]]
+        dfm[&#34;variacao_acumulada_ano&#34;] = (
+            dfm[[&#34;variacao_mensal&#34;]]
             .groupby(dfm.index.year)
             .apply(self._calculate_year_accum)
         )
@@ -288,12 +293,13 @@ class IGPData:
         last_days.drop(columns=[&#34;mes&#34;], inplace=True)
         dfy = pd.merge(grouped_df, last_days, how=&#34;outer&#34;, on=&#34;YEAR&#34;)
         dfy.drop(dfy.tail(1).index, inplace=True)
-        dfy[&#34;var_anual&#34;] = dfy[&#34;indice&#34;].pct_change(periods=1) * 100
+        dfy[&#34;variacao_anual&#34;] = dfy[&#34;indice&#34;].pct_change(periods=1) * 100
         dfy[&#34;next_month&#34;] = dfy[&#34;indice&#34;].shift(-1)
         dfy[&#34;indice_fechamento_anual&#34;] = round(
             np.sqrt(dfy[&#34;indice&#34;] * dfy[&#34;next_month&#34;]), ndigits=6
         )
         dfy.drop(columns=[&#34;next_month&#34;], inplace=True)
+        dfy[&#34;ano&#34;] = pd.to_numeric(dfy[&#34;ano&#34;], downcast=&#34;integer&#34;)
         return dfy
 
     def _get_decendios(self) -&gt; pd.DataFrame:
@@ -303,11 +309,15 @@ class IGPData:
             pd.DataFrame: DataFrame with 1st and 2nd tenths
         &#34;&#34;&#34;
         dec1 = idpy.timeseries(self.decendios[0])
-        dec1.rename({dec1.columns[-1]: &#34;var_primeiro_decendio&#34;}, axis=1, inplace=True)
-        dec1 = dec1[[&#34;var_primeiro_decendio&#34;]]
+        dec1.rename(
+            {dec1.columns[-1]: &#34;variacao_primeiro_decendio&#34;}, axis=1, inplace=True
+        )
+        dec1 = dec1[[&#34;variacao_primeiro_decendio&#34;]]
         dec2 = idpy.timeseries(self.decendios[1])
-        dec2.rename({dec2.columns[-1]: &#34;var_segundo_decendio&#34;}, axis=1, inplace=True)
-        dec2 = dec2[[&#34;var_segundo_decendio&#34;]]
+        dec2.rename(
+            {dec2.columns[-1]: &#34;variacao_segundo_decendio&#34;}, axis=1, inplace=True
+        )
+        dec2 = dec2[[&#34;variacao_segundo_decendio&#34;]]
         return pd.merge(dec1, dec2, how=&#34;outer&#34;, on=&#34;DATE&#34;)
 
     @staticmethod
@@ -372,14 +382,14 @@ def filepath(self) -&gt; str:
     Returns:
         pd.DataFrame: DataFrame with specific columns
     &#34;&#34;&#34;
-    dfm[&#34;var_mensal&#34;] = dfm[&#34;indice&#34;].pct_change(periods=1) * 100
-    dfm[&#34;var_12_meses&#34;] = dfm[&#34;indice&#34;].pct_change(periods=12) * 100
+    dfm[&#34;variacao_mensal&#34;] = dfm[&#34;indice&#34;].pct_change(periods=1) * 100
+    dfm[&#34;variacao_12_meses&#34;] = dfm[&#34;indice&#34;].pct_change(periods=12) * 100
     if self.first_dec and self.second_dec:
         decendios = self._get_decendios()
         dfm = pd.merge(dfm, decendios, how=&#34;outer&#34;, on=&#34;DATE&#34;)
     # noinspection PyUnresolvedReferences
-    dfm[&#34;acum_ano&#34;] = (
-        dfm[[&#34;var_mensal&#34;]]
+    dfm[&#34;variacao_acumulada_ano&#34;] = (
+        dfm[[&#34;variacao_mensal&#34;]]
         .groupby(dfm.index.year)
         .apply(self._calculate_year_accum)
     )
@@ -428,12 +438,13 @@ def filepath(self) -&gt; str:
     last_days.drop(columns=[&#34;mes&#34;], inplace=True)
     dfy = pd.merge(grouped_df, last_days, how=&#34;outer&#34;, on=&#34;YEAR&#34;)
     dfy.drop(dfy.tail(1).index, inplace=True)
-    dfy[&#34;var_anual&#34;] = dfy[&#34;indice&#34;].pct_change(periods=1) * 100
+    dfy[&#34;variacao_anual&#34;] = dfy[&#34;indice&#34;].pct_change(periods=1) * 100
     dfy[&#34;next_month&#34;] = dfy[&#34;indice&#34;].shift(-1)
     dfy[&#34;indice_fechamento_anual&#34;] = round(
         np.sqrt(dfy[&#34;indice&#34;] * dfy[&#34;next_month&#34;]), ndigits=6
     )
     dfy.drop(columns=[&#34;next_month&#34;], inplace=True)
+    dfy[&#34;ano&#34;] = pd.to_numeric(dfy[&#34;ano&#34;], downcast=&#34;integer&#34;)
     return dfy</code></pre>
 </details>
 </dd>
