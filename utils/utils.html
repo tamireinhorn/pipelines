@@ -154,6 +154,7 @@ def run_cloud(
     run_description: str = &#34;&#34;,
     agent_type: str = &#34;kubernetes&#34;,
     machine_type: str = &#34;f1-micro&#34;,
+    image: str = &#34;ghcr.io/basedosdados/prefect-flows:latest&#34;,
 ):
     &#34;&#34;&#34;
     Runs a flow on Prefect Server (must have VPN configured).
@@ -165,12 +166,10 @@ def run_cloud(
     flow.name = f&#34;{flow.name} (development)&#34;
 
     if agent_type == &#34;kubernetes&#34;:
-        flow.run_config = KubernetesRun(
-            image=&#34;ghcr.io/basedosdados/prefect-flows:latest&#34;
-        )
+        flow.run_config = KubernetesRun(image=image)
     elif agent_type == &#34;vertex&#34;:
         flow.run_config = VertexRun(
-            image=&#34;ghcr.io/basedosdados/prefect-flows:latest&#34;,
+            image=image,
             machine_type=machine_type,
         )
     else:
@@ -1153,7 +1152,7 @@ def log_task(
 </details>
 </dd>
 <dt id="pipelines.utils.utils.run_cloud"><code class="name flex">
-<span>def <span class="ident">run_cloud</span></span>(<span>flow: prefect.core.flow.Flow, labels: List[str], parameters: Dict[str, Any] = None, run_description: str = '', agent_type: str = 'kubernetes', machine_type: str = 'f1-micro')</span>
+<span>def <span class="ident">run_cloud</span></span>(<span>flow: prefect.core.flow.Flow, labels: List[str], parameters: Dict[str, Any] = None, run_description: str = '', agent_type: str = 'kubernetes', machine_type: str = 'f1-micro', image: str = 'ghcr.io/basedosdados/prefect-flows:latest')</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Runs a flow on Prefect Server (must have VPN configured).</p></div>
@@ -1168,6 +1167,7 @@ def log_task(
     run_description: str = &#34;&#34;,
     agent_type: str = &#34;kubernetes&#34;,
     machine_type: str = &#34;f1-micro&#34;,
+    image: str = &#34;ghcr.io/basedosdados/prefect-flows:latest&#34;,
 ):
     &#34;&#34;&#34;
     Runs a flow on Prefect Server (must have VPN configured).
@@ -1179,12 +1179,10 @@ def log_task(
     flow.name = f&#34;{flow.name} (development)&#34;
 
     if agent_type == &#34;kubernetes&#34;:
-        flow.run_config = KubernetesRun(
-            image=&#34;ghcr.io/basedosdados/prefect-flows:latest&#34;
-        )
+        flow.run_config = KubernetesRun(image=image)
     elif agent_type == &#34;vertex&#34;:
         flow.run_config = VertexRun(
-            image=&#34;ghcr.io/basedosdados/prefect-flows:latest&#34;,
+            image=image,
             machine_type=machine_type,
         )
     else:
