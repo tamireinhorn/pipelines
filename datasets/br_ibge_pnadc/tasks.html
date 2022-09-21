@@ -90,13 +90,15 @@ def download_txt(url, chunk_size=128, mkdir=False) -&gt; str:
     os.system(&#39;cd /tmp/data/input; find . -type f ! -iname &#34;*.txt&#34; -delete&#39;)
     filepath = glob(&#34;/tmp/data/input/*.txt&#34;)[0]
 
+    log(f&#34;Using file {filepath}&#34;)
+
     return filepath
 
 
 @task
 def build_parquet_files(filepath: str) -&gt; str:
     &#34;&#34;&#34;
-    Build partitions from a given file.
+    Build parquets from txt original file.
     &#34;&#34;&#34;
 
     os.system(&#34;mkdir -p /tmp/data/staging/&#34;)
@@ -106,7 +108,7 @@ def build_parquet_files(filepath: str) -&gt; str:
         widths=pnad_constants.COLUMNS_WIDTHS.value,
         names=pnad_constants.COLUMNS_NAMES.value,
         header=None,
-        encoding=&#34;latin-1&#34;,
+        encoding=&#34;utf-8&#34;,
         dtype=str,
         chunksize=10000,
     )
@@ -138,7 +140,6 @@ def build_parquet_files(filepath: str) -&gt; str:
             f&#34;/tmp/data/staging/microdados_{i}.parquet&#34;,
             index=False,
         )
-        log(i)
 
     # print number of parquet files
     total_files = len(glob(&#34;/tmp/data/staging/*.parquet&#34;))
@@ -198,7 +199,7 @@ def save_partitions(filepath: str) -&gt; str:
 <span>def <span class="ident">build_parquet_files</span></span>(<span>filepath: str) ‑> str</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Build partitions from a given file.</p></div>
+<div class="desc"><p>Build parquets from txt original file.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -206,7 +207,7 @@ def save_partitions(filepath: str) -&gt; str:
 <pre><code class="python">@task
 def build_parquet_files(filepath: str) -&gt; str:
     &#34;&#34;&#34;
-    Build partitions from a given file.
+    Build parquets from txt original file.
     &#34;&#34;&#34;
 
     os.system(&#34;mkdir -p /tmp/data/staging/&#34;)
@@ -216,7 +217,7 @@ def build_parquet_files(filepath: str) -&gt; str:
         widths=pnad_constants.COLUMNS_WIDTHS.value,
         names=pnad_constants.COLUMNS_NAMES.value,
         header=None,
-        encoding=&#34;latin-1&#34;,
+        encoding=&#34;utf-8&#34;,
         dtype=str,
         chunksize=10000,
     )
@@ -248,7 +249,6 @@ def build_parquet_files(filepath: str) -&gt; str:
             f&#34;/tmp/data/staging/microdados_{i}.parquet&#34;,
             index=False,
         )
-        log(i)
 
     # print number of parquet files
     total_files = len(glob(&#34;/tmp/data/staging/*.parquet&#34;))
@@ -288,6 +288,8 @@ def download_txt(url, chunk_size=128, mkdir=False) -&gt; str:
         z.extractall(&#34;/tmp/data/input&#34;)
     os.system(&#39;cd /tmp/data/input; find . -type f ! -iname &#34;*.txt&#34; -delete&#39;)
     filepath = glob(&#34;/tmp/data/input/*.txt&#34;)[0]
+
+    log(f&#34;Using file {filepath}&#34;)
 
     return filepath</code></pre>
 </details>

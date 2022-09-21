@@ -48,16 +48,16 @@ every_quarter = Schedule(
             interval=timedelta(days=90),
             start_date=datetime(2021, 1, 1, 15, 0),
             labels=[
-                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+                constants.BASEDOSDADOS_PROD_AGENT_LABEL.value,
             ],
             parameter_defaults={
                 &#34;dataset_id&#34;: &#34;br_ibge_pnadc&#34;,
                 &#34;table_id&#34;: &#34;microdados&#34;,
                 &#34;year&#34;: current_year,
                 &#34;quarter&#34;: last_quarter,
-                &#34;materialization_mode&#34;: &#34;dev&#34;,
+                &#34;materialization_mode&#34;: &#34;prod&#34;,
                 &#34;materialize after dump&#34;: False,
-                &#34;dbt_alias&#34;: False,
+                &#34;dbt_alias&#34;: True,
             },
         )
     ],

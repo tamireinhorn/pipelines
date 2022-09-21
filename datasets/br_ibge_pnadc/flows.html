@@ -69,7 +69,7 @@ with Flow(name=&#34;br_ibge_pnadc.microdados&#34;, code_owners=[&#34;lucas_cr&#3
     materialize_after_dump = Parameter(
         &#34;materialize after dump&#34;, default=True, required=False
     )
-    dbt_alias = Parameter(&#34;dbt_alias&#34;, default=False, required=False)
+    dbt_alias = Parameter(&#34;dbt_alias&#34;, default=True, required=False)
 
     rename_flow_run = rename_current_flow_run_dataset_table(
         prefix=&#34;Dump: &#34;, dataset_id=dataset_id, table_id=table_id, wait=table_id
