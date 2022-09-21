@@ -47,7 +47,7 @@ from pipelines.datasets.br_ibge_pnadc.constants import constants as pnad_constan
 
 
 @task
-def get_url_from_template(year: int, quarter: int)-&gt; str:
+def get_url_from_template(year: int, quarter: int) -&gt; str:
     &#34;&#34;&#34;Return the url for the PNAD microdata file for a given year and month.
     Args:
         year (int): Year of the microdata file.
@@ -55,15 +55,15 @@ def get_url_from_template(year: int, quarter: int)-&gt; str:
     Returns:
         str: url
     &#34;&#34;&#34;
-    download_page=&#39;https://ftp.ibge.gov.br/Trabalho_e_Rendimento/Pesquisa_Nacional_por_Amostra_de_Domicilios_continua/Trimestral/Microdados/2021/&#39;
+    download_page = &#34;https://ftp.ibge.gov.br/Trabalho_e_Rendimento/Pesquisa_Nacional_por_Amostra_de_Domicilios_continua/Trimestral/Microdados/2021/&#34;
     response = requests.get(download_page, timeout=5)
-    hrefs = [k for k in response.text.split(&#39;href=&#34;&#39;)[1:] if k.__contains__(&#39;zip&#39;)]
+    hrefs = [k for k in response.text.split(&#39;href=&#34;&#39;)[1:] if k.__contains__(&#34;zip&#34;)]
     hrefs = [k.split(&#39;&#34;&#39;)[0] for k in hrefs]
     href = hrefs[0]
-    href = href.replace(&#39;2021&#39;, str(year))
-    filename = href.replace(&#39;01&#39;, str(quarter).zfill(2))
+    href = href.replace(&#34;2021&#34;, str(year))
+    filename = href.replace(&#34;01&#34;, str(quarter).zfill(2))
 
-    url = pnad_constants.URL_PREFIX.value + &#39;/{year}/{filename}&#39;
+    url = pnad_constants.URL_PREFIX.value + &#34;/{year}/{filename}&#34;
     return url.format(year=year, filename=filename)
 
 
@@ -102,15 +102,15 @@ def build_parquet_files(filepath: str) -&gt; str:
     os.system(&#34;mkdir -p /tmp/data/staging/&#34;)
     # read file
     chunks = pd.read_fwf(
-            filepath,
-            widths=pnad_constants.COLUMNS_WIDTHS.value,
-            names=pnad_constants.COLUMNS_NAMES.value,
-            header=None,
-            encoding=&#34;latin-1&#34;,
-            dtype=str,
-            chunksize=10000,
-        )
-    
+        filepath,
+        widths=pnad_constants.COLUMNS_WIDTHS.value,
+        names=pnad_constants.COLUMNS_NAMES.value,
+        header=None,
+        encoding=&#34;latin-1&#34;,
+        dtype=str,
+        chunksize=10000,
+    )
+
     for i, chunk in enumerate(chunks):
         # partition by year, quarter and region
         chunk.rename(
@@ -127,7 +127,6 @@ def build_parquet_files(filepath: str) -&gt; str:
         )
         chunk[&#34;sigla_uf&#34;] = chunk[&#34;id_uf&#34;].map(pnad_constants.map_codigo_sigla_uf.value)
         chunk[&#34;id_domicilio&#34;] = chunk[&#34;id_estrato&#34;] + chunk[&#34;V1008&#34;] + chunk[&#34;V1014&#34;]
-
 
         chunk[&#34;habitual&#34;] = [np.nan] * len(chunk)
         chunk[&#34;efetivo&#34;] = [np.nan] * len(chunk)
@@ -155,7 +154,7 @@ def save_partitions(filepath: str) -&gt; str:
 
     Args:
         filepath (str): Path to the file used to build the partitions.
-    
+
     Returns:
         str: Path to the saved file.
 
@@ -213,15 +212,15 @@ def build_parquet_files(filepath: str) -&gt; str:
     os.system(&#34;mkdir -p /tmp/data/staging/&#34;)
     # read file
     chunks = pd.read_fwf(
-            filepath,
-            widths=pnad_constants.COLUMNS_WIDTHS.value,
-            names=pnad_constants.COLUMNS_NAMES.value,
-            header=None,
-            encoding=&#34;latin-1&#34;,
-            dtype=str,
-            chunksize=10000,
-        )
-    
+        filepath,
+        widths=pnad_constants.COLUMNS_WIDTHS.value,
+        names=pnad_constants.COLUMNS_NAMES.value,
+        header=None,
+        encoding=&#34;latin-1&#34;,
+        dtype=str,
+        chunksize=10000,
+    )
+
     for i, chunk in enumerate(chunks):
         # partition by year, quarter and region
         chunk.rename(
@@ -238,7 +237,6 @@ def build_parquet_files(filepath: str) -&gt; str:
         )
         chunk[&#34;sigla_uf&#34;] = chunk[&#34;id_uf&#34;].map(pnad_constants.map_codigo_sigla_uf.value)
         chunk[&#34;id_domicilio&#34;] = chunk[&#34;id_estrato&#34;] + chunk[&#34;V1008&#34;] + chunk[&#34;V1014&#34;]
-
 
         chunk[&#34;habitual&#34;] = [np.nan] * len(chunk)
         chunk[&#34;efetivo&#34;] = [np.nan] * len(chunk)
@@ -316,7 +314,7 @@ def download_txt(url, chunk_size=128, mkdir=False) -&gt; str:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@task
-def get_url_from_template(year: int, quarter: int)-&gt; str:
+def get_url_from_template(year: int, quarter: int) -&gt; str:
     &#34;&#34;&#34;Return the url for the PNAD microdata file for a given year and month.
     Args:
         year (int): Year of the microdata file.
@@ -324,15 +322,15 @@ def get_url_from_template(year: int, quarter: int)-&gt; str:
     Returns:
         str: url
     &#34;&#34;&#34;
-    download_page=&#39;https://ftp.ibge.gov.br/Trabalho_e_Rendimento/Pesquisa_Nacional_por_Amostra_de_Domicilios_continua/Trimestral/Microdados/2021/&#39;
+    download_page = &#34;https://ftp.ibge.gov.br/Trabalho_e_Rendimento/Pesquisa_Nacional_por_Amostra_de_Domicilios_continua/Trimestral/Microdados/2021/&#34;
     response = requests.get(download_page, timeout=5)
-    hrefs = [k for k in response.text.split(&#39;href=&#34;&#39;)[1:] if k.__contains__(&#39;zip&#39;)]
+    hrefs = [k for k in response.text.split(&#39;href=&#34;&#39;)[1:] if k.__contains__(&#34;zip&#34;)]
     hrefs = [k.split(&#39;&#34;&#39;)[0] for k in hrefs]
     href = hrefs[0]
-    href = href.replace(&#39;2021&#39;, str(year))
-    filename = href.replace(&#39;01&#39;, str(quarter).zfill(2))
+    href = href.replace(&#34;2021&#34;, str(year))
+    filename = href.replace(&#34;01&#34;, str(quarter).zfill(2))
 
-    url = pnad_constants.URL_PREFIX.value + &#39;/{year}/{filename}&#39;
+    url = pnad_constants.URL_PREFIX.value + &#34;/{year}/{filename}&#34;
     return url.format(year=year, filename=filename)</code></pre>
 </details>
 </dd>
@@ -362,7 +360,7 @@ def save_partitions(filepath: str) -&gt; str:
 
     Args:
         filepath (str): Path to the file used to build the partitions.
-    
+
     Returns:
         str: Path to the saved file.
 
