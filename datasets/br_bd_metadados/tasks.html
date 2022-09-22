@@ -31,6 +31,7 @@
 &#34;&#34;&#34;
 Tasks for br_twitter
 &#34;&#34;&#34;
+# pylint: disable=invalid-name,too-many-nested-blocks,too-many-arguments,too-many-locals,too-many-branches,too-many-statements
 import os
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -75,7 +76,7 @@ def crawler_organizations():
     &#34;&#34;&#34;
 
     url = &#34;https://basedosdados.org/api/3/action/organization_list&#34;
-    r = requests.get(url)
+    r = requests.get(url, timeout=10)
     json_response = r.json()
 
     organizations_json = json_response[&#34;result&#34;]
@@ -85,7 +86,8 @@ def crawler_organizations():
         response = requests.get(
             &#34;https://basedosdados.org/api/3/action/organization_show?id={}&#34;.format(
                 organization
-            )
+            ),
+            timeout=10,
         )
         organization_json = response.json()[&#34;result&#34;]
 
@@ -124,7 +126,7 @@ def crawler_datasets():
     &#34;&#34;&#34;
 
     url = &#34;https://basedosdados.org/api/3/action/bd_dataset_search?page_size=50000&#34;
-    r = requests.get(url)
+    r = requests.get(url, timeout=10)
     datasets_json = r.json()[&#34;result&#34;][&#34;datasets&#34;]
 
     datasets = []
@@ -166,7 +168,7 @@ def crawler_resources():
     &#34;&#34;&#34;
 
     url = &#34;https://basedosdados.org/api/3/action/bd_dataset_search?page_size=50000&#34;
-    r = requests.get(url)
+    r = requests.get(url, timeout=10)
     datasets_json = r.json()[&#34;result&#34;][&#34;datasets&#34;]
 
     resources = []
@@ -208,7 +210,7 @@ def crawler_external_links():
     &#34;&#34;&#34;
 
     url = &#34;https://basedosdados.org/api/3/action/bd_dataset_search?page_size=50000&amp;resource_type=external_link&#34;
-    r = requests.get(url)
+    r = requests.get(url, timeout=10)
     datasets_json = r.json()[&#34;result&#34;][&#34;datasets&#34;]
 
     resources = []
@@ -260,7 +262,7 @@ def crawler_information_requests():
     &#34;&#34;&#34;
 
     url = &#34;https://basedosdados.org/api/3/action/bd_dataset_search?page_size=50000&amp;resource_type=information_request&#34;
-    r = requests.get(url)
+    r = requests.get(url, timeout=10)
     datasets_json = r.json()[&#34;result&#34;][&#34;datasets&#34;]
 
     resources = []
@@ -312,7 +314,7 @@ def crawler_tables():
     &#34;&#34;&#34;
 
     url = &#34;https://basedosdados.org/api/3/action/bd_dataset_search?page_size=50000&amp;resource_type=bdm_table&#34;
-    r = requests.get(url)
+    r = requests.get(url, timeout=10)
     json_response = r.json()
 
     current_date = datetime.today()
@@ -443,7 +445,7 @@ def crawler_columns():
     &#34;&#34;&#34;
 
     url = &#34;https://basedosdados.org/api/3/action/bd_dataset_search?page_size=50000&amp;resource_type=bdm_table&#34;
-    r = requests.get(url)
+    r = requests.get(url, timeout=10)
     json_response = r.json()
 
     datasets = json_response[&#34;result&#34;][&#34;datasets&#34;]
@@ -519,7 +521,7 @@ def crawler_columns():
     &#34;&#34;&#34;
 
     url = &#34;https://basedosdados.org/api/3/action/bd_dataset_search?page_size=50000&amp;resource_type=bdm_table&#34;
-    r = requests.get(url)
+    r = requests.get(url, timeout=10)
     json_response = r.json()
 
     datasets = json_response[&#34;result&#34;][&#34;datasets&#34;]
@@ -588,7 +590,7 @@ def crawler_datasets():
     &#34;&#34;&#34;
 
     url = &#34;https://basedosdados.org/api/3/action/bd_dataset_search?page_size=50000&#34;
-    r = requests.get(url)
+    r = requests.get(url, timeout=10)
     datasets_json = r.json()[&#34;result&#34;][&#34;datasets&#34;]
 
     datasets = []
@@ -642,7 +644,7 @@ def crawler_external_links():
     &#34;&#34;&#34;
 
     url = &#34;https://basedosdados.org/api/3/action/bd_dataset_search?page_size=50000&amp;resource_type=external_link&#34;
-    r = requests.get(url)
+    r = requests.get(url, timeout=10)
     datasets_json = r.json()[&#34;result&#34;][&#34;datasets&#34;]
 
     resources = []
@@ -706,7 +708,7 @@ def crawler_information_requests():
     &#34;&#34;&#34;
 
     url = &#34;https://basedosdados.org/api/3/action/bd_dataset_search?page_size=50000&amp;resource_type=information_request&#34;
-    r = requests.get(url)
+    r = requests.get(url, timeout=10)
     datasets_json = r.json()[&#34;result&#34;][&#34;datasets&#34;]
 
     resources = []
@@ -770,7 +772,7 @@ def crawler_organizations():
     &#34;&#34;&#34;
 
     url = &#34;https://basedosdados.org/api/3/action/organization_list&#34;
-    r = requests.get(url)
+    r = requests.get(url, timeout=10)
     json_response = r.json()
 
     organizations_json = json_response[&#34;result&#34;]
@@ -780,7 +782,8 @@ def crawler_organizations():
         response = requests.get(
             &#34;https://basedosdados.org/api/3/action/organization_show?id={}&#34;.format(
                 organization
-            )
+            ),
+            timeout=10,
         )
         organization_json = response.json()[&#34;result&#34;]
 
@@ -831,7 +834,7 @@ def crawler_resources():
     &#34;&#34;&#34;
 
     url = &#34;https://basedosdados.org/api/3/action/bd_dataset_search?page_size=50000&#34;
-    r = requests.get(url)
+    r = requests.get(url, timeout=10)
     datasets_json = r.json()[&#34;result&#34;][&#34;datasets&#34;]
 
     resources = []
@@ -885,7 +888,7 @@ def crawler_tables():
     &#34;&#34;&#34;
 
     url = &#34;https://basedosdados.org/api/3/action/bd_dataset_search?page_size=50000&amp;resource_type=bdm_table&#34;
-    r = requests.get(url)
+    r = requests.get(url, timeout=10)
     json_response = r.json()
 
     current_date = datetime.today()

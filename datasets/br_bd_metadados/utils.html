@@ -31,16 +31,16 @@
 &#34;&#34;&#34;
 utils for br_bd_inndicadores
 &#34;&#34;&#34;
-# pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods,invalid-name
 from datetime import datetime
 import pandas as pd
 
 
-def flatten_list(ll):
+def flatten_list(array):
     &#34;&#34;&#34;
     Flattens a list of lists into one list of strings.
     &#34;&#34;&#34;
-    return [str(item) for sublist in ll for item in sublist]
+    return [str(item) for sublist in array for item in sublist]
 
 
 def classify_frequency(interval):
@@ -174,7 +174,7 @@ def get_temporal_coverage_list(temporal_coverage_field: list) -&gt; list:
 </details>
 </dd>
 <dt id="pipelines.datasets.br_bd_metadados.utils.flatten_list"><code class="name flex">
-<span>def <span class="ident">flatten_list</span></span>(<span>ll)</span>
+<span>def <span class="ident">flatten_list</span></span>(<span>array)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Flattens a list of lists into one list of strings.</p></div>
@@ -182,11 +182,11 @@ def get_temporal_coverage_list(temporal_coverage_field: list) -&gt; list:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def flatten_list(ll):
+<pre><code class="python">def flatten_list(array):
     &#34;&#34;&#34;
     Flattens a list of lists into one list of strings.
     &#34;&#34;&#34;
-    return [str(item) for sublist in ll for item in sublist]</code></pre>
+    return [str(item) for sublist in array for item in sublist]</code></pre>
 </details>
 </dd>
 <dt id="pipelines.datasets.br_bd_metadados.utils.get_interval_range"><code class="name flex">
