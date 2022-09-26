@@ -32,7 +32,7 @@
 Flows for br_bd_indicadores
 &#34;&#34;&#34;
 # pylint: disable=invalid-name
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from prefect import Parameter, case
 from prefect.run_configs import KubernetesRun
@@ -56,6 +56,7 @@ from pipelines.utils.tasks import (
     create_table_and_upload_to_gcs,
     rename_current_flow_run_dataset_table,
     get_current_flow_labels,
+    update_metadata,
 )
 
 from pipelines.datasets.br_bd_indicadores.schedules import (
@@ -240,7 +241,17 @@ with Flow(
     ],
 ) as bd_ga_users:
     dataset_id = Parameter(&#34;dataset_id&#34;, default=&#34;br_bd_indicadores&#34;, required=True)
-    table_id = Parameter(&#34;table_id&#34;, default=&#34;website_users&#34;, required=True)
+    table_id = Parameter(&#34;table_id&#34;, default=&#34;website_user&#34;, required=True)
+
+    materialization_mode = Parameter(
+        &#34;materialization_mode&#34;, default=&#34;dev&#34;, required=False
+    )
+
+    materialize_after_dump = Parameter(
+        &#34;materialize after dump&#34;, default=True, required=False
+    )
+    dbt_alias = Parameter(&#34;dbt_alias&#34;, default=False, required=False)
+
     rename_flow_run = rename_current_flow_run_dataset_table(
         prefix=&#34;Dump: &#34;, dataset_id=dataset_id, table_id=table_id, wait=table_id
     )
@@ -267,6 +278,45 @@ with Flow(
         dump_mode=&#34;append&#34;,
         wait=filepath,
     )
+
+    wait_update_metadata = update_metadata(
+        dataset_id=dataset_id,
+        table_id=table_id,
+        fields_to_update=[
+            {&#34;last_updated&#34;: {&#34;data&#34;: datetime.now().strftime(&#34;%Y-%m-%d %H:%M:%S&#34;)}}
+        ],
+        upstream_tasks=[wait_upload_table],
+    )
+
+    with case(materialize_after_dump, True):
+        # Trigger DBT flow run
+        current_flow_labels = get_current_flow_labels()
+        materialization_flow = create_flow_run(
+            flow_name=utils_constants.FLOW_EXECUTE_DBT_MODEL_NAME.value,
+            project_name=constants.PREFECT_DEFAULT_PROJECT.value,
+            parameters={
+                &#34;dataset_id&#34;: dataset_id,
+                &#34;table_id&#34;: table_id,
+                &#34;mode&#34;: materialization_mode,
+                &#34;dbt_alias&#34;: dbt_alias,
+            },
+            labels=current_flow_labels,
+            run_name=f&#34;Materialize {dataset_id}.{table_id}&#34;,
+        )
+
+        wait_for_materialization = wait_for_flow_run(
+            materialization_flow,
+            stream_states=True,
+            stream_logs=True,
+            raise_final_state=True,
+        )
+        wait_for_materialization.max_retries = (
+            dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_ATTEMPTS.value
+        )
+        wait_for_materialization.retry_delay = timedelta(
+            seconds=dump_db_constants.WAIT_FOR_MATERIALIZATION_RETRY_INTERVAL.value
+        )
+
 
 bd_ga_users.storage = GCS(constants.GCS_FLOWS_BUCKET.value)
 bd_ga_users.run_config = KubernetesRun(image=constants.DOCKER_IMAGE.value)

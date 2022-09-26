@@ -520,17 +520,6 @@ def dump_header_to_csv(
     return save_header_path
 
 
-# if first character in the name collumn starts with a number, add underscore before it
-def add_underscore_to_column_name(dataframe: pd.DataFrame) -&gt; pd.DataFrame:
-    &#34;&#34;&#34;
-    Add underscore to column name if first character is a number.
-    &#34;&#34;&#34;
-    for column in dataframe.columns:
-        if column[0].isdigit():
-            dataframe.rename(columns={column: f&#34;_{column}&#34;}, inplace=True)
-    return dataframe
-
-
 def determine_whether_to_execute_or_not(
     cron_expression: str, datetime_now: datetime, datetime_last_execution: datetime
 ) -&gt; bool:
@@ -614,25 +603,6 @@ def get_credentials_from_env(
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="pipelines.utils.utils.add_underscore_to_column_name"><code class="name flex">
-<span>def <span class="ident">add_underscore_to_column_name</span></span>(<span>dataframe: pandas.core.frame.DataFrame) ‑> pandas.core.frame.DataFrame</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Add underscore to column name if first character is a number.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def add_underscore_to_column_name(dataframe: pd.DataFrame) -&gt; pd.DataFrame:
-    &#34;&#34;&#34;
-    Add underscore to column name if first character is a number.
-    &#34;&#34;&#34;
-    for column in dataframe.columns:
-        if column[0].isdigit():
-            dataframe.rename(columns={column: f&#34;_{column}&#34;}, inplace=True)
-    return dataframe</code></pre>
-</details>
-</dd>
 <dt id="pipelines.utils.utils.batch_to_dataframe"><code class="name flex">
 <span>def <span class="ident">batch_to_dataframe</span></span>(<span>batch: Tuple[Tuple], columns: List[str]) ‑> pandas.core.frame.DataFrame</span>
 </code></dt>
@@ -1434,7 +1404,6 @@ savepath='partitions/'
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="pipelines.utils.utils.add_underscore_to_column_name" href="#pipelines.utils.utils.add_underscore_to_column_name">add_underscore_to_column_name</a></code></li>
 <li><code><a title="pipelines.utils.utils.batch_to_dataframe" href="#pipelines.utils.utils.batch_to_dataframe">batch_to_dataframe</a></code></li>
 <li><code><a title="pipelines.utils.utils.clean_dataframe" href="#pipelines.utils.utils.clean_dataframe">clean_dataframe</a></code></li>
 <li><code><a title="pipelines.utils.utils.dataframe_to_csv" href="#pipelines.utils.utils.dataframe_to_csv">dataframe_to_csv</a></code></li>

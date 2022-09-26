@@ -49,7 +49,6 @@ from pipelines.utils.utils import (
     get_storage_blobs,
     log,
     get_credentials_from_secret,
-    add_underscore_to_column_name,
 )
 from pipelines.datasets.br_bd_indicadores.utils import (
     create_headers,
@@ -321,11 +320,11 @@ def crawler_report_ga(view_id: str, metrics: list = None) -&gt; str:
 
     df.drop(columns=[&#34;date&#34;], inplace=True)
 
-    df = add_underscore_to_column_name(df)
+    df.columns = [&#39;users_1_day&#39;,&#39;users_7_days&#39;,&#39;users_14_days&#39;, &#39;users_28_days&#39;, &#39;users_30_days&#39;,&#39;new_users&#39;]
 
     now = datetime.now().strftime(&#34;%Y-%m-%d&#34;)
 
-    filepath = f&#34;/tmp/data/upload_day={now}/users.csv&#34;
+    filepath = f&#34;/tmp/data/reference_date={now}/users.csv&#34;
     partition_path = filepath.replace(&#34;users.csv&#34;, &#34;&#34;)
     os.system(f&#34;mkdir -p {partition_path}&#34;)
 
@@ -550,11 +549,11 @@ def crawler_report_ga(view_id: str, metrics: list = None) -&gt; str:
 
     df.drop(columns=[&#34;date&#34;], inplace=True)
 
-    df = add_underscore_to_column_name(df)
+    df.columns = [&#39;users_1_day&#39;,&#39;users_7_days&#39;,&#39;users_14_days&#39;, &#39;users_28_days&#39;, &#39;users_30_days&#39;,&#39;new_users&#39;]
 
     now = datetime.now().strftime(&#34;%Y-%m-%d&#34;)
 
-    filepath = f&#34;/tmp/data/upload_day={now}/users.csv&#34;
+    filepath = f&#34;/tmp/data/reference_date={now}/users.csv&#34;
     partition_path = filepath.replace(&#34;users.csv&#34;, &#34;&#34;)
     os.system(f&#34;mkdir -p {partition_path}&#34;)
 
