@@ -668,6 +668,8 @@ def clean_receita22(folder):
 
     for file in files:
         df = pd.read_csv(file, sep=&#34;;&#34;, encoding=&#34;latin-1&#34;)
+        # replace cells like &#39;##############&#39; to np.nan
+        df.replace({r&#39;^#*$&#39;:np.nan}, regex=True, inplace=True)
         n = df.shape[0]
         uf = &#34;&#34;.join([k for k in file if k.isupper()])
 
@@ -1428,6 +1430,8 @@ def clean_receita22(folder):
 
     for file in files:
         df = pd.read_csv(file, sep=&#34;;&#34;, encoding=&#34;latin-1&#34;)
+        # replace cells like &#39;##############&#39; to np.nan
+        df.replace({r&#39;^#*$&#39;:np.nan}, regex=True, inplace=True)
         n = df.shape[0]
         uf = &#34;&#34;.join([k for k in file if k.isupper()])
 
