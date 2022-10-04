@@ -320,7 +320,14 @@ def crawler_report_ga(view_id: str, metrics: list = None) -&gt; str:
 
     df.drop(columns=[&#34;date&#34;], inplace=True)
 
-    df.columns = [&#39;users_1_day&#39;,&#39;users_7_days&#39;,&#39;users_14_days&#39;, &#39;users_28_days&#39;, &#39;users_30_days&#39;,&#39;new_users&#39;]
+    df.columns = [
+        &#34;users_1_day&#34;,
+        &#34;users_7_days&#34;,
+        &#34;users_14_days&#34;,
+        &#34;users_28_days&#34;,
+        &#34;users_30_days&#34;,
+        &#34;new_users&#34;,
+    ]
 
     now = datetime.now().strftime(&#34;%Y-%m-%d&#34;)
 
@@ -549,7 +556,14 @@ def crawler_report_ga(view_id: str, metrics: list = None) -&gt; str:
 
     df.drop(columns=[&#34;date&#34;], inplace=True)
 
-    df.columns = [&#39;users_1_day&#39;,&#39;users_7_days&#39;,&#39;users_14_days&#39;, &#39;users_28_days&#39;, &#39;users_30_days&#39;,&#39;new_users&#39;]
+    df.columns = [
+        &#34;users_1_day&#34;,
+        &#34;users_7_days&#34;,
+        &#34;users_14_days&#34;,
+        &#34;users_28_days&#34;,
+        &#34;users_30_days&#34;,
+        &#34;new_users&#34;,
+    ]
 
     now = datetime.now().strftime(&#34;%Y-%m-%d&#34;)
 
