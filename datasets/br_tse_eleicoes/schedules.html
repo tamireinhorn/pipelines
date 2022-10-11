@@ -37,28 +37,6 @@ from prefect.schedules import Schedule, filters
 from prefect.schedules.clocks import IntervalClock
 from pipelines.constants import constants
 
-schedule_candidatos = Schedule(
-    clocks=[
-        IntervalClock(
-            interval=timedelta(days=1),
-            start_date=datetime(2021, 1, 1, 9, 45),
-            labels=[
-                constants.BASEDOSDADOS_PROD_AGENT_LABEL.value,
-            ],
-            parameter_defaults={
-                &#34;dataset_id&#34;: &#34;br_tse_eleicoes&#34;,
-                &#34;table_id&#34;: &#34;candidatos&#34;,
-                &#34;start&#34;: 2018,
-                &#34;id_candidato_bd&#34;: False,
-                &#34;materialization_mode&#34;: &#34;prod&#34;,
-                &#34;materialize after dump&#34;: True,
-                &#34;dbt_alias&#34;: False,
-            },
-        ),
-    ],
-    filters=[filters.is_weekday],
-)
-
 schedule_bens = Schedule(
     clocks=[
         IntervalClock(
