@@ -31,10 +31,15 @@
 &#34;&#34;&#34;
 Schedules for ibge inflacao
 &#34;&#34;&#34;
+# pylint: disable=arguments-differ
+import ssl
+from datetime import datetime
 
-from datetime import timedelta, datetime
+import requests
 from prefect.schedules import Schedule, filters, adjustments
-from prefect.schedules.clocks import IntervalClock
+from prefect.schedules.clocks import CronClock
+import urllib3
+
 from pipelines.constants import constants
 
 
@@ -43,10 +48,10 @@ def generate_inflacao_clocks(parameters: dict):
     generate ibge inflacao schedules
     &#34;&#34;&#34;
     return Schedule(
-        [
-            IntervalClock(
-                interval=timedelta(days=30),
-                start_date=datetime(2021, 1, 1, 15, 5),
+        clocks=[
+            CronClock(
+                cron=&#34;0 18 12 * *&#34;,  # day 12 of every month at 6 pm
+                start_date=datetime(2021, 1, 1, 15, 0),
                 labels=[
                     constants.BASEDOSDADOS_PROD_AGENT_LABEL.value,
                 ],
@@ -55,7 +60,35 @@ def generate_inflacao_clocks(parameters: dict):
         ],
         filters=[filters.is_weekday],
         adjustments=[adjustments.next_weekday],
-    )</code></pre>
+    )
+
+
+# class to deal with ssl context. See more at:https://github.com/psf/requests/issues/4775
+class CustomHttpAdapter(requests.adapters.HTTPAdapter):
+    &#34;&#34;&#34;Transport adapter&#34; that allows us to use custom ssl_context.&#34;&#34;&#34;
+
+    def __init__(self, ssl_context=None, **kwargs):
+        &#34;&#34;&#34;Initiate the class with the ssl context&#34;&#34;&#34;
+        self.ssl_context = ssl_context
+        super().__init__(**kwargs)
+
+    def init_poolmanager(self, connections, maxsize, block=False):
+        &#34;&#34;&#34;Initiate the pool manager&#34;&#34;&#34;
+        self.poolmanager = urllib3.poolmanager.PoolManager(
+            num_pools=connections,
+            maxsize=maxsize,
+            block=block,
+            ssl_context=self.ssl_context,
+        )
+
+
+def get_legacy_session():
+    &#34;&#34;&#34;Get the session with the ssl context&#34;&#34;&#34;
+    ctx = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+    ctx.options |= 0x4  # OP_LEGACY_SERVER_CONNECT
+    session = requests.session()
+    session.mount(&#34;https://&#34;, CustomHttpAdapter(ctx))
+    return session</code></pre>
 </details>
 </section>
 <section>
@@ -79,10 +112,10 @@ def generate_inflacao_clocks(parameters: dict):
     generate ibge inflacao schedules
     &#34;&#34;&#34;
     return Schedule(
-        [
-            IntervalClock(
-                interval=timedelta(days=30),
-                start_date=datetime(2021, 1, 1, 15, 5),
+        clocks=[
+            CronClock(
+                cron=&#34;0 18 12 * *&#34;,  # day 12 of every month at 6 pm
+                start_date=datetime(2021, 1, 1, 15, 0),
                 labels=[
                     constants.BASEDOSDADOS_PROD_AGENT_LABEL.value,
                 ],
@@ -94,9 +127,86 @@ def generate_inflacao_clocks(parameters: dict):
     )</code></pre>
 </details>
 </dd>
+<dt id="pipelines.utils.crawler_ibge_inflacao.utils.get_legacy_session"><code class="name flex">
+<span>def <span class="ident">get_legacy_session</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the session with the ssl context</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_legacy_session():
+    &#34;&#34;&#34;Get the session with the ssl context&#34;&#34;&#34;
+    ctx = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+    ctx.options |= 0x4  # OP_LEGACY_SERVER_CONNECT
+    session = requests.session()
+    session.mount(&#34;https://&#34;, CustomHttpAdapter(ctx))
+    return session</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="pipelines.utils.crawler_ibge_inflacao.utils.CustomHttpAdapter"><code class="flex name class">
+<span>class <span class="ident">CustomHttpAdapter</span></span>
+<span>(</span><span>ssl_context=None, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Transport adapter" that allows us to use custom ssl_context.</p>
+<p>Initiate the class with the ssl context</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class CustomHttpAdapter(requests.adapters.HTTPAdapter):
+    &#34;&#34;&#34;Transport adapter&#34; that allows us to use custom ssl_context.&#34;&#34;&#34;
+
+    def __init__(self, ssl_context=None, **kwargs):
+        &#34;&#34;&#34;Initiate the class with the ssl context&#34;&#34;&#34;
+        self.ssl_context = ssl_context
+        super().__init__(**kwargs)
+
+    def init_poolmanager(self, connections, maxsize, block=False):
+        &#34;&#34;&#34;Initiate the pool manager&#34;&#34;&#34;
+        self.poolmanager = urllib3.poolmanager.PoolManager(
+            num_pools=connections,
+            maxsize=maxsize,
+            block=block,
+            ssl_context=self.ssl_context,
+        )</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>requests.adapters.HTTPAdapter</li>
+<li>requests.adapters.BaseAdapter</li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="pipelines.utils.crawler_ibge_inflacao.utils.CustomHttpAdapter.init_poolmanager"><code class="name flex">
+<span>def <span class="ident">init_poolmanager</span></span>(<span>self, connections, maxsize, block=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Initiate the pool manager</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def init_poolmanager(self, connections, maxsize, block=False):
+    &#34;&#34;&#34;Initiate the pool manager&#34;&#34;&#34;
+    self.poolmanager = urllib3.poolmanager.PoolManager(
+        num_pools=connections,
+        maxsize=maxsize,
+        block=block,
+        ssl_context=self.ssl_context,
+    )</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -113,6 +223,17 @@ def generate_inflacao_clocks(parameters: dict):
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="pipelines.utils.crawler_ibge_inflacao.utils.generate_inflacao_clocks" href="#pipelines.utils.crawler_ibge_inflacao.utils.generate_inflacao_clocks">generate_inflacao_clocks</a></code></li>
+<li><code><a title="pipelines.utils.crawler_ibge_inflacao.utils.get_legacy_session" href="#pipelines.utils.crawler_ibge_inflacao.utils.get_legacy_session">get_legacy_session</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="pipelines.utils.crawler_ibge_inflacao.utils.CustomHttpAdapter" href="#pipelines.utils.crawler_ibge_inflacao.utils.CustomHttpAdapter">CustomHttpAdapter</a></code></h4>
+<ul class="">
+<li><code><a title="pipelines.utils.crawler_ibge_inflacao.utils.CustomHttpAdapter.init_poolmanager" href="#pipelines.utils.crawler_ibge_inflacao.utils.CustomHttpAdapter.init_poolmanager">init_poolmanager</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
