@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>pipelines.utils.cross_update.schedules API documentation</title>
-<meta name="description" content="Schedules for br_tse_eleicoes" />
+<title>pipelines.datasets.cross_update.flows API documentation</title>
+<meta name="description" content="Flows for br_tse_eleicoes" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -19,40 +19,68 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>pipelines.utils.cross_update.schedules</code></h1>
+<h1 class="title">Module <code>pipelines.datasets.cross_update.flows</code></h1>
 </header>
 <section id="section-intro">
-<p>Schedules for br_tse_eleicoes</p>
+<p>Flows for br_tse_eleicoes</p>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python"># -*- coding: utf-8 -*-
 &#34;&#34;&#34;
-Schedules for br_tse_eleicoes
+Flows for br_tse_eleicoes
 &#34;&#34;&#34;
+# pylint: disable=invalid-name,line-too-long
 
-from datetime import timedelta, datetime
-from prefect.schedules import Schedule
-from prefect.schedules.clocks import IntervalClock
+from prefect.run_configs import KubernetesRun
+from prefect.storage import GCS
+from prefect.tasks.prefect import create_flow_run, wait_for_flow_run
+from prefect import Parameter, unmapped, case
+
 from pipelines.constants import constants
+from pipelines.utils.decorators import Flow
+from pipelines.datasets.cross_update.tasks import (
+    datasearch_json,
+    crawler_tables,
+    update_nrows,
+)
+from pipelines.datasets.cross_update.schedules import schedule_nrows
+from pipelines.utils.constants import constants as utils_constants
+from pipelines.utils.tasks import get_current_flow_labels
 
-schedule_nrows = Schedule(
-    clocks=[
-        IntervalClock(
-            interval=timedelta(days=7),
-            start_date=datetime(2021, 1, 1, 9, 45),
-            labels=[
-                constants.BASEDOSDADOS_PROD_AGENT_LABEL.value,
-            ],
-            parameter_defaults={
-                &#34;dump_to_gcs&#34;: True,
-                &#34;days&#34;: 7,
-                &#34;mode&#34;: &#34;prod&#34;,
-            },
-        ),
-    ],
-)</code></pre>
+with Flow(
+    name=&#34;cross_update.update_nrows&#34;, code_owners=[&#34;lucas_cr&#34;]
+) as crossupdate_nrows:
+    dump_to_gcs = Parameter(&#34;dump_to_gcs&#34;, default=False, required=False)
+    days = Parameter(&#34;days&#34;, default=7, required=False)
+    mode = Parameter(&#34;mode&#34;, default=&#34;prod&#34;, required=False)
+
+    json_response = datasearch_json(page_size=100, mode=mode)
+    updated_tables, tables_to_zip = crawler_tables(json_response, days=days)
+    updated_tables.set_upstream(json_response)
+    update_nrows.map(updated_tables, mode=unmapped(mode))
+
+    with case(dump_to_gcs, True):
+        current_flow_labels = get_current_flow_labels()
+        dump_to_gcs_flow = create_flow_run.map(
+            flow_name=unmapped(utils_constants.FLOW_DUMP_TO_GCS_NAME.value),
+            project_name=unmapped(constants.PREFECT_DEFAULT_PROJECT.value),
+            parameters=tables_to_zip,
+            labels=unmapped(current_flow_labels),
+            run_name=unmapped(&#34;Dump to GCS&#34;),
+        )
+
+        wait_for_dump_to_gcs = wait_for_flow_run.map(
+            dump_to_gcs_flow,
+            stream_states=unmapped(True),
+            stream_logs=unmapped(True),
+            raise_final_state=unmapped(True),
+        )
+
+crossupdate_nrows.storage = GCS(constants.GCS_FLOWS_BUCKET.value)
+crossupdate_nrows.run_config = KubernetesRun(image=constants.DOCKER_IMAGE.value)
+crossupdate_nrows.schedule = schedule_nrows</code></pre>
 </details>
 </section>
 <section>
@@ -72,7 +100,7 @@ schedule_nrows = Schedule(
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="pipelines.utils.cross_update" href="index.html">pipelines.utils.cross_update</a></code></li>
+<li><code><a title="pipelines.datasets.cross_update" href="index.html">pipelines.datasets.cross_update</a></code></li>
 </ul>
 </li>
 </ul>
