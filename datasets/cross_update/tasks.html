@@ -35,10 +35,13 @@ Tasks for cross update of metadata.
 from typing import List, Dict, Tuple
 import datetime
 from datetime import timedelta
+import re
 
 import basedosdados as bd
 from prefect import task
 import ruamel.yaml as ryaml
+from google.cloud import storage
+from tqdm import tqdm
 
 
 from pipelines.datasets.cross_update.utils import _safe_fetch
@@ -216,7 +219,21 @@ def update_nrows(table_dict: Dict[str, str], mode: str) -&gt; None:
         handle.publish(if_exists=&#34;replace&#34;)
         log(f&#34;Metadata for {table_id} updated&#34;)
     else:
-        log(&#34;Fail to validate metadata.&#34;)</code></pre>
+        log(&#34;Fail to validate metadata.&#34;)
+
+
+@task
+def rename_blobs() -&gt; None:
+    &#34;&#34;&#34;Rename blobs in basedosdados-dev bucket&#34;&#34;&#34;
+    storage_client = storage.Client()
+
+    bucket = storage_client.get_bucket(&#34;basedosdados-public&#34;)
+    blobs = bucket.list_blobs(prefix=&#34;one-click-download/&#34;)
+
+    for blob in tqdm(list(blobs)):
+        table_id = blob.name.split(&#34;/&#34;)[-2]
+        new_name = re.sub(r&#34;data0*\.csv\.gz&#34;, table_id + &#34;.csv.gz&#34;, blob.name)
+        bucket.rename_blob(blob, new_name)</code></pre>
 </details>
 </section>
 <section>
@@ -357,6 +374,29 @@ def datasearch_json(page_size: int, mode: str) -&gt; Dict:
     return json_response</code></pre>
 </details>
 </dd>
+<dt id="pipelines.datasets.cross_update.tasks.rename_blobs"><code class="name flex">
+<span>def <span class="ident">rename_blobs</span></span>(<span>) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Rename blobs in basedosdados-dev bucket</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@task
+def rename_blobs() -&gt; None:
+    &#34;&#34;&#34;Rename blobs in basedosdados-dev bucket&#34;&#34;&#34;
+    storage_client = storage.Client()
+
+    bucket = storage_client.get_bucket(&#34;basedosdados-public&#34;)
+    blobs = bucket.list_blobs(prefix=&#34;one-click-download/&#34;)
+
+    for blob in tqdm(list(blobs)):
+        table_id = blob.name.split(&#34;/&#34;)[-2]
+        new_name = re.sub(r&#34;data0*\.csv\.gz&#34;, table_id + &#34;.csv.gz&#34;, blob.name)
+        bucket.rename_blob(blob, new_name)</code></pre>
+</details>
+</dd>
 <dt id="pipelines.datasets.cross_update.tasks.update_nrows"><code class="name flex">
 <span>def <span class="ident">update_nrows</span></span>(<span>table_dict: Dict[str, str], mode: str) ‑> None</span>
 </code></dt>
@@ -467,6 +507,7 @@ def update_nrows(table_dict: Dict[str, str], mode: str) -&gt; None:
 <ul class="">
 <li><code><a title="pipelines.datasets.cross_update.tasks.crawler_tables" href="#pipelines.datasets.cross_update.tasks.crawler_tables">crawler_tables</a></code></li>
 <li><code><a title="pipelines.datasets.cross_update.tasks.datasearch_json" href="#pipelines.datasets.cross_update.tasks.datasearch_json">datasearch_json</a></code></li>
+<li><code><a title="pipelines.datasets.cross_update.tasks.rename_blobs" href="#pipelines.datasets.cross_update.tasks.rename_blobs">rename_blobs</a></code></li>
 <li><code><a title="pipelines.datasets.cross_update.tasks.update_nrows" href="#pipelines.datasets.cross_update.tasks.update_nrows">update_nrows</a></code></li>
 </ul>
 </li>
