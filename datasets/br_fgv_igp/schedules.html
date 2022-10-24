@@ -32,27 +32,27 @@
 Schedules for br_fgv_igp
 &#34;&#34;&#34;
 
-from datetime import timedelta, datetime
+from datetime import datetime
 
 from prefect.schedules import Schedule
-from prefect.schedules.clocks import IntervalClock
+from prefect.schedules.clocks import CronClock
 
 from pipelines.constants import constants
 
 igp_di_mes = Schedule(
     clocks=[
-        IntervalClock(
-            interval=timedelta(days=30),
+        CronClock(
+            cron=&#34;00 03 08 * *&#34;,  # At 03:00 on day-of-month 8
             start_date=datetime(2021, 1, 1),
             labels=[
-                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+                constants.BASEDOSDADOS_PROD_AGENT_LABEL.value,
             ],
             parameter_defaults={
                 &#34;dataset_id&#34;: &#34;br_fgv_igp&#34;,
                 &#34;table_id&#34;: &#34;igp_di_mes&#34;,
                 &#34;indice&#34;: &#34;IGPDI&#34;,
                 &#34;periodo&#34;: &#34;mes&#34;,
-                &#34;materialization_mode&#34;: &#34;dev&#34;,
+                &#34;materialization_mode&#34;: &#34;prod&#34;,
                 &#34;materialize_after_dump&#34;: True,
                 &#34;dbt_alias&#34;: True,
             },
@@ -62,18 +62,18 @@ igp_di_mes = Schedule(
 
 igp_di_ano = Schedule(
     clocks=[
-        IntervalClock(
-            interval=timedelta(days=30),
+        CronClock(
+            cron=&#34;00 03 08 01 *&#34;,  # At 03:00 on day-of-month 8 in January
             start_date=datetime(2021, 1, 1),
             labels=[
-                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+                constants.BASEDOSDADOS_PROD_AGENT_LABEL.value,
             ],
             parameter_defaults={
                 &#34;dataset_id&#34;: &#34;br_fgv_igp&#34;,
                 &#34;table_id&#34;: &#34;igp_di_ano&#34;,
                 &#34;indice&#34;: &#34;IGPDI&#34;,
                 &#34;periodo&#34;: &#34;ano&#34;,
-                &#34;materialization_mode&#34;: &#34;dev&#34;,
+                &#34;materialization_mode&#34;: &#34;prod&#34;,
                 &#34;materialize_after_dump&#34;: True,
                 &#34;dbt_alias&#34;: True,
             },
@@ -83,18 +83,18 @@ igp_di_ano = Schedule(
 
 igp_m_mes = Schedule(
     clocks=[
-        IntervalClock(
-            interval=timedelta(days=30),
+        CronClock(
+            cron=&#34;00 03 01 * *&#34;,  # At 03:00 on day-of-month 1
             start_date=datetime(2021, 1, 1),
             labels=[
-                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+                constants.BASEDOSDADOS_PROD_AGENT_LABEL.value,
             ],
             parameter_defaults={
                 &#34;dataset_id&#34;: &#34;br_fgv_igp&#34;,
                 &#34;table_id&#34;: &#34;igp_m_mes&#34;,
                 &#34;indice&#34;: &#34;IGPM&#34;,
                 &#34;periodo&#34;: &#34;mes&#34;,
-                &#34;materialization_mode&#34;: &#34;dev&#34;,
+                &#34;materialization_mode&#34;: &#34;prod&#34;,
                 &#34;materialize_after_dump&#34;: True,
                 &#34;dbt_alias&#34;: True,
             },
@@ -104,18 +104,18 @@ igp_m_mes = Schedule(
 
 igp_m_ano = Schedule(
     clocks=[
-        IntervalClock(
-            interval=timedelta(days=30),
+        CronClock(
+            cron=&#34;00 03 01 01 *&#34;,  # At 03:00 on day-of-month 1 in January
             start_date=datetime(2021, 1, 1),
             labels=[
-                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+                constants.BASEDOSDADOS_PROD_AGENT_LABEL.value,
             ],
             parameter_defaults={
                 &#34;dataset_id&#34;: &#34;br_fgv_igp&#34;,
                 &#34;table_id&#34;: &#34;igp_m_ano&#34;,
                 &#34;indice&#34;: &#34;IGPM&#34;,
                 &#34;periodo&#34;: &#34;ano&#34;,
-                &#34;materialization_mode&#34;: &#34;dev&#34;,
+                &#34;materialization_mode&#34;: &#34;prod&#34;,
                 &#34;materialize_after_dump&#34;: True,
                 &#34;dbt_alias&#34;: True,
             },
@@ -125,18 +125,18 @@ igp_m_ano = Schedule(
 
 igp_og_mes = Schedule(
     clocks=[
-        IntervalClock(
-            interval=timedelta(days=30),
+        CronClock(
+            cron=&#34;00 03 08 * *&#34;,  # At 03:00 on day-of-month 8
             start_date=datetime(2021, 1, 1),
             labels=[
-                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+                constants.BASEDOSDADOS_PROD_AGENT_LABEL.value,
             ],
             parameter_defaults={
                 &#34;dataset_id&#34;: &#34;br_fgv_igp&#34;,
                 &#34;table_id&#34;: &#34;igp_og_mes&#34;,
                 &#34;indice&#34;: &#34;IGPOG&#34;,
                 &#34;periodo&#34;: &#34;mes&#34;,
-                &#34;materialization_mode&#34;: &#34;dev&#34;,
+                &#34;materialization_mode&#34;: &#34;prod&#34;,
                 &#34;materialize_after_dump&#34;: True,
                 &#34;dbt_alias&#34;: True,
             },
@@ -146,18 +146,18 @@ igp_og_mes = Schedule(
 
 igp_og_ano = Schedule(
     clocks=[
-        IntervalClock(
-            interval=timedelta(days=30),
+        CronClock(
+            cron=&#34;00 03 08 01 *&#34;,  # At 03:00 on day-of-month 8 in January
             start_date=datetime(2021, 1, 1),
             labels=[
-                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+                constants.BASEDOSDADOS_PROD_AGENT_LABEL.value,
             ],
             parameter_defaults={
                 &#34;dataset_id&#34;: &#34;br_fgv_igp&#34;,
                 &#34;table_id&#34;: &#34;igp_og_ano&#34;,
                 &#34;indice&#34;: &#34;IGPOG&#34;,
                 &#34;periodo&#34;: &#34;ano&#34;,
-                &#34;materialization_mode&#34;: &#34;dev&#34;,
+                &#34;materialization_mode&#34;: &#34;prod&#34;,
                 &#34;materialize_after_dump&#34;: True,
                 &#34;dbt_alias&#34;: True,
             },
@@ -167,18 +167,18 @@ igp_og_ano = Schedule(
 
 igp_10_mes = Schedule(
     clocks=[
-        IntervalClock(
-            interval=timedelta(days=30),
+        CronClock(
+            cron=&#34;00 03 18 * *&#34;,  # At 03:00 on day-of-month 18
             start_date=datetime(2021, 1, 1),
             labels=[
-                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+                constants.BASEDOSDADOS_PROD_AGENT_LABEL.value,
             ],
             parameter_defaults={
                 &#34;dataset_id&#34;: &#34;br_fgv_igp&#34;,
                 &#34;table_id&#34;: &#34;igp_10_mes&#34;,
                 &#34;indice&#34;: &#34;IGP10&#34;,
                 &#34;periodo&#34;: &#34;mes&#34;,
-                &#34;materialization_mode&#34;: &#34;dev&#34;,
+                &#34;materialization_mode&#34;: &#34;prod&#34;,
                 &#34;materialize_after_dump&#34;: True,
                 &#34;dbt_alias&#34;: True,
             },
