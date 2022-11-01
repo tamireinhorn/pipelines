@@ -34,22 +34,18 @@ Tasks for br_twitter
 # pylint: disable=invalid-name,too-many-branches,too-many-nested-blocks
 import os
 from datetime import datetime, timedelta
-from typing import Tuple
 from functools import reduce
+from typing import Tuple
 
-import pytz
-from prefect import task
-import requests
-from tqdm import tqdm
-from requests_oauthlib import OAuth1
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytz
+import requests
+from prefect import task
+from requests_oauthlib import OAuth1
+from tqdm import tqdm
 
-from pipelines.utils.utils import (
-    get_storage_blobs,
-    log,
-    get_credentials_from_secret,
-)
+from pipelines.constants import constants
 from pipelines.datasets.br_bd_indicadores.utils import (
     create_headers,
     create_url,
@@ -59,8 +55,13 @@ from pipelines.datasets.br_bd_indicadores.utils import (
     parse_data,
     initialize_analyticsreporting,
     get_report,
+    create_google_sheet_url,
 )
-from pipelines.constants import constants
+from pipelines.utils.utils import (
+    get_storage_blobs,
+    log,
+    get_credentials_from_secret,
+)
 
 
 # pylint: disable=C0103
@@ -337,7 +338,29 @@ def crawler_report_ga(view_id: str, metrics: list = None) -&gt; str:
 
     df.to_csv(filepath, index=False)
 
-    return &#34;/tmp/data/&#34;</code></pre>
+    return &#34;/tmp/data/&#34;
+
+
+@task(
+    max_retries=constants.TASK_MAX_RETRIES.value,
+    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
+)
+def get_data_from_sheet(sheet_id: str, sheet_name: str) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Get the data from a Google Sheet, and return a DataFrame.&#34;&#34;&#34;
+    google_sheet = create_google_sheet_url(sheet_id, sheet_name)
+    df_contabilidade = pd.read_csv(google_sheet)
+    return df_contabilidade
+
+
+@task(
+    max_retries=constants.TASK_MAX_RETRIES.value,
+    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
+)
+def save_data_to_csv(df: pd.DataFrame, filename: str) -&gt; str:
+    &#34;&#34;&#34;Save the DataFrame as csv and return the path to the csv file&#34;&#34;&#34;
+    filepath = f&#34;/tmp/data/{filename}.csv&#34;
+    df.to_csv(filepath, encoding=&#34;utf-8&#34;, sep=&#34;,&#34;, na_rep=np.nan, index=False)
+    return filepath</code></pre>
 </details>
 </section>
 <section>
@@ -596,6 +619,26 @@ def echo(message: str) -&gt; None:
     log(message)</code></pre>
 </details>
 </dd>
+<dt id="pipelines.datasets.br_bd_indicadores.tasks.get_data_from_sheet"><code class="name flex">
+<span>def <span class="ident">get_data_from_sheet</span></span>(<span>sheet_id: str, sheet_name: str) ‑> pandas.core.frame.DataFrame</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the data from a Google Sheet, and return a DataFrame.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@task(
+    max_retries=constants.TASK_MAX_RETRIES.value,
+    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
+)
+def get_data_from_sheet(sheet_id: str, sheet_name: str) -&gt; pd.DataFrame:
+    &#34;&#34;&#34;Get the data from a Google Sheet, and return a DataFrame.&#34;&#34;&#34;
+    google_sheet = create_google_sheet_url(sheet_id, sheet_name)
+    df_contabilidade = pd.read_csv(google_sheet)
+    return df_contabilidade</code></pre>
+</details>
+</dd>
 <dt id="pipelines.datasets.br_bd_indicadores.tasks.get_ga_credentials"><code class="name flex">
 <span>def <span class="ident">get_ga_credentials</span></span>(<span>secret_path: str, key: str, wait=None) ‑> str</span>
 </code></dt>
@@ -697,6 +740,26 @@ def has_new_tweets(bearer_token: str, table_id: str) -&gt; bool:
     return not df1.empty</code></pre>
 </details>
 </dd>
+<dt id="pipelines.datasets.br_bd_indicadores.tasks.save_data_to_csv"><code class="name flex">
+<span>def <span class="ident">save_data_to_csv</span></span>(<span>df: pandas.core.frame.DataFrame, filename: str) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Save the DataFrame as csv and return the path to the csv file</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@task(
+    max_retries=constants.TASK_MAX_RETRIES.value,
+    retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
+)
+def save_data_to_csv(df: pd.DataFrame, filename: str) -&gt; str:
+    &#34;&#34;&#34;Save the DataFrame as csv and return the path to the csv file&#34;&#34;&#34;
+    filepath = f&#34;/tmp/data/{filename}.csv&#34;
+    df.to_csv(filepath, encoding=&#34;utf-8&#34;, sep=&#34;,&#34;, na_rep=np.nan, index=False)
+    return filepath</code></pre>
+</details>
+</dd>
 </dl>
 </section>
 <section>
@@ -719,9 +782,11 @@ def has_new_tweets(bearer_token: str, table_id: str) -&gt; bool:
 <li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.crawler_real_time" href="#pipelines.datasets.br_bd_indicadores.tasks.crawler_real_time">crawler_real_time</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.crawler_report_ga" href="#pipelines.datasets.br_bd_indicadores.tasks.crawler_report_ga">crawler_report_ga</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.echo" href="#pipelines.datasets.br_bd_indicadores.tasks.echo">echo</a></code></li>
+<li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.get_data_from_sheet" href="#pipelines.datasets.br_bd_indicadores.tasks.get_data_from_sheet">get_data_from_sheet</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.get_ga_credentials" href="#pipelines.datasets.br_bd_indicadores.tasks.get_ga_credentials">get_ga_credentials</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.get_twitter_credentials" href="#pipelines.datasets.br_bd_indicadores.tasks.get_twitter_credentials">get_twitter_credentials</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.has_new_tweets" href="#pipelines.datasets.br_bd_indicadores.tasks.has_new_tweets">has_new_tweets</a></code></li>
+<li><code><a title="pipelines.datasets.br_bd_indicadores.tasks.save_data_to_csv" href="#pipelines.datasets.br_bd_indicadores.tasks.save_data_to_csv">save_data_to_csv</a></code></li>
 </ul>
 </li>
 </ul>

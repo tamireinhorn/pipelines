@@ -33,13 +33,12 @@ utils for br_bd_indicadores
 &#34;&#34;&#34;
 # pylint: disable=too-few-public-methods
 import collections
-from typing import Tuple
-from typing import List
 import os
+from typing import List
+from typing import Tuple
 
-from googleapiclient.discovery import build
-from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
+import requests
 from google.analytics.data_v1beta import BetaAnalyticsDataClient
 from google.analytics.data_v1beta.types import (
     Dimension,
@@ -48,7 +47,10 @@ from google.analytics.data_v1beta.types import (
 from google.analytics.data_v1beta.types import (
     RunRealtimeReportRequest,
 )
-import requests
+from googleapiclient.discovery import build
+from oauth2client.service_account import ServiceAccountCredentials
+
+from pipelines.utils.constants import constants
 
 
 def create_headers(bearer_token: str) -&gt; dict:
@@ -247,7 +249,13 @@ def parse_data(response) -&gt; pd.DataFrame:
 
     # Assign columns names to DF
     result.columns = column_names
-    return result</code></pre>
+    return result
+
+
+def create_google_sheet_url(sheet_id: str, sheet_name: str) -&gt; str:
+    &#34;&#34;&#34;Create a Google Sheet URL from a sheet ID and sheet name.&#34;&#34;&#34;
+    google_sheets_url = constants.GOOGLE_SHEETS_URL.value
+    return google_sheets_url.format(sheet_id=sheet_id, sheet_name=sheet_name)</code></pre>
 </details>
 </section>
 <section>
@@ -276,6 +284,21 @@ def parse_data(response) -&gt; pd.DataFrame:
     if response.status_code != 200:
         raise Exception(response.status_code, response.text)
     return response.json()</code></pre>
+</details>
+</dd>
+<dt id="pipelines.datasets.br_bd_indicadores.utils.create_google_sheet_url"><code class="name flex">
+<span>def <span class="ident">create_google_sheet_url</span></span>(<span>sheet_id: str, sheet_name: str) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a Google Sheet URL from a sheet ID and sheet name.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_google_sheet_url(sheet_id: str, sheet_name: str) -&gt; str:
+    &#34;&#34;&#34;Create a Google Sheet URL from a sheet ID and sheet name.&#34;&#34;&#34;
+    google_sheets_url = constants.GOOGLE_SHEETS_URL.value
+    return google_sheets_url.format(sheet_id=sheet_id, sheet_name=sheet_name)</code></pre>
 </details>
 </dd>
 <dt id="pipelines.datasets.br_bd_indicadores.utils.create_headers"><code class="name flex">
@@ -654,6 +677,7 @@ More information: <a href="https://support.google.com/analytics/answer/9271392?h
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="pipelines.datasets.br_bd_indicadores.utils.connect_to_endpoint" href="#pipelines.datasets.br_bd_indicadores.utils.connect_to_endpoint">connect_to_endpoint</a></code></li>
+<li><code><a title="pipelines.datasets.br_bd_indicadores.utils.create_google_sheet_url" href="#pipelines.datasets.br_bd_indicadores.utils.create_google_sheet_url">create_google_sheet_url</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.utils.create_headers" href="#pipelines.datasets.br_bd_indicadores.utils.create_headers">create_headers</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.utils.create_url" href="#pipelines.datasets.br_bd_indicadores.utils.create_url">create_url</a></code></li>
 <li><code><a title="pipelines.datasets.br_bd_indicadores.utils.flatten" href="#pipelines.datasets.br_bd_indicadores.utils.flatten">flatten</a></code></li>
