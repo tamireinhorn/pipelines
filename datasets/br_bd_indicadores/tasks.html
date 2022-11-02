@@ -35,6 +35,7 @@ Tasks for br_twitter
 import os
 from datetime import datetime, timedelta
 from functools import reduce
+from pathlib import Path
 from typing import Tuple
 
 import numpy as np
@@ -358,7 +359,10 @@ def get_data_from_sheet(sheet_id: str, sheet_name: str) -&gt; pd.DataFrame:
 )
 def save_data_to_csv(df: pd.DataFrame, filename: str) -&gt; str:
     &#34;&#34;&#34;Save the DataFrame as csv and return the path to the csv file&#34;&#34;&#34;
-    filepath = f&#34;/tmp/data/{filename}.csv&#34;
+    out_path = Path(&#34;tmp/data&#34;)
+    if not out_path.is_dir():
+        out_path.mkdir(parents=True)
+    filepath = f&#34;tmp/data/{filename}.csv&#34;
     df.to_csv(filepath, encoding=&#34;utf-8&#34;, sep=&#34;,&#34;, na_rep=np.nan, index=False)
     return filepath</code></pre>
 </details>
@@ -755,7 +759,10 @@ def has_new_tweets(bearer_token: str, table_id: str) -&gt; bool:
 )
 def save_data_to_csv(df: pd.DataFrame, filename: str) -&gt; str:
     &#34;&#34;&#34;Save the DataFrame as csv and return the path to the csv file&#34;&#34;&#34;
-    filepath = f&#34;/tmp/data/{filename}.csv&#34;
+    out_path = Path(&#34;tmp/data&#34;)
+    if not out_path.is_dir():
+        out_path.mkdir(parents=True)
+    filepath = f&#34;tmp/data/{filename}.csv&#34;
     df.to_csv(filepath, encoding=&#34;utf-8&#34;, sep=&#34;,&#34;, na_rep=np.nan, index=False)
     return filepath</code></pre>
 </details>
