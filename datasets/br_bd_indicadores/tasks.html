@@ -350,6 +350,8 @@ def get_data_from_sheet(sheet_id: str, sheet_name: str) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Get the data from a Google Sheet, and return a DataFrame.&#34;&#34;&#34;
     google_sheet = create_google_sheet_url(sheet_id, sheet_name)
     df_contabilidade = pd.read_csv(google_sheet)
+    df_contabilidade[&#34;valor&#34;] = df_contabilidade[&#34;valor&#34;].str.replace(&#34;,&#34;, &#34;.&#34;)
+    df_contabilidade[&#34;valor&#34;] = df_contabilidade[&#34;valor&#34;].astype(float)
     return df_contabilidade
 
 
@@ -359,10 +361,10 @@ def get_data_from_sheet(sheet_id: str, sheet_name: str) -&gt; pd.DataFrame:
 )
 def save_data_to_csv(df: pd.DataFrame, filename: str) -&gt; str:
     &#34;&#34;&#34;Save the DataFrame as csv and return the path to the csv file&#34;&#34;&#34;
-    out_path = Path(&#34;tmp/data&#34;)
+    out_path = Path(&#34;/tmp/data&#34;)
     if not out_path.is_dir():
         out_path.mkdir(parents=True)
-    filepath = f&#34;tmp/data/{filename}.csv&#34;
+    filepath = f&#34;/tmp/data/{filename}.csv&#34;
     df.to_csv(filepath, encoding=&#34;utf-8&#34;, sep=&#34;,&#34;, na_rep=np.nan, index=False)
     return filepath</code></pre>
 </details>
@@ -640,6 +642,8 @@ def get_data_from_sheet(sheet_id: str, sheet_name: str) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Get the data from a Google Sheet, and return a DataFrame.&#34;&#34;&#34;
     google_sheet = create_google_sheet_url(sheet_id, sheet_name)
     df_contabilidade = pd.read_csv(google_sheet)
+    df_contabilidade[&#34;valor&#34;] = df_contabilidade[&#34;valor&#34;].str.replace(&#34;,&#34;, &#34;.&#34;)
+    df_contabilidade[&#34;valor&#34;] = df_contabilidade[&#34;valor&#34;].astype(float)
     return df_contabilidade</code></pre>
 </details>
 </dd>
@@ -759,10 +763,10 @@ def has_new_tweets(bearer_token: str, table_id: str) -&gt; bool:
 )
 def save_data_to_csv(df: pd.DataFrame, filename: str) -&gt; str:
     &#34;&#34;&#34;Save the DataFrame as csv and return the path to the csv file&#34;&#34;&#34;
-    out_path = Path(&#34;tmp/data&#34;)
+    out_path = Path(&#34;/tmp/data&#34;)
     if not out_path.is_dir():
         out_path.mkdir(parents=True)
-    filepath = f&#34;tmp/data/{filename}.csv&#34;
+    filepath = f&#34;/tmp/data/{filename}.csv&#34;
     df.to_csv(filepath, encoding=&#34;utf-8&#34;, sep=&#34;,&#34;, na_rep=np.nan, index=False)
     return filepath</code></pre>
 </details>
