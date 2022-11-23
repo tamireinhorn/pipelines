@@ -141,6 +141,50 @@ schedule_receitas = Schedule(
     ],
     filters=[filters.is_weekday],
     adjustments=[adjustments.next_weekday],
+)
+
+schedule_equipes = Schedule(
+    clocks=[
+        IntervalClock(
+            interval=timedelta(days=1),
+            start_date=datetime(2022, 1, 1, 6, 0),
+            labels=[
+                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+            ],
+            parameter_defaults={
+                &#34;dataset_id&#34;: &#34;br_bd_indicadores&#34;,
+                &#34;table_id&#34;: &#34;equipes&#34;,
+                &#34;sheet_id&#34;: &#34;1gLJyoxiFeIRn7FKiP3Fpbr04bScVuhmF&#34;,
+                &#34;sheet_name&#34;: &#34;equipes&#34;,
+                &#34;materialization_mode&#34;: &#34;prod&#34;,
+                &#34;materialize after dump&#34;: True,
+            },
+        ),
+    ],
+    filters=[filters.is_weekday],
+    adjustments=[adjustments.next_weekday],
+)
+
+schedule_pessoas = Schedule(
+    clocks=[
+        IntervalClock(
+            interval=timedelta(days=1),
+            start_date=datetime(2022, 1, 1, 6, 0),
+            labels=[
+                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+            ],
+            parameter_defaults={
+                &#34;dataset_id&#34;: &#34;br_bd_indicadores&#34;,
+                &#34;table_id&#34;: &#34;pessoas&#34;,
+                &#34;sheet_id&#34;: &#34;1cQj9ItJoO_AQElRT2ngpHZXhFCSpQCrV&#34;,
+                &#34;sheet_name&#34;: &#34;pessoas&#34;,
+                &#34;materialization_mode&#34;: &#34;prod&#34;,
+                &#34;materialize after dump&#34;: True,
+            },
+        ),
+    ],
+    filters=[filters.is_weekday],
+    adjustments=[adjustments.next_weekday],
 )</code></pre>
 </details>
 </section>
