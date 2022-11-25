@@ -113,7 +113,7 @@ schedule_contabilidade = Schedule(
                 &#34;sheet_id&#34;: &#34;1jtZAV2SFEdEX99DumpUQ1LjZE2vcSgvL4DNo4n6HIec&#34;,
                 &#34;sheet_name&#34;: &#34;transacoes_anonimizado&#34;,
                 &#34;materialization_mode&#34;: &#34;prod&#34;,
-                &#34;materialize after dump&#34;: True,
+                &#34;materialize_after_dump&#34;: True,
             },
         ),
     ],
@@ -135,7 +135,7 @@ schedule_receitas = Schedule(
                 &#34;sheet_id&#34;: &#34;1fHp1NNUyhFIAAJ9bZOdZ2i9PSLIbkjSjMcGAlaxur90&#34;,
                 &#34;sheet_name&#34;: &#34;receitas_planejadas_anonimizado&#34;,
                 &#34;materialization_mode&#34;: &#34;prod&#34;,
-                &#34;materialize after dump&#34;: True,
+                &#34;materialize_after_dump&#34;: True,
             },
         ),
     ],
@@ -149,7 +149,7 @@ schedule_equipes = Schedule(
             interval=timedelta(days=1),
             start_date=datetime(2022, 1, 1, 6, 0),
             labels=[
-                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+                constants.BASEDOSDADOS_PROD_AGENT_LABEL.value,
             ],
             parameter_defaults={
                 &#34;dataset_id&#34;: &#34;br_bd_indicadores&#34;,
@@ -157,7 +157,7 @@ schedule_equipes = Schedule(
                 &#34;sheet_id&#34;: &#34;1gLJyoxiFeIRn7FKiP3Fpbr04bScVuhmF&#34;,
                 &#34;sheet_name&#34;: &#34;equipes&#34;,
                 &#34;materialization_mode&#34;: &#34;prod&#34;,
-                &#34;materialize after dump&#34;: True,
+                &#34;materialize_after_dump&#34;: True,
             },
         ),
     ],
@@ -171,7 +171,7 @@ schedule_pessoas = Schedule(
             interval=timedelta(days=1),
             start_date=datetime(2022, 1, 1, 6, 0),
             labels=[
-                constants.BASEDOSDADOS_DEV_AGENT_LABEL.value,
+                constants.BASEDOSDADOS_PROD_AGENT_LABEL.value,
             ],
             parameter_defaults={
                 &#34;dataset_id&#34;: &#34;br_bd_indicadores&#34;,
@@ -179,7 +179,7 @@ schedule_pessoas = Schedule(
                 &#34;sheet_id&#34;: &#34;1cQj9ItJoO_AQElRT2ngpHZXhFCSpQCrV&#34;,
                 &#34;sheet_name&#34;: &#34;pessoas&#34;,
                 &#34;materialization_mode&#34;: &#34;prod&#34;,
-                &#34;materialize after dump&#34;: True,
+                &#34;materialize_after_dump&#34;: True,
             },
         ),
     ],
