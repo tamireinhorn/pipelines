@@ -36,7 +36,7 @@ import os
 from datetime import datetime, timedelta
 from functools import reduce
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Optional
 
 import numpy as np
 import pandas as pd
@@ -348,10 +348,14 @@ def crawler_report_ga(view_id: str, metrics: list = None) -&gt; str:
     max_retries=constants.TASK_MAX_RETRIES.value,
     retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
 )
-def get_data_from_sheet(sheet_id: str, sheet_name: str) -&gt; pd.DataFrame:
+def get_data_from_sheet(
+    sheet_id: str, sheet_name: str, usecols: Optional[int] = None
+) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Get the data from a Google Sheet, and return a DataFrame.&#34;&#34;&#34;
     google_sheet = create_google_sheet_url(sheet_id, sheet_name)
-    dff = pd.read_csv(google_sheet)
+    if isinstance(usecols, int):
+        usecols = list(range(usecols))
+    dff = pd.read_csv(google_sheet, usecols=usecols)
     if &#34;valor&#34; in dff.columns:
         if dff[&#34;valor&#34;].dtype == &#34;object&#34;:
             dff[&#34;valor&#34;] = dff[&#34;valor&#34;].str.replace(&#34;,&#34;, &#34;.&#34;)
@@ -632,7 +636,7 @@ def echo(message: str) -&gt; None:
 </details>
 </dd>
 <dt id="pipelines.datasets.br_bd_indicadores.tasks.get_data_from_sheet"><code class="name flex">
-<span>def <span class="ident">get_data_from_sheet</span></span>(<span>sheet_id: str, sheet_name: str) ‑> pandas.core.frame.DataFrame</span>
+<span>def <span class="ident">get_data_from_sheet</span></span>(<span>sheet_id: str, sheet_name: str, usecols: Optional[int] = None) ‑> pandas.core.frame.DataFrame</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the data from a Google Sheet, and return a DataFrame.</p></div>
@@ -645,10 +649,14 @@ def echo(message: str) -&gt; None:
     max_retries=constants.TASK_MAX_RETRIES.value,
     retry_delay=timedelta(seconds=constants.TASK_RETRY_DELAY.value),
 )
-def get_data_from_sheet(sheet_id: str, sheet_name: str) -&gt; pd.DataFrame:
+def get_data_from_sheet(
+    sheet_id: str, sheet_name: str, usecols: Optional[int] = None
+) -&gt; pd.DataFrame:
     &#34;&#34;&#34;Get the data from a Google Sheet, and return a DataFrame.&#34;&#34;&#34;
     google_sheet = create_google_sheet_url(sheet_id, sheet_name)
-    dff = pd.read_csv(google_sheet)
+    if isinstance(usecols, int):
+        usecols = list(range(usecols))
+    dff = pd.read_csv(google_sheet, usecols=usecols)
     if &#34;valor&#34; in dff.columns:
         if dff[&#34;valor&#34;].dtype == &#34;object&#34;:
             dff[&#34;valor&#34;] = dff[&#34;valor&#34;].str.replace(&#34;,&#34;, &#34;.&#34;)
