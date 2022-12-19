@@ -38,6 +38,9 @@ from typing import List, Tuple, Union
 import requests
 
 
+# pylint: disable=invalid-name
+
+
 def get_ip_location(
     ip_address: Union[List[str], str] = None
 ) -&gt; Union[
@@ -60,11 +63,11 @@ def get_ip_location(
     if isinstance(ip_address, list) and len(ip_address) &gt; 1:
         url = &#34;http://ip-api.com/batch&#34;
         data = [{&#34;query&#34;: ip} for ip in ip_address]
-        response = requests.post(url, json=data)
+        response = requests.post(url, json=data, timeout=300)
         data = response.json()
         return [parse_data(d) for d in data]
     # If it&#39;s a list of length 1, a string or None
-    elif (
+    if (
         isinstance(ip_address, list)
         and len(ip_address) == 1
         or isinstance(ip_address, str)
@@ -73,23 +76,25 @@ def get_ip_location(
         url = &#34;http://ip-api.com/json/&#34;
         if ip_address:
             url = f&#34;{url}{ip_address}&#34;
-        response = requests.get(url)
+        response = requests.get(url, timeout=300)
         data = response.json()
         try:
             ip, country, city, lat, lon = parse_data(data)
-        except KeyError:
-            raise KeyError(f&#34;Error while parsing data: {data}&#34;)
+        except KeyError as err:
+            raise KeyError(f&#34;Error while parsing data: {data}&#34;) from err
         return ip, country, city, lat, lon
-    else:
-        raise ValueError(f&#34;Invalid ip_address: {ip_address}&#34;)
+
+    raise ValueError(f&#34;Invalid ip_address: {ip_address}&#34;)
 
 
 def traceroute(hostname: str):
     &#34;&#34;&#34;
     Launches traceroute command and parses results.
     &#34;&#34;&#34;
-    traceroute = subprocess.Popen(
-        [&#34;traceroute&#34;, hostname], stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+    traceroute = (  # pylint: disable=redefined-outer-name
+        subprocess.Popen(  # pylint: disable=consider-using-with
+            [&#34;traceroute&#34;, hostname], stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        )
     )
     ipList = []
     for line in iter(traceroute.stdout.readline, b&#34;&#34;):
@@ -141,11 +146,11 @@ def traceroute(hostname: str):
     if isinstance(ip_address, list) and len(ip_address) &gt; 1:
         url = &#34;http://ip-api.com/batch&#34;
         data = [{&#34;query&#34;: ip} for ip in ip_address]
-        response = requests.post(url, json=data)
+        response = requests.post(url, json=data, timeout=300)
         data = response.json()
         return [parse_data(d) for d in data]
     # If it&#39;s a list of length 1, a string or None
-    elif (
+    if (
         isinstance(ip_address, list)
         and len(ip_address) == 1
         or isinstance(ip_address, str)
@@ -154,15 +159,15 @@ def traceroute(hostname: str):
         url = &#34;http://ip-api.com/json/&#34;
         if ip_address:
             url = f&#34;{url}{ip_address}&#34;
-        response = requests.get(url)
+        response = requests.get(url, timeout=300)
         data = response.json()
         try:
             ip, country, city, lat, lon = parse_data(data)
-        except KeyError:
-            raise KeyError(f&#34;Error while parsing data: {data}&#34;)
+        except KeyError as err:
+            raise KeyError(f&#34;Error while parsing data: {data}&#34;) from err
         return ip, country, city, lat, lon
-    else:
-        raise ValueError(f&#34;Invalid ip_address: {ip_address}&#34;)</code></pre>
+
+    raise ValueError(f&#34;Invalid ip_address: {ip_address}&#34;)</code></pre>
 </details>
 </dd>
 <dt id="pipelines.utils.traceroute.utils.traceroute"><code class="name flex">
@@ -178,8 +183,10 @@ def traceroute(hostname: str):
     &#34;&#34;&#34;
     Launches traceroute command and parses results.
     &#34;&#34;&#34;
-    traceroute = subprocess.Popen(
-        [&#34;traceroute&#34;, hostname], stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+    traceroute = (  # pylint: disable=redefined-outer-name
+        subprocess.Popen(  # pylint: disable=consider-using-with
+            [&#34;traceroute&#34;, hostname], stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+        )
     )
     ipList = []
     for line in iter(traceroute.stdout.readline, b&#34;&#34;):
