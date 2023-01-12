@@ -203,6 +203,11 @@ def crawler_metricas(
         for col in df.columns
     ]
 
+    # A partir de 10/01/2023 o campo &#34;impression_count&#34; ficou duplicado no dataframe
+    # Não consegui encontrar o motivo, então estou removendo o campo duplicado
+
+    df = df.loc[:, ~df.columns.duplicated()]
+
     url = (
         &#34;https://api.twitter.com/2/users/1184334528837574656?user.fields=public_metrics&#34;
     )
@@ -461,6 +466,11 @@ def crawler_metricas(
         col.replace(&#34;non_public_metrics_&#34;, &#34;&#34;).replace(&#34;public_metrics_&#34;, &#34;&#34;)
         for col in df.columns
     ]
+
+    # A partir de 10/01/2023 o campo &#34;impression_count&#34; ficou duplicado no dataframe
+    # Não consegui encontrar o motivo, então estou removendo o campo duplicado
+
+    df = df.loc[:, ~df.columns.duplicated()]
 
     url = (
         &#34;https://api.twitter.com/2/users/1184334528837574656?user.fields=public_metrics&#34;
