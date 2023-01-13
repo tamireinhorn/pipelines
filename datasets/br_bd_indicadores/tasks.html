@@ -363,13 +363,7 @@ def get_data_from_sheet(
     dff = pd.read_csv(google_sheet, usecols=usecols)
     if &#34;valor&#34; in dff.columns:
         if dff[&#34;valor&#34;].dtype == &#34;object&#34;:
-            dff[&#34;valor&#34;] = (
-                dff[&#34;valor&#34;]
-                .str.replace(&#34;.&#34;, &#34;#&#34;)
-                .str.replace(&#34;,&#34;, &#34;.&#34;)
-                .str.replace(&#34;#&#34;, &#34;&#34;)
-            )
-            # dff[&#34;valor&#34;] = dff[&#34;valor&#34;].str.replace(&#34;,&#34;, &#34;.&#34;)
+            dff[&#34;valor&#34;] = dff[&#34;valor&#34;].str.replace(&#34;,&#34;, &#34;.&#34;)
             dff[&#34;valor&#34;] = dff[&#34;valor&#34;].astype(float)
 
     return dff
@@ -675,13 +669,7 @@ def get_data_from_sheet(
     dff = pd.read_csv(google_sheet, usecols=usecols)
     if &#34;valor&#34; in dff.columns:
         if dff[&#34;valor&#34;].dtype == &#34;object&#34;:
-            dff[&#34;valor&#34;] = (
-                dff[&#34;valor&#34;]
-                .str.replace(&#34;.&#34;, &#34;#&#34;)
-                .str.replace(&#34;,&#34;, &#34;.&#34;)
-                .str.replace(&#34;#&#34;, &#34;&#34;)
-            )
-            # dff[&#34;valor&#34;] = dff[&#34;valor&#34;].str.replace(&#34;,&#34;, &#34;.&#34;)
+            dff[&#34;valor&#34;] = dff[&#34;valor&#34;].str.replace(&#34;,&#34;, &#34;.&#34;)
             dff[&#34;valor&#34;] = dff[&#34;valor&#34;].astype(float)
 
     return dff</code></pre>
