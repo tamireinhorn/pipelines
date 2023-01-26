@@ -379,7 +379,7 @@ def save_data_to_csv(df: pd.DataFrame, filename: str) -&gt; str:
     if not out_path.is_dir():
         out_path.mkdir(parents=True)
     filepath = f&#34;tmp/data/{filename}.csv&#34;
-    df.to_csv(filepath, encoding=&#34;utf-8&#34;, sep=&#34;,&#34;, na_rep=np.nan, index=False)
+    df.to_csv(filepath, encoding=&#34;utf-8&#34;, sep=&#34;,&#34;, na_rep=&#34;&#34;, index=False)
 
     return filepath</code></pre>
 </details>
@@ -795,7 +795,7 @@ def save_data_to_csv(df: pd.DataFrame, filename: str) -&gt; str:
     if not out_path.is_dir():
         out_path.mkdir(parents=True)
     filepath = f&#34;tmp/data/{filename}.csv&#34;
-    df.to_csv(filepath, encoding=&#34;utf-8&#34;, sep=&#34;,&#34;, na_rep=np.nan, index=False)
+    df.to_csv(filepath, encoding=&#34;utf-8&#34;, sep=&#34;,&#34;, na_rep=&#34;&#34;, index=False)
 
     return filepath</code></pre>
 </details>
