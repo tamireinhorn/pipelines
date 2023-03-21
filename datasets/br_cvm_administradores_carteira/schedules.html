@@ -32,8 +32,10 @@
 Schedules for br_cvm_administradores_carteira
 &#34;&#34;&#34;
 from datetime import timedelta, datetime
+
 from prefect.schedules import Schedule, filters
 from prefect.schedules.clocks import IntervalClock
+
 from pipelines.constants import constants
 
 schedule_responsavel = Schedule(
@@ -47,7 +49,7 @@ schedule_responsavel = Schedule(
             parameter_defaults={
                 &#34;dataset_id&#34;: &#34;br_cvm_administradores_carteira&#34;,
                 &#34;materialization_mode&#34;: &#34;prod&#34;,
-                &#34;materialize after dump&#34;: True,
+                &#34;materialize_after_dump&#34;: True,
                 &#34;table_id&#34;: &#34;responsavel&#34;,
             },
         )
@@ -66,7 +68,7 @@ schedule_fisica = Schedule(
             parameter_defaults={
                 &#34;dataset_id&#34;: &#34;br_cvm_administradores_carteira&#34;,
                 &#34;materialization_mode&#34;: &#34;prod&#34;,
-                &#34;materialize after dump&#34;: True,
+                &#34;materialize_after_dump&#34;: True,
                 &#34;table_id&#34;: &#34;pessoa_fisica&#34;,
                 &#34;dbt_alias&#34;: False,
             },
@@ -86,7 +88,7 @@ schedule_juridica = Schedule(
             parameter_defaults={
                 &#34;dataset_id&#34;: &#34;br_cvm_administradores_carteira&#34;,
                 &#34;materialization_mode&#34;: &#34;prod&#34;,
-                &#34;materialize after dump&#34;: True,
+                &#34;materialize_after_dump&#34;: True,
                 &#34;table_id&#34;: &#34;pessoa_juridica&#34;,
                 &#34;dbt_alias&#34;: False,
             },

@@ -36,10 +36,10 @@ Tasks for br_cvm_administradores_carteira
 import os
 import shutil
 
-import requests
 import pandas as pd
-from prefect import task
+import requests
 from pandas.api.types import is_string_dtype
+from prefect import task
 from unidecode import unidecode
 
 
@@ -48,6 +48,7 @@ def crawl(root: str, url: str, chunk_size=128) -&gt; None:
     &#34;&#34;&#34;Download and unzip dataset br_cvm_administradores_carteira&#34;&#34;&#34;
     filepath = f&#34;{root}/data.zip&#34;
     os.makedirs(root, exist_ok=True)
+    os.makedirs(f&#34;{root}/cleaned&#34;, exist_ok=True)
 
     response = requests.get(url, timeout=300)
 
@@ -61,9 +62,9 @@ def crawl(root: str, url: str, chunk_size=128) -&gt; None:
 @task
 def clean_table_responsavel(root: str) -&gt; str:
     # pylint: disable=invalid-name
-    &#34;&#34;&#34;Clean table pessoa_fisica&#34;&#34;&#34;
+    &#34;&#34;&#34;Clean table responsavel&#34;&#34;&#34;
     in_filepath = f&#34;{root}/cad_adm_cart_resp.csv&#34;
-    ou_filepath = f&#34;{root}/bd_responsavel.csv&#34;
+    ou_filepath = f&#34;{root}/cleaned/bd_responsavel.csv&#34;
 
     dataframe: pd.DataFrame = pd.read_csv(
         in_filepath,
@@ -86,7 +87,7 @@ def clean_table_responsavel(root: str) -&gt; str:
                 lambda x: unidecode(x) if isinstance(x, str) else x
             )
 
-    dataframe.to_csv(ou_filepath, index=False)
+    dataframe.to_csv(ou_filepath, index=False, encoding=&#34;utf-8&#34;)
 
     return ou_filepath
 
@@ -96,7 +97,7 @@ def clean_table_pessoa_fisica(root: str) -&gt; str:
     # pylint: disable=invalid-name
     &#34;&#34;&#34;Clean table pessoa_fisica&#34;&#34;&#34;
     in_filepath = f&#34;{root}/cad_adm_cart_pf.csv&#34;
-    ou_filepath = f&#34;{root}/bd_pessoa_fisica.csv&#34;
+    ou_filepath = f&#34;{root}/cleaned/bd_pessoa_fisica.csv&#34;
 
     dataframe: pd.DataFrame = pd.read_csv(
         in_filepath,
@@ -132,7 +133,7 @@ def clean_table_pessoa_juridica(root: str) -&gt; str:
     # pylint: disable=invalid-name
     &#34;&#34;&#34;Clean table pessoa_fisica&#34;&#34;&#34;
     in_filepath = f&#34;{root}/cad_adm_cart_pj.csv&#34;
-    ou_filepath = f&#34;{root}/bd_pessoa_juridica.csv&#34;
+    ou_filepath = f&#34;{root}/cleaned/bd_pessoa_juridica.csv&#34;
 
     dataframe: pd.DataFrame = pd.read_csv(
         in_filepath, sep=&#34;;&#34;, keep_default_na=False, encoding=&#34;latin1&#34;, dtype=object
@@ -201,7 +202,7 @@ def clean_table_pessoa_fisica(root: str) -&gt; str:
     # pylint: disable=invalid-name
     &#34;&#34;&#34;Clean table pessoa_fisica&#34;&#34;&#34;
     in_filepath = f&#34;{root}/cad_adm_cart_pf.csv&#34;
-    ou_filepath = f&#34;{root}/bd_pessoa_fisica.csv&#34;
+    ou_filepath = f&#34;{root}/cleaned/bd_pessoa_fisica.csv&#34;
 
     dataframe: pd.DataFrame = pd.read_csv(
         in_filepath,
@@ -246,7 +247,7 @@ def clean_table_pessoa_juridica(root: str) -&gt; str:
     # pylint: disable=invalid-name
     &#34;&#34;&#34;Clean table pessoa_fisica&#34;&#34;&#34;
     in_filepath = f&#34;{root}/cad_adm_cart_pj.csv&#34;
-    ou_filepath = f&#34;{root}/bd_pessoa_juridica.csv&#34;
+    ou_filepath = f&#34;{root}/cleaned/bd_pessoa_juridica.csv&#34;
 
     dataframe: pd.DataFrame = pd.read_csv(
         in_filepath, sep=&#34;;&#34;, keep_default_na=False, encoding=&#34;latin1&#34;, dtype=object
@@ -298,7 +299,7 @@ def clean_table_pessoa_juridica(root: str) -&gt; str:
 <span>def <span class="ident">clean_table_responsavel</span></span>(<span>root: str) ‑> str</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Clean table pessoa_fisica</p></div>
+<div class="desc"><p>Clean table responsavel</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -306,9 +307,9 @@ def clean_table_pessoa_juridica(root: str) -&gt; str:
 <pre><code class="python">@task
 def clean_table_responsavel(root: str) -&gt; str:
     # pylint: disable=invalid-name
-    &#34;&#34;&#34;Clean table pessoa_fisica&#34;&#34;&#34;
+    &#34;&#34;&#34;Clean table responsavel&#34;&#34;&#34;
     in_filepath = f&#34;{root}/cad_adm_cart_resp.csv&#34;
-    ou_filepath = f&#34;{root}/bd_responsavel.csv&#34;
+    ou_filepath = f&#34;{root}/cleaned/bd_responsavel.csv&#34;
 
     dataframe: pd.DataFrame = pd.read_csv(
         in_filepath,
@@ -331,7 +332,7 @@ def clean_table_responsavel(root: str) -&gt; str:
                 lambda x: unidecode(x) if isinstance(x, str) else x
             )
 
-    dataframe.to_csv(ou_filepath, index=False)
+    dataframe.to_csv(ou_filepath, index=False, encoding=&#34;utf-8&#34;)
 
     return ou_filepath</code></pre>
 </details>
@@ -350,6 +351,7 @@ def crawl(root: str, url: str, chunk_size=128) -&gt; None:
     &#34;&#34;&#34;Download and unzip dataset br_cvm_administradores_carteira&#34;&#34;&#34;
     filepath = f&#34;{root}/data.zip&#34;
     os.makedirs(root, exist_ok=True)
+    os.makedirs(f&#34;{root}/cleaned&#34;, exist_ok=True)
 
     response = requests.get(url, timeout=300)
 
